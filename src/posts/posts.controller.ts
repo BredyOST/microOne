@@ -19,7 +19,7 @@ export class PostsController {
   @Cron('0 */10 * * * *')
   @Get('/addNewPosts')
   addNewPostsVk() {
-    return this.postsService.processGroups(`2`, 4000, 0, false)
+    return this.postsService.processGroups(`2`, 3000, 0, false)
   }
 
   @Get('/createPostsForNewCategory')
