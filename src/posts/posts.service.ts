@@ -479,8 +479,8 @@ export class PostsService {
 
       return data;
     } catch (err) {
-      await this.logsServicePostsAdd.log(
-        `ошибка получения постов в группе проверяем ids ${new Date().toTimeString()} для ${err}`,
+      await this.logsServicePostsAdd.error(
+        `ошибка получения постов в группе проверяем ids ${new Date().toTimeString()} для ${err}`, 'ERRORS',
       );
     }
   }
@@ -626,7 +626,7 @@ export class PostsService {
 
       // Разделение groupBatch на подгруппы по 450 групп
       for (let i = 0; i < groups.length; i += mainBatchSize) {
-        this.logsServicePostsAdd.log(`№1 обработка пакета группы ${i} - ${i + mainBatchSize}, всего групп ${groups.length} групп, делим по ${mainBatchSize} групп в пачке`,);
+        // this.logsServicePostsAdd.log(`№1 обработка пакета группы ${i} - ${i + mainBatchSize}, всего групп ${groups.length} групп, делим по ${mainBatchSize} групп в пачке`,);
         this.processMainBatch(groups.slice(i, i + mainBatchSize), indicator, i, mainBatchSize, boolIndex);
       }
 
@@ -639,7 +639,7 @@ export class PostsService {
   }
   // №2 вспомогательная к стартовой функции
   async processMainBatch(groups, indicator, i, mainBatchSize, boolIndex) {
-    this.logsServicePostsAdd.log(`№2 processMainBatch, запуск второй функции  для групп ${i} - ${i + mainBatchSize}, количество групп ${groups.length} ******************************************************************************************`,);
+    // this.logsServicePostsAdd.log(`№2 processMainBatch, запуск второй функции  для групп ${i} - ${i + mainBatchSize}, количество групп ${groups.length} ******************************************************************************************`,);
 
     try {
       // делим на более мелкие пакеты по 10 и 25 групп в каждом, ограничение по мб от вк
@@ -706,12 +706,10 @@ export class PostsService {
         return;
       }
 
-      this.logsServicePostsAdd.log(`К дальнейшей обработке  ${groupsForNextFunction.length} из ${groups.length}, делим ${batchSize} для групп ${i} - ${i + mainBatchSize}.`,);
+      // this.logsServicePostsAdd.log(`К дальнейшей обработке  ${groupsForNextFunction.length} из ${groups.length}, делим ${batchSize} для групп ${i} - ${i + mainBatchSize}.`,);
 
       for (let u = 0; u < groupsForNextFunction.length; u += batchSize) {
-        this.logsServicePostsAdd.log(
-          `№2 Обработка пакета мелкого №${u / batchSize + 1} из ${Math.ceil(groupsForNextFunction.length / batchSize)} для групп ${i} - ${i + mainBatchSize}`,
-        );
+        // this.logsServicePostsAdd.log(`№2 Обработка пакета мелкого №${u / batchSize + 1} из ${Math.ceil(groupsForNextFunction.length / batchSize)} для групп ${i} - ${i + mainBatchSize}`,);
         const groupBatch = groupsForNextFunction.slice(u, u + batchSize);
         this.createAndCheckVk(indicator, groupBatch, i, u, mainBatchSize, batchSize, boolIndex);
       }
@@ -725,9 +723,9 @@ export class PostsService {
   // №3 подготавливаем к запросам
   async createAndCheckVk(indicator, owner, i, u, mainBatchSize, batchSize, boolIndex) {
     // owner - тут группы с бд со всей инфой что в бд
-    this.logsServicePostsAdd.log(
-      `№3 createAndCheckVk запуск третьей функции в ${new Date().toTimeString()} для групп ${i} ${i + mainBatchSize}, количество групп ${owner.length}, пачка ${u} - ${u + batchSize} +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++`,
-    );
+    // this.logsServicePostsAdd.log(
+    //   `№3 createAndCheckVk запуск третьей функции в ${new Date().toTimeString()} для групп ${i} ${i + mainBatchSize}, количество групп ${owner.length}, пачка ${u} - ${u + batchSize} +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++`,
+    // );
 
     try {
       const IfNoPostsInRepository = `80`; // если нет постов в нашем репозитории, то будем запрашивать по 100 постов
@@ -834,9 +832,9 @@ export class PostsService {
     //postsForRequst - запрос для вк
 
     try {
-      this.logsServicePostsAdd.log(
-        `№4 addPostsToCommonOrUpdate в ${new Date().toTimeString()} для групп ${i} ${i + mainBatchSize} пачка  - ${u + batchSize}, количество групп ${owner?.length} +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++`,
-      );
+      // this.logsServicePostsAdd.log(
+      //   `№4 addPostsToCommonOrUpdate в ${new Date().toTimeString()} для групп ${i} ${i + mainBatchSize} пачка  - ${u + batchSize}, количество групп ${owner?.length} +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++`,
+      // );
 
       let startOffset = +numberOffset; // изнчально  офсет 0
 
@@ -846,8 +844,8 @@ export class PostsService {
       );
 
       if (!posts || Object.keys(posts?.response)?.length == 0) {
-        this.logsServicePostsAdd.log(`№4 не получены группы или ключи для групп ${i} ${i + mainBatchSize} пачка  - ${u + batchSize} - останов`,
-        );
+        // this.logsServicePostsAdd.log(`№4 не получены группы или ключи для групп ${i} ${i + mainBatchSize} пачка  - ${u + batchSize} - останов`,
+        // );
         return;
       }
 
@@ -862,9 +860,9 @@ export class PostsService {
         // this.logsServicePostsAdd.log(
         //   `№4 ВХОД В БЕСКОНЕЧНЫЙ ЦИКЛ -------------------------------------------------------------------- для групп ${i} ${i + mainBatchSize} пачка  - ${u + batchSize} итерация № ${i} `,
         // );
-        this.logsServicePostsAdd.log(
-          `№4 для групп ${i} ${i + mainBatchSize} пачка  - ${u + batchSize} итерация № ${i} не прошли по датам ${filterGroups?.length} шт, а именно id: ${filterGroups}`,
-        );
+        // this.logsServicePostsAdd.log(
+        //   `№4 для групп ${i} ${i + mainBatchSize} пачка  - ${u + batchSize} итерация № ${i} не прошли по датам ${filterGroups?.length} шт, а именно id: ${filterGroups}`,
+        // );
 
         // если есть id групп которые не прошли по датам то фильтруем
         if (filterGroups && filterGroups?.length) {
@@ -881,7 +879,7 @@ export class PostsService {
         }
 
         if (!allGroups || !allGroups?.length) {
-          this.logsServicePostsAdd.log(`№4 allGroups нет для групп ${i} ${i + mainBatchSize} пачка  - ${u + batchSize} итерация № ${i} внутри цикла allGroups = ${allGroups.length} итерация № ${i} ${new Date()}`,);
+          // this.logsServicePostsAdd.log(`№4 allGroups нет для групп ${i} ${i + mainBatchSize} пачка  - ${u + batchSize} итерация № ${i} внутри цикла allGroups = ${allGroups.length} итерация № ${i} ${new Date()}`,);
           break;
         }
 
@@ -905,13 +903,13 @@ export class PostsService {
         );
 
         if (!posts || Object.keys(posts.response)?.length == 0) {
-          this.logsServicePostsAdd.log(`№4 ВНУТРИ В ЦИКЛЕ ПРИ ПОВТОРНОМ ЗАПРОСЕ для групп ${i} ${i + mainBatchSize} пачка  - ${u + batchSize} - posts =  ${posts?.length}`,);
+          // this.logsServicePostsAdd.log(`№4 ВНУТРИ В ЦИКЛЕ ПРИ ПОВТОРНОМ ЗАПРОСЕ для групп ${i} ${i + mainBatchSize} пачка  - ${u + batchSize} - posts =  ${posts?.length}`,);
           break;
         }
         filterGroups = await this.filterGroups(posts, indicator, i, u, mainBatchSize, batchSize,boolIndex);
       }
 
-      this.logsServicePostsAdd.log(`№4 Завершен беспонечный цикл для групп ${i} ${i + mainBatchSize} пачка  - ${u + batchSize} - ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++`,);
+      // this.logsServicePostsAdd.log(`№4 Завершен беспонечный цикл для групп ${i} ${i + mainBatchSize} пачка  - ${u + batchSize} - ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++`,);
     } catch (err) {
       this.logsServicePostsAdd.error(`№4 error`, `ошибка где входы в цикл: для групп ${i} ${i + mainBatchSize} пачка  - ${u + batchSize} ${err} для групп`);
       this.logsServicePostsAdd.error(`№4 error`, `Stack Trace: ${err.stack}`);  // Добавить стек вызова ошибки в лог
@@ -988,7 +986,7 @@ export class PostsService {
               // если не с закрепа то то кидаем в массив и прекращаем итерацию
               if (!item.is_pinned) {
                 remainingGroups.push(item.owner_id);
-                this.logsServicePostsAdd.log(`${group.items[0].owner_id} групп ${ii} -${ii + mainBatchSize} пачка ${u} - ${u + batchSize}  ${new Date(item.date * 1000).getMonth()} -------------------------------- BREAK--------------  на итерации ${i}`,);
+                // this.logsServicePostsAdd.log(`${group.items[0].owner_id} групп ${ii} -${ii + mainBatchSize} пачка ${u} - ${u + batchSize}  ${new Date(item.date * 1000).getMonth()} -------------------------------- BREAK--------------  на итерации ${i}`,);
                 break;
               }
             }
@@ -1065,7 +1063,7 @@ export class PostsService {
               // если не с закрепа то
               if (!item.is_pinned) {
                 remainingGroups.push(item.owner_id);
-                this.logsServicePostsAdd.log(`${group.items[0].owner_id} групп ${ii} -${ii + mainBatchSize} пачка ${u} - ${u + batchSize}  ${new Date(item.date * 1000).getMonth()} -------------------------------- BREAK--------------  на итерации ${i}`,);
+                // this.logsServicePostsAdd.log(`${group.items[0].owner_id} групп ${ii} -${ii + mainBatchSize} пачка ${u} - ${u + batchSize}  ${new Date(item.date * 1000).getMonth()} -------------------------------- BREAK--------------  на итерации ${i}`,);
                 this.changePostsDateToDateUpdateWhenBreak(groupInfo);
                 break;
               }
@@ -1139,7 +1137,7 @@ export class PostsService {
               // если не с закрепа то то кидаем в массив и прекращаем итерацию
               if (!item.is_pinned) {
                 remainingGroups.push(item.owner_id);
-                this.logsServicePostsAdd.log(`${group.items[0].owner_id} групп ${ii} -${ii + mainBatchSize} пачка ${u} - ${u + batchSize}  ${new Date(item.date * 1000).getMonth()} -------------------------------- BREAK--------------  на итерации ${i}`,);
+                // this.logsServicePostsAdd.log(`${group.items[0].owner_id} групп ${ii} -${ii + mainBatchSize} пачка ${u} - ${u + batchSize}  ${new Date(item.date * 1000).getMonth()} -------------------------------- BREAK--------------  на итерации ${i}`,);
                 break;
               }
             }
@@ -1187,7 +1185,6 @@ export class PostsService {
           const date = posts[0][text]
 
           if (new Date(date *1000).getFullYear() < year) {
-            console.log(true)
             await this.redisService.del(item);
           }
 

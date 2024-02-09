@@ -12,7 +12,7 @@ export class PostsController {
   // @Cron('0 */10 * * * *')
   @Get('/createGroupsVk')
   createGroupsVk() {
-    return this.postsService.processGroups(`1`, 3000, 8000, false)
+    return this.postsService.processGroups(`1`, 3000, 0, false)
   }
 
   // обновление постов
