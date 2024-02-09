@@ -22,8 +22,12 @@ export class PostsController {
   // @Cron('0 */10 * * * *')
   @Get('/addNewPosts')
   addNewPostsVk() {
+    let start = 2000
+    let pass = 0
     serverConfig.servers.map((item) => {
-      this.postsService.processGroups(`2`, 4000, 0, false, item.ip, item.port)
+      this.postsService.processGroups(`2`, start, pass, false, item.ip, item.port)
+      start += 2000
+      pass += 2000
     })
   }
 
