@@ -370,7 +370,7 @@ export class PostsService {
 
   // Второстепенные функции при обновлении и добавлении
   // получаем посты с вк
-  async getPostsFromVK(postsForRequst) {
+  async getPostsFromVK(postsForRequst, ip, port) {
     const access = process.env['ACCESS_TOKEN'];
     const versionVk = process.env['VERSION_VK'];
 
@@ -379,7 +379,14 @@ export class PostsService {
         this.httpService
           .get<any>(
             `https://api.vk.com/method/execute?code=${encodeURIComponent(postsForRequst)}&access_token=${access}&v=${versionVk}`,
-          )
+              {
+                proxy: {
+                  host: ip,
+                  port: port, // Порт вашего прокси-сервера
+                  protocol: 'http',
+                }
+              }
+        )
           .pipe(
             catchError((error: AxiosError) => {
               if (
@@ -438,7 +445,7 @@ export class PostsService {
     }
   }
   // запрос групп по id чтобы проверить закрыта группа или нет
-  async checkIsClosedGroup(code) {
+  async checkIsClosedGroup(code, ip, port) {
     const access = process.env['ACCESS_TOKEN'];
     const versionVk = process.env['VERSION_VK'];
 
@@ -447,6 +454,13 @@ export class PostsService {
         this.httpService
           .get<any>(
             `https://api.vk.com/method/execute?code=${encodeURIComponent(code)}&access_token=${access}&v=${versionVk}`,
+              {
+                proxy: {
+                  host: ip,
+                  port: port, // Порт вашего прокси-сервера
+                  protocol: 'https'
+                }
+              }
           )
           .pipe(
             catchError((error: AxiosError) => {
@@ -607,9 +621,9 @@ export class PostsService {
 
   // БЛОК ФУНКЦИй ДЛЯ ДОБАВЛЕНИЯ ПОСТОВ С НОВЫХ ГРУПП
   // №1 стратовая функция
-  async processGroups(indicator, start, pass, boolIndex) {
+  async processGroups(indicator, start, pass, boolIndex, ip, port) {
     try {
-      this.logsServicePostsAdd.log(`${new Date().toTimeString()} ${(indicator == 1 && !boolIndex) ? 'СОЗДАНИЕ' : indicator == 2 ? 'ОБНОВЛЕНИЕ' : 'ОБНОВЛЕНИЕ КОНКРЕТНО'}`,);
+      this.logsServicePostsAdd.log(`${new Date().toTimeString()} ${(indicator == 1 && !boolIndex) ? `СОЗДАНИЕ ${ ip, port }` : indicator == 2 ? 'ОБНОВЛЕНИЕ' : 'ОБНОВЛЕНИЕ КОНКРЕТНО'}`,);
 
       // получаем группы с репозитория в формате масcива объектов
       const groups = await this.getGroups(start, pass);
@@ -627,7 +641,7 @@ export class PostsService {
       // Разделение groupBatch на подгруппы по 450 групп
       for (let i = 0; i < groups.length; i += mainBatchSize) {
         // this.logsServicePostsAdd.log(`№1 обработка пакета группы ${i} - ${i + mainBatchSize}, всего групп ${groups.length} групп, делим по ${mainBatchSize} групп в пачке`,);
-        this.processMainBatch(groups.slice(i, i + mainBatchSize), indicator, i, mainBatchSize, boolIndex);
+        this.processMainBatch(groups.slice(i, i + mainBatchSize), indicator, i, mainBatchSize, boolIndex, ip, port);
       }
 
       // this.logsServicePostsAdd.log(
@@ -638,7 +652,7 @@ export class PostsService {
     }
   }
   // №2 вспомогательная к стартовой функции
-  async processMainBatch(groups, indicator, i, mainBatchSize, boolIndex) {
+  async processMainBatch(groups, indicator, i, mainBatchSize, boolIndex, ip, port) {
     // this.logsServicePostsAdd.log(`№2 processMainBatch, запуск второй функции  для групп ${i} - ${i + mainBatchSize}, количество групп ${groups.length} ******************************************************************************************`,);
 
     try {
@@ -657,7 +671,7 @@ export class PostsService {
             return { groupInfo: groupInfo };`;
 
       // получаем инфу о группах в массиве и в каждом объекте есть свойство is_closed по которому определяем закрыта группа или нет
-      const groupsInfo = await limiterTwo.schedule(() => this.checkIsClosedGroup(code),);
+      const groupsInfo = await limiterTwo.schedule(() => this.checkIsClosedGroup(code, ip, port),);
 
       if (!groupsInfo) {
         this.logsServicePostsAdd.error(`№2 для групп ${i} - ${i + mainBatchSize} - не получено инфа о закрытости для ${groupsInfo}`,`groupsInfo` );
@@ -711,7 +725,7 @@ export class PostsService {
       for (let u = 0; u < groupsForNextFunction.length; u += batchSize) {
         // this.logsServicePostsAdd.log(`№2 Обработка пакета мелкого №${u / batchSize + 1} из ${Math.ceil(groupsForNextFunction.length / batchSize)} для групп ${i} - ${i + mainBatchSize}`,);
         const groupBatch = groupsForNextFunction.slice(u, u + batchSize);
-        this.createAndCheckVk(indicator, groupBatch, i, u, mainBatchSize, batchSize, boolIndex);
+        this.createAndCheckVk(indicator, groupBatch, i, u, mainBatchSize, batchSize, boolIndex, ip, port);
       }
     } catch (err) {
       await this.logsServicePostsAdd.error(
@@ -721,7 +735,7 @@ export class PostsService {
     }
   }
   // №3 подготавливаем к запросам
-  async createAndCheckVk(indicator, owner, i, u, mainBatchSize, batchSize, boolIndex) {
+  async createAndCheckVk(indicator, owner, i, u, mainBatchSize, batchSize, boolIndex, ip, port) {
     // owner - тут группы с бд со всей инфой что в бд
     // this.logsServicePostsAdd.log(
     //   `№3 createAndCheckVk запуск третьей функции в ${new Date().toTimeString()} для групп ${i} ${i + mainBatchSize}, количество групп ${owner.length}, пачка ${u} - ${u + batchSize} +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++`,
@@ -797,7 +811,7 @@ export class PostsService {
           ' };';
 
         if (codeIfPostsNo && codeIfPostsNo?.length)
-          this.addPostsToCommonOrUpdate( codeIfPostsNo, IfNoPostsInRepository, numberOffset, partOfGroupsIfPostsNo, indicator, i, u, mainBatchSize, batchSize,boolIndex);
+          this.addPostsToCommonOrUpdate( codeIfPostsNo, IfNoPostsInRepository, numberOffset, partOfGroupsIfPostsNo, indicator, i, u, mainBatchSize, batchSize,boolIndex, ip, port);
       }
 
       if (indicator == 2) {
@@ -817,7 +831,7 @@ export class PostsService {
           ' };';
 
         if (codeIfPostsYes && codeIfPostsYes?.length)
-          this.addPostsToCommonOrUpdate(codeIfPostsYes, IfPostsAreInRepository, numberOffset, partOfGroupsIfPostsAre, indicator, i, u, mainBatchSize, batchSize,boolIndex);
+          this.addPostsToCommonOrUpdate(codeIfPostsYes, IfPostsAreInRepository, numberOffset, partOfGroupsIfPostsAre, indicator, i, u, mainBatchSize, batchSize,boolIndex, ip, port);
       }
     } catch (err) {
       await this.logsServicePostsAdd.error(
@@ -827,7 +841,7 @@ export class PostsService {
     }
   }
   // №4 тут уже цикл с передачей в функции добавления
-  async addPostsToCommonOrUpdate(postsForRequst, numberPost, numberOffset, owner, indicator, i, u, mainBatchSize, batchSize,boolIndex) {
+  async addPostsToCommonOrUpdate(postsForRequst, numberPost, numberOffset, owner, indicator, i, u, mainBatchSize, batchSize,boolIndex, ip, port) {
     //owner - группы по 25 шт
     //postsForRequst - запрос для вк
 
@@ -840,7 +854,7 @@ export class PostsService {
 
       // получаем первые посты. тут будет объект в котором будет находится инфа о группе {group0: { count: 8267, items: [Array], profiles: [Array], groups: [Array] }, group1:{...}}
       const posts = await limiter.schedule(() =>
-        this.getPostsFromVK(postsForRequst),
+        this.getPostsFromVK(postsForRequst, ip, port),
       );
 
       if (!posts || Object.keys(posts?.response)?.length == 0) {
@@ -899,7 +913,7 @@ export class PostsService {
             .join(', ') +
           ' };';
         const posts = await limiter.schedule(() =>
-          this.getPostsFromVK(codeMany),
+          this.getPostsFromVK(codeMany, ip, port),
         );
 
         if (!posts || Object.keys(posts.response)?.length == 0) {
@@ -1063,14 +1077,13 @@ export class PostsService {
               // если не с закрепа то
               if (!item.is_pinned) {
                 remainingGroups.push(item.owner_id);
-                // this.logsServicePostsAdd.log(`${group.items[0].owner_id} групп ${ii} -${ii + mainBatchSize} пачка ${u} - ${u + batchSize}  ${new Date(item.date * 1000).getMonth()} -------------------------------- BREAK--------------  на итерации ${i}`,);
+                this.logsServicePostsAdd.log(`${group.items[0].owner_id} групп ${ii} -${ii + mainBatchSize} пачка ${u} - ${u + batchSize}  ${new Date(item.date * 1000).getMonth()} -------------------------------- BREAK--------------  на итерации ${i}`,);
                 this.changePostsDateToDateUpdateWhenBreak(groupInfo);
                 break;
               }
             }
             if (new Date(item.date * 1000).getTime() > new Date(latestPostsDates).getTime()) {
-              // await this.create(item, group.groups, group.profiles, 'vk'); // ТУТ УБРАТЬ AWAIT ДЛЯ ИСКЛЮЧЕНИЯ ЗЕДЕРЖЕК
-              // this.logsServicePostsAdd.log(`${group.items[0].owner_id} групп ${ii} -${ii + mainBatchSize} пачка ${u} - ${u + batchSize} ${new Date(item.date * 1000).getMonth()} CREATE------------------------------------------  на итерации ${i}`,);
+              this.logsServicePostsAdd.log(`${group.items[0].owner_id} групп ${ii} -${ii + mainBatchSize} пачка ${u} - ${u + batchSize} ${new Date(item.date * 1000).getMonth()} CREATE------------------------------------------  на итерации ${i}`,);
               const postData = {
                 count: group.count,
                 date: new Date(item.date * 1000),
