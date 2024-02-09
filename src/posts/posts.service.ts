@@ -623,7 +623,7 @@ export class PostsService {
   // №1 стратовая функция
   async processGroups(indicator, start, pass, boolIndex, ip, port) {
     try {
-      this.logsServicePostsAdd.log(`${new Date().toTimeString()} ${(indicator == 1 && !boolIndex) ? `СОЗДАНИЕ ${ ip, port }` : indicator == 2 ? 'ОБНОВЛЕНИЕ' : 'ОБНОВЛЕНИЕ КОНКРЕТНО'}`,);
+      this.logsServicePostsAdd.log(`${new Date().toTimeString()} ${(indicator == 1 && !boolIndex) ? `СОЗДАНИЕ ${ip} ${port }` : indicator == 2 ? 'ОБНОВЛЕНИЕ' : 'ОБНОВЛЕНИЕ КОНКРЕТНО'}`,);
 
       // получаем группы с репозитория в формате масcива объектов
       const groups = await this.getGroups(start, pass);
