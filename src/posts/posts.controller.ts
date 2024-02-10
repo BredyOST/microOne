@@ -20,6 +20,7 @@ export class PostsController {
   @Cron('0 */10 * * * *')
   @Get('/addNewPosts')
   addNewPostsVk() {
+    console.log(1)
     if(serverConfig?.servers?.length >= 1 ){
       serverConfig?.servers?.map((item) => {
         return this.postsService.processGroups(`2`, 3500, 3000, false, item.ip);
