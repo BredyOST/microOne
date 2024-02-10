@@ -17,7 +17,7 @@ export class PostsController {
   }
 
   // обновление постов
-  // @Cron('0 */10 * * * *')
+  @Cron('0 */10 * * * *')
   @Get('/addNewPosts')
   addNewPostsVk() {
     // console.log(1)
