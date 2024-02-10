@@ -445,10 +445,12 @@ export class PostsService {
     try {
       const { data } = await firstValueFrom(
         this.httpService.get<any>(`${ip}`, { headers: {
-              code: encodeURIComponent(code),
-              versionVk: versionVk,
-              access_token: access,
-          } }).pipe(
+              'code': encodeURIComponent(code),
+              'versionVk': versionVk,
+              'access_token': access,
+            },
+          })
+          .pipe(
             catchError((error: AxiosError) => {
               if (error.response && 'data' in error.response && error.response.data != undefined) {
                 this.logsServicePostsAdd.error(
@@ -656,8 +658,6 @@ export class PostsService {
 
       // получаем инфу о группах в массиве и в каждом объекте есть свойство is_closed по которому определяем закрыта группа или нет
       const groupsInfo = await limiterTwo.schedule(() => this.checkIsClosedGroup(code, ip),);
-      console.log('ответ снаружи')
-      console.log(groupsInfo)
 
       if (!groupsInfo) {
         this.logsServicePostsAdd.error(`№2 для групп ${i} - ${i + mainBatchSize} - не получено инфа о закрытости для ${groupsInfo}`,`groupsInfo` );

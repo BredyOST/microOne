@@ -17,14 +17,14 @@ export class PostsController {
   }
 
   // обновление постов
-  // @Cron('0 */10 * * * *')
+  @Cron('0 */10 * * * *')
   @Get('/addNewPosts')
   addNewPostsVk() {
     console.log(1)
     if(serverConfig?.servers?.length >= 1 ){
       serverConfig?.servers?.map((item) => {
         console.log(item)
-        this.postsService.processGroups(`2`, 100, 0, false, item.ip);
+        this.postsService.processGroups(`2`, 4000, 0, false, item.ip);
     })
     }
   }
