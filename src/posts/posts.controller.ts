@@ -13,11 +13,11 @@ export class PostsController {
   // @Cron('0 */10 * * * *')
   @Get('/createGroupsVk')
   createGroupsVk() {
-    return this.postsService.processGroups(`1`, 3000, 0, false)
+    // return this.postsService.processGroups(`1`, 3000, 0, false)
   }
 
   // обновление постов
-  // @Cron('0 */10 * * * *')
+  @Cron('0 */10 * * * *')
   @Get('/addNewPosts')
   addNewPostsVk() {
     if(serverConfig?.servers?.length >= 1 ){
@@ -29,7 +29,7 @@ export class PostsController {
 
   @Get('/createPostsForNewCategory')
   async createPostsForNewCategory(){
-    await this.postsService.processGroups(`1`, 100, 0, true)
+    // await this.postsService.processGroups(`1`, 100, 0, true)
   }
 
 
