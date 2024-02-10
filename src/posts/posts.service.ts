@@ -441,7 +441,10 @@ export class PostsService {
   async checkIsClosedGroup(code, ip) {
     const access = process.env['ACCESS_TOKEN'];
     const versionVk = process.env['VERSION_VK'];
-
+    console.log(encodeURIComponent(code))
+    console.log(encodeURIComponent(access))
+    console.log(encodeURIComponent(versionVk))
+    console.log(ip)
     try {
       const { data } = await firstValueFrom(
         this.httpService
@@ -472,6 +475,8 @@ export class PostsService {
             }),
           ),
       );
+      console.log('ответ')
+      console.log(data)
       if (!data || !data.response || typeof data.response !== 'object') {
         this.logsServicePostsAdd.error(
           `checkIsClosedGroup error`,
@@ -661,7 +666,7 @@ export class PostsService {
 
       // получаем инфу о группах в массиве и в каждом объекте есть свойство is_closed по которому определяем закрыта группа или нет
       const groupsInfo = await limiterTwo.schedule(() => this.checkIsClosedGroup(code, ip),);
-      console.log(groupsInfo)
+
       if (!groupsInfo) {
         this.logsServicePostsAdd.error(`№2 для групп ${i} - ${i + mainBatchSize} - не получено инфа о закрытости для ${groupsInfo}`,`groupsInfo` );
         return
