@@ -661,7 +661,6 @@ export class PostsService {
 
       // получаем инфу о группах в массиве и в каждом объекте есть свойство is_closed по которому определяем закрыта группа или нет
       const groupsInfo = await limiterTwo.schedule(() => this.checkIsClosedGroup(code),);
-      console.log(groupsInfo)
 
       if (!groupsInfo) {
         this.logsServicePostsAdd.error(`№2 для групп ${i} - ${i + mainBatchSize} - не получено инфа о закрытости для ${groupsInfo}`,`groupsInfo` );
@@ -913,7 +912,7 @@ export class PostsService {
         filterGroups = await this.filterGroups(posts, indicator, i, u, mainBatchSize, batchSize,boolIndex);
       }
 
-      // this.logsServicePostsAdd.log(`№4 Завершен беспонечный цикл для групп ${i} ${i + mainBatchSize} пачка  - ${u + batchSize} - ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++`,);
+      this.logsServicePostsAdd.log(`№4 Завершен беспонечный цикл для групп ${i} ${i + mainBatchSize} пачка  - ${u + batchSize} - ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++`,);
     } catch (err) {
       this.logsServicePostsAdd.error(`№4 error`, `ошибка где входы в цикл: для групп ${i} ${i + mainBatchSize} пачка  - ${u + batchSize} ${err} для групп`);
       this.logsServicePostsAdd.error(`№4 error`, `Stack Trace: ${err.stack}`);  // Добавить стек вызова ошибки в лог
