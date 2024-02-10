@@ -447,7 +447,7 @@ export class PostsService {
         this.httpService
           .get<any>(
               `${ip}`,
-              { headers: { 'Code': encodeURIComponent(code), 'Access-Token': access, 'Version-Vk': versionVk } },
+              { headers: { 'code': encodeURIComponent(code), 'access_token': access, 'versionVk': versionVk } }
           )
           .pipe(
             catchError((error: AxiosError) => {
@@ -609,7 +609,7 @@ export class PostsService {
   // БЛОК ФУНКЦИй ДЛЯ ДОБАВЛЕНИЯ ПОСТОВ С НОВЫХ ГРУПП
   // №1 стратовая функция
   async processGroups(indicator, start, pass, boolIndex, ip) {
-    console.log(ip)
+
     try {
       this.logsServicePostsAdd.log(`${new Date().toTimeString()} ${(indicator == 1 && !boolIndex) ? 'СОЗДАНИЕ' : indicator == 2 ? 'ОБНОВЛЕНИЕ' : 'ОБНОВЛЕНИЕ КОНКРЕТНО'}`,);
 
