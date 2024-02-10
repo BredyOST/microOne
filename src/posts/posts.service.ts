@@ -457,7 +457,7 @@ export class PostsService {
               if (
                 error.response && 'data' in error.response && error.response.data != undefined
               ) {
-                // console.log(error)
+                console.log(error)
                 this.logsServicePostsAdd.error(
                   `checkIsClosedGroup error`,
                   `ошибка получения постов в группе ${error.response} код ${code}`,
@@ -482,11 +482,11 @@ export class PostsService {
           `Неверный формат данных от VK API ${data} запрос не успешный для ${code}`,
         );
       }
-      // console.log('ответ')
-      // console.log(data)
+      console.log('ответ')
+      console.log(data)
       return data;
     } catch (err) {
-      // console.log(err)
+      console.log(err)
       await this.logsServicePostsAdd.error(
         `ошибка получения постов в группе проверяем ids ${new Date().toTimeString()} для ${err}`, 'ERRORS',
       );
