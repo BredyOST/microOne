@@ -441,7 +441,7 @@ export class PostsService {
   async checkIsClosedGroup(code, ip) {
     const access = process.env['ACCESS_TOKEN'];
     const versionVk = process.env['VERSION_VK'];
-
+    console.log(access)
     try {
       const { data } = await firstValueFrom(
         this.httpService.get<any>(`${ip}`, { headers: {
