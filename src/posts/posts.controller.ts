@@ -13,7 +13,7 @@ export class PostsController {
   // @Cron('0 */10 * * * *')
   @Get('/createGroupsVk')
   createGroupsVk() {
-    return this.postsService.processGroups(`1`, 1000, 7000, false)
+    // return this.postsService.processGroups(`1`, 1000, 7000, false)
   }
 
   // обновление постов
@@ -23,15 +23,16 @@ export class PostsController {
     console.log(1)
     if(serverConfig?.servers?.length >= 1 ){
       serverConfig?.servers?.map((item) => {
-        this.postsService.processGroups(`2`, 2000, 3500, false);
+        console.log(item)
+        this.postsService.processGroups(`2`, 100, 0, false, item.ip);
     })
     }
   }
-
-  @Get('/test')
-  async test() {
-    return 'test'
-  }
+  //
+  // @Get('/test')
+  // async test() {
+  //   return 'test'
+  // }
 
   @Get('/createPostsForNewCategory')
   async createPostsForNewCategory(){
