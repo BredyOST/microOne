@@ -445,9 +445,9 @@ export class PostsService {
     try {
       const { data } = await firstValueFrom(
         this.httpService.get<any>(`${ip}`, { headers: {
-              'code': encodeURIComponent(code),
-              'versionVk': versionVk,
-              'access_token': access,
+              code: encodeURIComponent(code),
+              versionVk: versionVk,
+              access_token: access,
             },
           })
           .pipe(
