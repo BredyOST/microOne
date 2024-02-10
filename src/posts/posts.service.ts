@@ -441,16 +441,14 @@ export class PostsService {
   async checkIsClosedGroup(code, ip) {
     const access = process.env['ACCESS_TOKEN'];
     const versionVk = process.env['VERSION_VK'];
-
-    const headers = {
-      code: encodeURIComponent(code),
-      access_token: access,
-      versionVk: versionVk,
-    };
-
+    git add .
     try {
       const { data } = await firstValueFrom(
-        this.httpService.get<any>(`${ip}`, { headers }).pipe(
+        this.httpService.get<any>(`${ip}`, { headers: {
+              code: encodeURIComponent(code),
+              versionVk: versionVk,
+              access_token: access,
+          } }).pipe(
             catchError((error: AxiosError) => {
               if (error.response && 'data' in error.response && error.response.data != undefined) {
                 this.logsServicePostsAdd.error(
