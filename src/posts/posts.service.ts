@@ -444,9 +444,9 @@ export class PostsService {
     console.log(console.log(access))
 
     const headers = {
-      'code': encodeURIComponent(code),
-      'access_token': access,
-      'versionVk': versionVk,
+      code: encodeURIComponent(code),
+      access_token: access,
+      versionVk: versionVk,
     };
 
     try {
@@ -454,13 +454,11 @@ export class PostsService {
         this.httpService.get<any>(`${ip}`, { headers }).pipe(
             catchError((error: AxiosError) => {
               if (error.response && 'data' in error.response && error.response.data != undefined) {
-
                 this.logsServicePostsAdd.error(
                   `checkIsClosedGroup error`,
                   `ошибка получения постов в группе ${error.response} код ${code}`,
                 );
               }
-              console.log(`ответ: ${data}`)
               this.logsServicePostsAdd.error(
                 `checkIsClosedGroup error`,
                 `ошибка получения постов в группе ${error.response} код ${code}`,
@@ -471,15 +469,13 @@ export class PostsService {
             }),
           ),
       );
-
+      console.log(`ответ: ${data}`)
       if (!data || !data.response || typeof data.response !== 'object') {
         this.logsServicePostsAdd.error(
           `checkIsClosedGroup error`,
           `Неверный формат данных от VK API ${data} запрос не успешный для ${code}`,
         );
       }
-      console.log('ответ')
-      console.log(data)
       return data;
     } catch (err) {
       console.error('Error:', err);
