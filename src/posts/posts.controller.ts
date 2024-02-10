@@ -22,9 +22,10 @@ export class PostsController {
   addNewPostsVk() {
     console.log(1)
     if(serverConfig?.servers?.length >= 1 ){
-      console.log(serverConfig)
+      // console.log(serverConfig);
       serverConfig?.servers?.map((item) => {
-        this.postsService.processGroups(`2`, 3500, 3000, false, item.ip)
+        console.log(item)
+        return this.postsService.processGroups(`2`, 3500, 3000, false, item.ip);
       })
     }
   }
