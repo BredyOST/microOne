@@ -441,30 +441,29 @@ export class PostsService {
   async checkIsClosedGroup(code, ip) {
     const access = process.env['ACCESS_TOKEN'];
     const versionVk = process.env['VERSION_VK'];
-    console.log(encodeURIComponent(code))
-    console.log(encodeURIComponent(access))
-    console.log(encodeURIComponent(versionVk))
-    console.log(ip)
+    console.log(console.log(access))
+
+    const headers = {
+      'code': encodeURIComponent(code),
+      'access_token': access,
+      'versionVk': versionVk,
+    };
+
     try {
       const { data } = await firstValueFrom(
         this.httpService
-          .get<any>(
-            // `https://api.vk.com/method/execute?code=${encodeURIComponent(code)}&access_token=${access}&v=${versionVk}`,
-              `${ip}`,
-              { headers: { 'code': encodeURIComponent(code), 'access_token': access, 'versionVk': versionVk } }
-          )
-          .pipe(
+          .get<any>(`${ip}`, { headers }).pipe(
             catchError((error: AxiosError) => {
               if (
                 error.response && 'data' in error.response && error.response.data != undefined
               ) {
-                console.log(error)
+                // console.log(error)
                 this.logsServicePostsAdd.error(
                   `checkIsClosedGroup error`,
                   `ошибка получения постов в группе ${error.response} код ${code}`,
                 );
               }
-              console.log(error)
+              // console.log(error)
               this.logsServicePostsAdd.error(
                 `checkIsClosedGroup error`,
                 `ошибка получения постов в группе ${error.response} код ${code}`,
@@ -477,17 +476,17 @@ export class PostsService {
       );
 
       if (!data || !data.response || typeof data.response !== 'object') {
-        console.log('no no no')
+        // console.log('no no no')
         this.logsServicePostsAdd.error(
           `checkIsClosedGroup error`,
           `Неверный формат данных от VK API ${data} запрос не успешный для ${code}`,
         );
       }
-      console.log('ответ')
-      console.log(data)
+      // console.log('ответ')
+      // console.log(data)
       return data;
     } catch (err) {
-      console.log(err)
+      // console.log(err)
       await this.logsServicePostsAdd.error(
         `ошибка получения постов в группе проверяем ids ${new Date().toTimeString()} для ${err}`, 'ERRORS',
       );
