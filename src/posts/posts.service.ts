@@ -475,15 +475,15 @@ export class PostsService {
             }),
           ),
       );
-      console.log('ответ')
-      console.log(data)
+
       if (!data || !data.response || typeof data.response !== 'object') {
         this.logsServicePostsAdd.error(
           `checkIsClosedGroup error`,
           `Неверный формат данных от VK API ${data} запрос не успешный для ${code}`,
         );
       }
-
+      console.log('ответ')
+      console.log(data)
       return data;
     } catch (err) {
       await this.logsServicePostsAdd.error(
@@ -666,6 +666,8 @@ export class PostsService {
 
       // получаем инфу о группах в массиве и в каждом объекте есть свойство is_closed по которому определяем закрыта группа или нет
       const groupsInfo = await limiterTwo.schedule(() => this.checkIsClosedGroup(code, ip),);
+      console.log('ответ снаружи')
+      console.log(groupsInfo)
 
       if (!groupsInfo) {
         this.logsServicePostsAdd.error(`№2 для групп ${i} - ${i + mainBatchSize} - не получено инфа о закрытости для ${groupsInfo}`,`groupsInfo` );
