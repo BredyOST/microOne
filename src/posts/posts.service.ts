@@ -441,7 +441,6 @@ export class PostsService {
   async checkIsClosedGroup(code, ip) {
     const access = process.env['ACCESS_TOKEN'];
     const versionVk = process.env['VERSION_VK'];
-    console.log(console.log(access))
 
     const headers = {
       code: encodeURIComponent(code),
@@ -469,7 +468,7 @@ export class PostsService {
             }),
           ),
       );
-      console.log(`ответ: ${data}`)
+      console.log(data)
       if (!data || !data.response || typeof data.response !== 'object') {
         this.logsServicePostsAdd.error(
           `checkIsClosedGroup error`,
