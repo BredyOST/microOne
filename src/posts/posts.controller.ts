@@ -1,6 +1,7 @@
 import { Controller, Get, Post, Body } from '@nestjs/common'
 import { PostsService } from './posts.service'
 import { Cron } from '@nestjs/schedule';
+import {serverConfig} from "./serverConfig";
 @Controller('posts')
 export class PostsController {
 
@@ -16,10 +17,14 @@ export class PostsController {
   }
 
   // обновление постов
-  @Cron('0 */10 * * * *')
+  // @Cron('0 */10 * * * *')
   @Get('/addNewPosts')
   addNewPostsVk() {
-    return this.postsService.processGroups(`2`, 3000, 0, false)
+    if(serverConfig?.servers?.length >= 1 ){
+      serverConfig?.servers?.map((item) => {
+        this.postsService.processGroups(`2`, 3500, 3000, false, item.ip)
+      })
+    }
   }
 
   @Get('/createPostsForNewCategory')
