@@ -469,10 +469,11 @@ export class PostsService {
           ),
       );
 
-      if (!data || !data.response || typeof data.response !== 'object') {
+      // if (!data || !data.response || typeof data.response !== 'object') {
+        if (!response) {
         this.logsServicePostsAdd.error(
           `checkIsClosedGroup error`,
-          `Неверный формат данных от VK API ${data} запрос не успешный для ${code}`,
+          `Неверный формат данных от VK API ${response} запрос не успешный для ${code}`,
         );
       }
       const data = response.data;
