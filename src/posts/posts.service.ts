@@ -441,7 +441,7 @@ export class PostsService {
   async checkIsClosedGroup(code, ip) {
     const access = process.env['ACCESS_TOKEN'];
     const versionVk = process.env['VERSION_VK'];
-    console.log(access)
+
     try {
       const response = await firstValueFrom(
         this.httpService.get<any>(`${ip}`, { headers: {
@@ -454,16 +454,16 @@ export class PostsService {
             catchError((error: AxiosError) => {
               if (error.response && 'data' in error.response && error.response.data != undefined) {
                 this.logsServicePostsAdd.error(
-                  `checkIsClosedGroup error`,
+                  `checkIsClosedGroup1 error`,
                   `ошибка получения постов в группе ${error.response} код ${code}`,
                 );
               }
               this.logsServicePostsAdd.error(
-                `checkIsClosedGroup error`,
+                `checkIsClosedGroup2 error`,
                 `ошибка получения постов в группе ${error.response} код ${code}`,
               );
               throw new Error(
-                `checkIsClosedGroup An error happened! для ${code}`,
+                `checkIsClosedGroup3 An error happened! для ${code}`,
               );
             }),
           ),
@@ -472,7 +472,7 @@ export class PostsService {
       // if (!data || !data.response || typeof data.response !== 'object') {
         if (!response) {
         this.logsServicePostsAdd.error(
-          `checkIsClosedGroup error`,
+          `checkIsClosedGroup4 error`,
           `Неверный формат данных от VK API ${response} запрос не успешный для ${code}`,
         );
       }
