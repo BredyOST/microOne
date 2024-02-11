@@ -443,7 +443,7 @@ export class PostsService {
     const versionVk = process.env['VERSION_VK'];
     console.log(access)
     try {
-      const response = = await firstValueFrom(
+      const response = await firstValueFrom(
         this.httpService.get<any>(`${ip}`, { headers: {
               'code': encodeURIComponent(code),
               'versionVk': versionVk,
