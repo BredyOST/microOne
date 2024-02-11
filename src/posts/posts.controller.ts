@@ -25,7 +25,8 @@ export class PostsController {
       serverConfig?.servers?.map((item) => {
         console.log(item)
         this.postsService.processGroups(`2`, 1, 10, false, item.ip);
-    })
+    // this.postsService.processGroups(`2`, 6000, 0, false);
+      });
     }
   }
   //

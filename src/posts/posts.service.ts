@@ -444,6 +444,10 @@ export class PostsService {
 
     try {
       const response = await firstValueFrom(
+          // this.httpService
+          //     .get<any>(
+          //         `https://api.vk.com/method/execute?code=${encodeURIComponent(code)}&access_token=${access}&v=${versionVk}`,
+          //     )
         this.httpService.get<any>(`${ip}`, { headers: {
               'code': encodeURIComponent(code),
               'versionVk': versionVk,
@@ -478,7 +482,7 @@ export class PostsService {
         );
       }
       const data = response.data;
-      // console.log(data)
+      console.log(data)
       return data;
     } catch (err) {
       console.error('Error:', err);
@@ -610,8 +614,7 @@ export class PostsService {
 
   // БЛОК ФУНКЦИй ДЛЯ ДОБАВЛЕНИЯ ПОСТОВ С НОВЫХ ГРУПП
   // №1 стратовая функция
-  async processGroups(indicator, start, pass, boolIndex, ip) {
-
+    async processGroups(indicator, start, pass, boolIndex, ip) {
     try {
       this.logsServicePostsAdd.log(`${new Date().toTimeString()} ${(indicator == 1 && !boolIndex) ? 'СОЗДАНИЕ' : indicator == 2 ? 'ОБНОВЛЕНИЕ' : 'ОБНОВЛЕНИЕ КОНКРЕТНО'}`,);
 
