@@ -444,7 +444,7 @@ export class PostsService {
     console.log(access)
     try {
       const { data } = await firstValueFrom(
-        this.httpService.get<any>(`${ip}`, { params: {
+        this.httpService.get<any>(`${ip}`, { headers: {
               'code': encodeURIComponent(code),
               'versionVk': versionVk,
               'access_token': access,
