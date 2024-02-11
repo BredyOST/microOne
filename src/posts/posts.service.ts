@@ -462,9 +462,9 @@ export class PostsService {
                 `checkIsClosedGroup2 error`,
                 `ошибка получения постов в группе ${error.response} код ${code}`,
               );
-              throw new Error(
-                `checkIsClosedGroup3 An error happened! для ${code}`,
-              );
+              // throw new Error(
+              //   `checkIsClosedGroup3 An error happened! для ${code}`,
+              // );
             }),
           ),
       );
@@ -477,7 +477,7 @@ export class PostsService {
         );
       }
       const data = response.data;
-      console.log(data)
+      // console.log(data)
       return data;
     } catch (err) {
       console.error('Error:', err);
