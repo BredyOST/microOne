@@ -463,7 +463,7 @@ export class PostsService {
                 `ошибка получения постов в группе ${error.response} код ${code}`,
               );
               throw new Error(
-                `checkIsClosedGroup An error happened! ${data} для ${code}`,
+                `checkIsClosedGroup An error happened! для ${code}`,
               );
             }),
           ),
