@@ -437,7 +437,7 @@ export class PostsService {
       );
     }
   }
-  // запрос групп по id чтобы проверить закрыта группа или нет
+  // запрос групп по id чтобы проверить закрыта группа илимн нет
   async checkIsClosedGroup(code, ip) {
     const access = process.env['ACCESS_TOKEN'];
     const versionVk = process.env['VERSION_VK'];
