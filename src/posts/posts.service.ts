@@ -443,7 +443,7 @@ export class PostsService {
     const versionVk = process.env['VERSION_VK'];
     console.log(access)
     try {
-      const { data } = await firstValueFrom(
+      const response = = await firstValueFrom(
         this.httpService.get<any>(`${ip}`, { headers: {
               'code': encodeURIComponent(code),
               'versionVk': versionVk,
@@ -468,13 +468,15 @@ export class PostsService {
             }),
           ),
       );
-      console.log(data)
+
       if (!data || !data.response || typeof data.response !== 'object') {
         this.logsServicePostsAdd.error(
           `checkIsClosedGroup error`,
           `Неверный формат данных от VK API ${data} запрос не успешный для ${code}`,
         );
       }
+      const data = response.data;
+      console.log(data)
       return data;
     } catch (err) {
       console.error('Error:', err);
