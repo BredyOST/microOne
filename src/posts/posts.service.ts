@@ -449,7 +449,7 @@ export class PostsService {
                   `https://api.vk.com/method/execute?code=${encodeURIComponent(code)}&access_token=${access}&v=${versionVk}`,
                   {
                     proxy: {
-                      protocol: "https",
+                      protocol: 'http',
                       host: '79.141.68.155',
                       port: 7000,
                     },
