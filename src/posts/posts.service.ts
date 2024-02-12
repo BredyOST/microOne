@@ -652,7 +652,7 @@ export class PostsService {
     }
   }
   // №2 вспомогательная к стартовой функции
-  async processMainBatch(groups, indicator, i, mainBatchSize, boolIndex, ip) {
+  async processMainBatch(groups, indicator, i, mainBatchSize, boolIndex) {
     // this.logsServicePostsAdd.log(`№2 processMainBatch, запуск второй функции  для групп ${i} - ${i + mainBatchSize}, количество групп ${groups.length} ******************************************************************************************`,);
 
     try {
@@ -673,6 +673,7 @@ export class PostsService {
       // получаем инфу о группах в массиве и в каждом объекте есть свойство is_closed по которому определяем закрыта группа или нет
       const groupsInfo = await limiterTwo.schedule(() => this.checkIsClosedGroup(code),);
     console.log(groupsInfo)
+      return
       if (!groupsInfo) {
         this.logsServicePostsAdd.error(`№2 для групп ${i} - ${i + mainBatchSize} - не получено инфа о закрытости для ${groupsInfo}`,`groupsInfo` );
         return
