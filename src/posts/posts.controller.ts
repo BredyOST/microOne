@@ -21,10 +21,20 @@ export class PostsController {
   @Get('/addNewPosts')
   addNewPostsVk() {
     if(serverConfig?.servers?.length >= 1 ){
-      serverConfig?.servers?.map((item) => {
-        this.postsService.processGroups(`2`, 1000, 0, false, item.ip);
-        // this.postsService.processGroups(`2`, 10, 0, false);
-      });
+      const countPosts = 1500;
+      let pass = 0;
+      let stepPass= 1000;
+      const end = 11000;
+      for (let i = 1; pass <= end; i++) {
+        if(pass > end) break;
+        serverConfig?.servers?.map((item) => {
+          // console.log(item)
+          this.postsService.processGroups(`2`, countPosts, pass, false, item.ip);
+          // console.log(`${countPosts} ${pass}`)
+          pass += countPosts;
+          // this.postsService.processGroups(`2`, 10, 0, false);
+        });
+      }
     }
   }
   //
