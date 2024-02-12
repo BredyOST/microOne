@@ -438,59 +438,66 @@ export class PostsService {
     }
   }
   // запрос групп по id чтобы проверить закрыта группа илимн нет
-  async checkIsClosedGroup(code, ip) {
+  async checkIsClosedGroup(code) {
     const access = process.env['ACCESS_TOKEN'];
     const versionVk = process.env['VERSION_VK'];
 
     try {
-      const response = await firstValueFrom(
-          // this.httpService
-          //     .get<any>(
-          //         `https://api.vk.com/method/execute?code=${encodeURIComponent(code)}&access_token=${access}&v=${versionVk}`,
-          //     )
-        this.httpService.get<any>(`${ip}`, { headers: {
-              'code': `${encodeURIComponent(code)}`,
-              'version': `1`,
-              'access': `1`,
-            },
-          })
-          .pipe(
-            catchError((error: AxiosError) => {
-              if (error.response && 'data' in error.response && error.response.data != undefined) {
-                this.logsServicePostsAdd.error(
-                  `checkIsClosedGroup1 error`,
-                  `ошибка получения постов в группе ${error.response} код ${code}`,
-                );
-              }
-              this.logsServicePostsAdd.error(
-                `checkIsClosedGroup2 error`,
-                `ошибка получения постов в группе ${error.response} код ${code}`,
-              );
-
-              throw new Error(
-                `checkIsClosedGroup3 An error happened! для ${error}`,
-              );
-            }),
-          ),
+      const { data } = await firstValueFrom(
+          this.httpService
+              .get<any>(
+                  `https://api.vk.com/method/execute?code=${encodeURIComponent(code)}&access_token=${access}&v=${versionVk}`,
+                  {
+                    proxy: {
+                      host: '79.141.68.155',
+                      port: '7000',
+                    },
+                  }
+              )
+              .pipe(
+                  catchError((error: AxiosError) => {
+                    if (
+                        error.response &&
+                        'data' in error.response &&
+                        error.response.data != undefined
+                    ) {
+                      this.logsServicePostsAdd.error(
+                          `checkIsClosedGroup error`,
+                          `ошибка получения постов в группе ${error.response} код ${code}`,
+                      );
+                    }
+                    this.logsServicePostsAdd.error(
+                        `checkIsClosedGroup error`,
+                        `ошибка получения постов в группе ${error.response} код ${code}`,
+                    );
+                    throw new Error(
+                        `checkIsClosedGroup An error happened! ${data} для ${code}`,
+                    );
+                  }),
+              ),
       );
-
-      // if (!data || !data.response || typeof data.response !== 'object') {
-        if (!response) {
+      if (!data || !data.response || typeof data.response !== 'object') {
         this.logsServicePostsAdd.error(
-          `checkIsClosedGroup4 error`,
-          `Неверный формат данных от VK API ${response} запрос не успешный для ${code}`,
+            `checkIsClosedGroup error`,
+            `Неверный формат данных от VK API ${data} запрос не успешный для ${code}`,
         );
       }
-      const data = response.data;
-      console.log(data.error.request_params)
+
       return data;
     } catch (err) {
-      console.error('Error:', err.request_params);
-      await this.logsServicePostsAdd.error(
-        `ошибка получения постов в группе проверяем ids ${new Date().toTimeString()} для ${err}`, 'ERRORS',
+      await this.logsServicePostsAdd.log(
+          `ошибка получения постов в группе проверяем ids ${new Date().toTimeString()} для ${err}`,
       );
     }
   }
+  // есть ли посты в общем репозитории по искомой группе перед формированием запросов
+  async hasPosts(group) {
+    const latestPostsDates = await this.getLatestPostByIdForThisGroup(
+        group.idVk,
+    );
+    return latestPostsDates != null;
+  }
+
   // есть ли посты в общем репозитории по искомой группе перед формированием запросов
   async hasPosts(group) {
     const latestPostsDates = await this.getLatestPostByIdForThisGroup(
@@ -614,7 +621,7 @@ export class PostsService {
 
   // БЛОК ФУНКЦИй ДЛЯ ДОБАВЛЕНИЯ ПОСТОВ С НОВЫХ ГРУПП
   // №1 стратовая функция
-    async processGroups(indicator, start, pass, boolIndex, ip) {
+    async processGroups(indicator, start, pass, boolIndex) {
     try {
       this.logsServicePostsAdd.log(`${new Date().toTimeString()} ${(indicator == 1 && !boolIndex) ? 'СОЗДАНИЕ' : indicator == 2 ? 'ОБНОВЛЕНИЕ' : 'ОБНОВЛЕНИЕ КОНКРЕТНО'}`,);
 
@@ -634,7 +641,7 @@ export class PostsService {
       // Разделение groupBatch на подгруппы по 450 групп
       for (let i = 0; i < groups.length; i += mainBatchSize) {
         this.logsServicePostsAdd.log(`№1 обработка пакета группы ${i} - ${i + mainBatchSize}, всего групп ${groups.length} групп, делим по ${mainBatchSize} групп в пачке`,);
-        this.processMainBatch(groups.slice(i, i + mainBatchSize), indicator, i, mainBatchSize, boolIndex, ip);
+        this.processMainBatch(groups.slice(i, i + mainBatchSize), indicator, i, mainBatchSize, boolIndex);
       }
 
       // this.logsServicePostsAdd.log(
@@ -664,7 +671,7 @@ export class PostsService {
             return { groupInfo: groupInfo };`;
 
       // получаем инфу о группах в массиве и в каждом объекте есть свойство is_closed по которому определяем закрыта группа или нет
-      const groupsInfo = await limiterTwo.schedule(() => this.checkIsClosedGroup(code, ip),);
+      const groupsInfo = await limiterTwo.schedule(() => this.checkIsClosedGroup(code),);
     console.log(groupsInfo)
       if (!groupsInfo) {
         this.logsServicePostsAdd.error(`№2 для групп ${i} - ${i + mainBatchSize} - не получено инфа о закрытости для ${groupsInfo}`,`groupsInfo` );
