@@ -450,7 +450,7 @@ export class PostsService {
                   {
                     proxy: {
                       host: '79.141.68.155',
-                      port: '7000',
+                      port: 7000,
                     },
                   }
               )
@@ -489,13 +489,6 @@ export class PostsService {
           `ошибка получения постов в группе проверяем ids ${new Date().toTimeString()} для ${err}`,
       );
     }
-  }
-  // есть ли посты в общем репозитории по искомой группе перед формированием запросов
-  async hasPosts(group) {
-    const latestPostsDates = await this.getLatestPostByIdForThisGroup(
-        group.idVk,
-    );
-    return latestPostsDates != null;
   }
 
   // есть ли посты в общем репозитории по искомой группе перед формированием запросов
