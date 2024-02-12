@@ -438,59 +438,43 @@ export class PostsService {
     }
   }
   // запрос групп по id чтобы проверить закрыта группа илимн нет
-  async checkIsClosedGroup(code) {
+  async checkIsClosedGroup(code, ip) {
     const access = process.env['ACCESS_TOKEN'];
     const versionVk = process.env['VERSION_VK'];
 
     try {
       const response = await firstValueFrom(
-          this.httpService
-              .get<any>(
-                  `https://api.vk.com/method/execute?code=${encodeURIComponent(code)}&access_token=${access}&v=${versionVk}`,
-                  {
-                    proxy: {
-                      protocol: 'http',
-                      host: '79.141.68.155',
-                      port: 7000,
-                    },
-                  }
-              )
+          this.httpService.get<any>(`${ip}`, { headers: {
+              'code': `${encodeURIComponent(code)}`,
+              'version': `${versionVk}`,
+              'access': `${access}`,
+            },
+          })
               .pipe(
                   catchError((error: AxiosError) => {
-                    console.log(error)
-                    if (
-                        error.response &&
-                        'data' in error.response &&
-                        error.response.data != undefined
-                    ) {
+                    if (error.response && 'data' in error.response && error.response.data != undefined) {
                       this.logsServicePostsAdd.error(
-                          `checkIsClosedGroup error`,
+                          `checkIsClosedGroup1 error`,
                           `ошибка получения постов в группе ${error.response} код ${code}`,
                       );
                     }
-                    this.logsServicePostsAdd.error(
-                        `checkIsClosedGroup error`,
-                        `ошибка получения постов в группе ${error.response} код ${code}`,
-                    );
-                    throw new Error(
-                        `checkIsClosedGroup An error happened! для ${code}`,
-                    );
+                    throw new Error(error );
                   }),
               ),
       );
       if (!response) {
         this.logsServicePostsAdd.error(
-            `checkIsClosedGroup error`,
+            `checkIsClosedGroup4 error`,
             `Неверный формат данных от VK API ${response} запрос не успешный для ${code}`,
         );
       }
-      // console.log(response)
-      return response;
-
+      const data = response.data;
+      console.log(data.error.request_params)
+      return data;
     } catch (err) {
-
-      await this.logsServicePostsAdd.log(
-          `ошибка получения постов в группе проверяем ids ${new Date().toTimeString()} для ${err}`,
+      console.error('Error:', err.request_params);
+      await this.logsServicePostsAdd.error(
+          `ошибка получения постов в группе проверяем ids ${new Date().toTimeString()} для ${err}`, 'ERRORS',
       );
     }
   }
@@ -618,7 +602,7 @@ export class PostsService {
 
   // БЛОК ФУНКЦИй ДЛЯ ДОБАВЛЕНИЯ ПОСТОВ С НОВЫХ ГРУПП
   // №1 стратовая функция
-    async processGroups(indicator, start, pass, boolIndex) {
+    async processGroups(indicator, start, pass, boolIndex, ip) {
     try {
       this.logsServicePostsAdd.log(`${new Date().toTimeString()} ${(indicator == 1 && !boolIndex) ? 'СОЗДАНИЕ' : indicator == 2 ? 'ОБНОВЛЕНИЕ' : 'ОБНОВЛЕНИЕ КОНКРЕТНО'}`,);
 
@@ -638,7 +622,7 @@ export class PostsService {
       // Разделение groupBatch на подгруппы по 450 групп
       for (let i = 0; i < groups.length; i += mainBatchSize) {
         this.logsServicePostsAdd.log(`№1 обработка пакета группы ${i} - ${i + mainBatchSize}, всего групп ${groups.length} групп, делим по ${mainBatchSize} групп в пачке`,);
-        this.processMainBatch(groups.slice(i, i + mainBatchSize), indicator, i, mainBatchSize, boolIndex);
+        this.processMainBatch(groups.slice(i, i + mainBatchSize), indicator, i, mainBatchSize, boolIndex, ip);
       }
 
       // this.logsServicePostsAdd.log(
@@ -649,7 +633,7 @@ export class PostsService {
     }
   }
   // №2 вспомогательная к стартовой функции
-  async processMainBatch(groups, indicator, i, mainBatchSize, boolIndex) {
+  async processMainBatch(groups, indicator, i, mainBatchSize, boolIndex, ip) {
     // this.logsServicePostsAdd.log(`№2 processMainBatch, запуск второй функции  для групп ${i} - ${i + mainBatchSize}, количество групп ${groups.length} ******************************************************************************************`,);
 
     try {
@@ -668,8 +652,8 @@ export class PostsService {
             return { groupInfo: groupInfo };`;
 
       // получаем инфу о группах в массиве и в каждом объекте есть свойство is_closed по которому определяем закрыта группа или нет
-      const groupsInfo = await limiterTwo.schedule(() => this.checkIsClosedGroup(code),);
-    console.log(groupsInfo)
+      const groupsInfo = await limiterTwo.schedule(() => this.checkIsClosedGroup(code, ip),);
+
       return
       if (!groupsInfo) {
         this.logsServicePostsAdd.error(`№2 для групп ${i} - ${i + mainBatchSize} - не получено инфа о закрытости для ${groupsInfo}`,`groupsInfo` );
