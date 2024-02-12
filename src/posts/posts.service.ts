@@ -449,9 +449,9 @@ export class PostsService {
           //         `https://api.vk.com/method/execute?code=${encodeURIComponent(code)}&access_token=${access}&v=${versionVk}`,
           //     )
         this.httpService.get<any>(`${ip}`, { headers: {
-              'code': ${encodeURIComponent(code)},
-              'version': versionVk,
-              'access': `ss`,
+              'code': `${encodeURIComponent(code)}`,
+              'version': `versionVk`,
+              'access': `11`,
             },
           })
           .pipe(
