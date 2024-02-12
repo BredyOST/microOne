@@ -450,8 +450,8 @@ export class PostsService {
           //     )
         this.httpService.get<any>(`${ip}`, { headers: {
               'code': `${encodeURIComponent(code)}`,
-              'version': `versionVk`,
-              'access': `11`,
+              'version': `${versionVk}`,
+              'access': `${access}`,
             },
           })
           .pipe(
