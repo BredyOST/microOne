@@ -22,7 +22,7 @@ export class PostsController {
   addNewPostsVk() {
     if(serverConfig?.servers?.length >= 1 ){
       serverConfig?.servers?.map((item) => {
-        this.postsService.processGroups(`2`, 1, 0, false, item.ip);
+        this.postsService.processGroups(`2`, 10, 0, false, item.ip);
         // this.postsService.processGroups(`2`, 10, 0, false);
       });
     }

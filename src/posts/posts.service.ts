@@ -446,8 +446,8 @@ export class PostsService {
       const response = await firstValueFrom(
           this.httpService.get<any>(`${ip}`, { headers: {
               'code': `${encodeURIComponent(code)}`,
-              'version': `${versionVk}`,
-              'access': `${access}`,
+              'version': `1`,
+              'access': `1`,
             },
           })
               .pipe(
