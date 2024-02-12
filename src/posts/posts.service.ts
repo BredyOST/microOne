@@ -449,9 +449,9 @@ export class PostsService {
           //         `https://api.vk.com/method/execute?code=${encodeURIComponent(code)}&access_token=${access}&v=${versionVk}`,
           //     )
         this.httpService.get<any>(`${ip}`, { headers: {
-              'code': encodeURIComponent(code),
-              'versionVk': versionVk,
-              'access_token': access,
+              'code': `${encodeURIComponent(code)}`,
+              'version': `${versionVk}`,
+              'access': `${access}`,
             },
           })
           .pipe(
@@ -482,10 +482,10 @@ export class PostsService {
         );
       }
       const data = response.data;
-      console.log(data)
+      console.log(data.error.request_params)
       return data;
     } catch (err) {
-      console.error('Error:', err);
+      console.error('Error:', err.request_params);
       await this.logsServicePostsAdd.error(
         `ошибка получения постов в группе проверяем ids ${new Date().toTimeString()} для ${err}`, 'ERRORS',
       );
@@ -665,7 +665,7 @@ export class PostsService {
 
       // получаем инфу о группах в массиве и в каждом объекте есть свойство is_closed по которому определяем закрыта группа или нет
       const groupsInfo = await limiterTwo.schedule(() => this.checkIsClosedGroup(code, ip),);
-    console.log(groupsInfo)
+    // console.log(groupsInfo)
       if (!groupsInfo) {
         this.logsServicePostsAdd.error(`№2 для групп ${i} - ${i + mainBatchSize} - не получено инфа о закрытости для ${groupsInfo}`,`groupsInfo` );
         return
