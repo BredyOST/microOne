@@ -458,7 +458,7 @@ export class PostsService {
                           `ошибка получения постов в группе ${error.response} код ${code}`,
                       );
                     }
-                    throw new Error(error );
+                    throw new Error(`${error}`);
                   }),
               ),
       );
