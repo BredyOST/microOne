@@ -442,12 +442,13 @@ export class PostsService {
     const access = process.env['ACCESS_TOKEN'];
     const versionVk = process.env['VERSION_VK'];
 
+    console.log(ip)
     try {
       const response = await firstValueFrom(
           this.httpService.get<any>(`${ip}`, { headers: {
               'code': `${encodeURIComponent(code)}`,
-              'version': `1`,
-              'access': `1`,
+              'version': versionVk,
+              'access': access,
             },
           })
               .pipe(
@@ -469,10 +470,10 @@ export class PostsService {
         );
       }
       const data = response.data;
-      console.log(data.error.request_params)
+      console.log(data)
       return data;
     } catch (err) {
-      console.error('Error:', err.request_params);
+      // console.error('Error:', err.request_params);
       await this.logsServicePostsAdd.error(
           `ошибка получения постов в группе проверяем ids ${new Date().toTimeString()} для ${err}`, 'ERRORS',
       );
