@@ -443,12 +443,13 @@ export class PostsService {
     const versionVk = process.env['VERSION_VK'];
 
     try {
-      const { data } = await firstValueFrom(
+      const response = await firstValueFrom(
           this.httpService
               .get<any>(
                   `https://api.vk.com/method/execute?code=${encodeURIComponent(code)}&access_token=${access}&v=${versionVk}`,
                   {
                     proxy: {
+                      protocol: "https",
                       host: '79.141.68.155',
                       port: 7000,
                     },
@@ -471,20 +472,22 @@ export class PostsService {
                         `ошибка получения постов в группе ${error.response} код ${code}`,
                     );
                     throw new Error(
-                        `checkIsClosedGroup An error happened! ${data} для ${code}`,
+                        `checkIsClosedGroup An error happened! для ${code}`,
                     );
                   }),
               ),
       );
-      if (!data || !data.response || typeof data.response !== 'object') {
+      if (!response) {
         this.logsServicePostsAdd.error(
             `checkIsClosedGroup error`,
-            `Неверный формат данных от VK API ${data} запрос не успешный для ${code}`,
+            `Неверный формат данных от VK API ${response} запрос не успешный для ${code}`,
         );
       }
+      console.log(response)
+      return response;
 
-      return data;
     } catch (err) {
+      // console.log(err)
       await this.logsServicePostsAdd.log(
           `ошибка получения постов в группе проверяем ids ${new Date().toTimeString()} для ${err}`,
       );
