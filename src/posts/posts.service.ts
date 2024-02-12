@@ -457,6 +457,7 @@ export class PostsService {
               )
               .pipe(
                   catchError((error: AxiosError) => {
+                    console.log(error)
                     if (
                         error.response &&
                         'data' in error.response &&
@@ -483,11 +484,11 @@ export class PostsService {
             `Неверный формат данных от VK API ${response} запрос не успешный для ${code}`,
         );
       }
-      console.log(response)
+      // console.log(response)
       return response;
 
     } catch (err) {
-      // console.log(err)
+
       await this.logsServicePostsAdd.log(
           `ошибка получения постов в группе проверяем ids ${new Date().toTimeString()} для ${err}`,
       );
