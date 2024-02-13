@@ -193,7 +193,10 @@ export class NanniesService {
         signer_id: item.signer_id || '',
       });
     } catch (err) {
-      console.log(err);
+      this.logsService.error(
+          `Функция добавления няни - ошибка`,
+          `${err}`,
+      );
     }
   }
   async createIfEmpty(post) {

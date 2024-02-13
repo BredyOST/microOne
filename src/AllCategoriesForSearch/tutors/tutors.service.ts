@@ -160,7 +160,6 @@ export class TutorsService {
     telegramLimiter,
   ) {
     try {
-      console.log(item)
       const ownerId = String(item.owner_id).replace('-', '');
       const groupInfo = groups?.find((element) => element.id == ownerId);
       const profileInfo = profiles?.find(
@@ -190,7 +189,7 @@ export class TutorsService {
         signer_id: item.signer_id || '',
       });
     } catch (err) {
-      console.log(err);
+      this.logsService.error(`Функция добавление постов тюторс- ошибка`, `${err}`,);
     }
   }
   async createIfEmpty(post) {

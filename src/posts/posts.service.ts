@@ -604,9 +604,9 @@ export class PostsService {
 
   // БЛОК ФУНКЦИй ДЛЯ ДОБАВЛЕНИЯ ПОСТОВ С НОВЫХ ГРУПП
   // №1 стратовая функция
-    async processGroups(indicator, start, pass, boolIndex, ip) {
+  async processGroups(indicator, start, pass, boolIndex, ip) {
     try {
-      this.logsServicePostsAdd.log(`${new Date().toTimeString()} ${(indicator == 1 && !boolIndex) ? 'СОЗДАНИЕ' : indicator == 2 ? 'ОБНОВЛЕНИЕ' : 'ОБНОВЛЕНИЕ КОНКРЕТНО'}`,);
+      // this.logsServicePostsAdd.log(`${new Date().toTimeString()} ${(indicator == 1 && !boolIndex) ? 'СОЗДАНИЕ' : indicator == 2 ? 'ОБНОВЛЕНИЕ' : 'ОБНОВЛЕНИЕ КОНКРЕТНО'}`,);
 
       // получаем группы с репозитория в формате масcива объектов
       const groups = await this.getGroups(start, pass);
@@ -623,7 +623,7 @@ export class PostsService {
 
       // Разделение groupBatch на подгруппы по 450 групп
       for (let i = 0; i < groups.length; i += mainBatchSize) {
-        this.logsServicePostsAdd.log(`№1 обработка пакета группы ${i} - ${i + mainBatchSize}, всего групп ${groups.length} групп, делим по ${mainBatchSize} групп в пачке`,);
+        // this.logsServicePostsAdd.log(`№1 обработка пакета группы ${i} - ${i + mainBatchSize}, всего групп ${groups.length} групп, делим по ${mainBatchSize} групп в пачке`,);
         this.processMainBatch(groups.slice(i, i + mainBatchSize), indicator, i, mainBatchSize, boolIndex, ip);
       }
 
@@ -655,7 +655,7 @@ export class PostsService {
 
       // получаем инфу о группах в массиве и в каждом объекте есть свойство is_closed по которому определяем закрыта группа или нет
       const groupsInfo = await limiterTwo.schedule(() => this.checkIsClosedGroup(code, ip),);
-      return
+
       if (!groupsInfo) {
         this.logsServicePostsAdd.error(`№2 для групп ${i} - ${i + mainBatchSize} - не получено инфа о закрытости для ${groupsInfo}`,`groupsInfo` );
         return
@@ -919,20 +919,11 @@ export class PostsService {
       let remainingGroups = [];
 
       if (indicator == 1 && !boolIndex) {
-        // this.logsServicePostsAdd.log(
-        //   `№5 функция фильтрации создание для групп ${i} -${i + mainBatchSize} пачка ${u} - ${u + batchSize}  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++`,
-        // );
         remainingGroups = await this.forFuncfilterGroupsIfCreateGroups(posts, i, u, mainBatchSize, batchSize,boolIndex);
       } else if (indicator == 2) {
-        // this.logsServicePostsAdd.log(
-        //   `№5 функция фильтрации обновление для групп ${i} -${i + mainBatchSize} пачка ${u} - ${u + batchSize}  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++`,
-        // );
         remainingGroups = await this.forFuncfilterGroupsIfUpadete(posts, i, u, mainBatchSize, batchSize,boolIndex);
       } else if (indicator == 1 && boolIndex) {
         remainingGroups = await this.forFuncfilterGroupsIfCreate(posts, i, u, mainBatchSize, batchSize,boolIndex);
-        // this.logsServicePostsAdd.log(
-        //     `№5 функция фильтрации создание для новой группы ${i} -${i + mainBatchSize} пачка ${u} - ${u + batchSize}  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++`,
-        // );
       } else {
         this.logsServicePostsAdd.error(
           `№5 error для групп ${i} -${i + mainBatchSize} пачка ${u} - ${u + batchSize} `,
@@ -976,13 +967,13 @@ export class PostsService {
             if (new Date(item.date * 1000).getMonth() < searchFromCurrentMonth) {
               // если месяц меньше искомого, то проверяем не закреп ли это
               if (item.is_pinned) {
-                this.logsServicePostsAdd.log(`${group.items[0].owner_id} групп ${ii} -${ii + mainBatchSize} пачка ${u} - ${u + batchSize} дата ${new Date(item.date * 1000).getMonth()} ------------------------------------ ISPING ==== на итерации ${i}`,);
+                // this.logsServicePostsAdd.log(`${group.items[0].owner_id} групп ${ii} -${ii + mainBatchSize} пачка ${u} - ${u + batchSize} дата ${new Date(item.date * 1000).getMonth()} ------------------------------------ ISPING ==== на итерации ${i}`,);
                 continue;
               }
               // если не с закрепа то то кидаем в массив и прекращаем итерацию
               if (!item.is_pinned) {
                 remainingGroups.push(item.owner_id);
-                this.logsServicePostsAdd.log(`${group.items[0].owner_id} групп ${ii} -${ii + mainBatchSize} пачка ${u} - ${u + batchSize}  ${new Date(item.date * 1000).getMonth()} -------------------------------- BREAK--------------  на итерации ${i}`,);
+                // this.logsServicePostsAdd.log(`${group.items[0].owner_id} групп ${ii} -${ii + mainBatchSize} пачка ${u} - ${u + batchSize}  ${new Date(item.date * 1000).getMonth()} -------------------------------- BREAK--------------  на итерации ${i}`,);
                 break;
               }
             }
@@ -1057,7 +1048,7 @@ export class PostsService {
               // если не с закрепа то
               if (!item.is_pinned) {
                 remainingGroups.push(item.owner_id);
-                this.logsServicePostsAdd.log(`${group.items[0].owner_id} групп ${ii} -${ii + mainBatchSize} пачка ${u} - ${u + batchSize}  ${new Date(item.date * 1000).getMonth()} -------------------------------- BREAK--------------  на итерации ${i}`,);
+                // this.logsServicePostsAdd.log(`${group.items[0].owner_id} групп ${ii} -${ii + mainBatchSize} пачка ${u} - ${u + batchSize}  ${new Date(item.date * 1000).getMonth()} -------------------------------- BREAK--------------  на итерации ${i}`,);
                 this.changePostsDateToDateUpdateWhenBreak(groupInfo);
                 break;
               }

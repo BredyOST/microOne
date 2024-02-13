@@ -14,7 +14,7 @@ export class HandymanAndBuilderController {
   async getPostForStatic() {
     return this.handymanAndBuilderService.getPostForStatic()
   }
-  // @Cron('0 */10 * * * *')
+  @Cron('0 */10 * * * *')
   @Get('/forRedis')
   async savePostsToRedis() {
     return this.handymanAndBuilderService.savePostsToRedis()
