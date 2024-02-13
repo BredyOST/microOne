@@ -12,7 +12,7 @@ export class TutorsController {
   async getPostForStatic() {
     return this.tutorsService.getPostForStatic()
   }
-  @Cron('0 */10 * * * *')
+  @Cron('0 */5 * * * *')
   @Get('/forRedis')
   async savePostsToRedis() {
     return this.tutorsService.savePostsToRedis()

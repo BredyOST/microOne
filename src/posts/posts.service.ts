@@ -611,7 +611,7 @@ export class PostsService {
       // получаем группы с репозитория в формате масcива объектов
       const groups = await this.getGroups(start, pass);
 
-      this.logsServicePostsAdd.log(`№1 получено ${groups.length} групп`);
+      // this.logsServicePostsAdd.log(`№1 получено ${groups.length} групп`);
 
       if (!groups || !groups?.length) {
         await this.logsServicePostsAdd.error('№1 ERROR', `группы с бд не получены`,);
@@ -655,7 +655,7 @@ export class PostsService {
 
       // получаем инфу о группах в массиве и в каждом объекте есть свойство is_closed по которому определяем закрыта группа или нет
       const groupsInfo = await limiterTwo.schedule(() => this.checkIsClosedGroup(code, ip),);
-
+      return
       if (!groupsInfo) {
         this.logsServicePostsAdd.error(`№2 для групп ${i} - ${i + mainBatchSize} - не получено инфа о закрытости для ${groupsInfo}`,`groupsInfo` );
         return
@@ -914,6 +914,7 @@ export class PostsService {
   }
   // №5 распределяем куда дальше - создаем или обновляем
   async filterGroups(posts, indicator, i, u, mainBatchSize, batchSize, boolIndex) {
+
     try {
       let remainingGroups = [];
 
@@ -946,9 +947,6 @@ export class PostsService {
   }
   // №6.1 для создания
   async forFuncfilterGroupsIfCreateGroups(posts, ii, u, mainBatchSize, batchSize, boolIndex) {
-    // this.logsServicePostsAdd.log(
-    //   `№6 функция получения и добавления постов для групп ${ii} -${ii + mainBatchSize} пачка ${u} - ${u + batchSize}  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++`,
-    // );
 
     try {
       const currentMonth = new Date().getMonth(); // текущий месяц
@@ -968,6 +966,7 @@ export class PostsService {
 
           for (let i = 0; i < group.items?.length; i++) {
             const item = group.items[i];
+
             // если год поста меньше года искомого и это не с закрепа то останавливаемся
             if (new Date(item.date * 1000).getFullYear() < currentYear && !item.is_pinned) {
               remainingGroups.push(item.owner_id);
@@ -977,25 +976,23 @@ export class PostsService {
             if (new Date(item.date * 1000).getMonth() < searchFromCurrentMonth) {
               // если месяц меньше искомого, то проверяем не закреп ли это
               if (item.is_pinned) {
-                // this.logsServicePostsAdd.log(`${group.items[0].owner_id} групп ${ii} -${ii + mainBatchSize} пачка ${u} - ${u + batchSize} дата ${new Date(item.date * 1000).getMonth()} ------------------------------------ ISPING ==== на итерации ${i}`,);
+                this.logsServicePostsAdd.log(`${group.items[0].owner_id} групп ${ii} -${ii + mainBatchSize} пачка ${u} - ${u + batchSize} дата ${new Date(item.date * 1000).getMonth()} ------------------------------------ ISPING ==== на итерации ${i}`,);
                 continue;
               }
               // если не с закрепа то то кидаем в массив и прекращаем итерацию
               if (!item.is_pinned) {
                 remainingGroups.push(item.owner_id);
-                // this.logsServicePostsAdd.log(`${group.items[0].owner_id} групп ${ii} -${ii + mainBatchSize} пачка ${u} - ${u + batchSize}  ${new Date(item.date * 1000).getMonth()} -------------------------------- BREAK--------------  на итерации ${i}`,);
+                this.logsServicePostsAdd.log(`${group.items[0].owner_id} групп ${ii} -${ii + mainBatchSize} пачка ${u} - ${u + batchSize}  ${new Date(item.date * 1000).getMonth()} -------------------------------- BREAK--------------  на итерации ${i}`,);
                 break;
               }
             }
             // Если же дата больше искомой то добавляем в репозиторий
             if (new Date(item.date * 1000).getMonth() >= searchFromCurrentMonth && currentYear == new Date(item.date * 1000).getFullYear()) {
-              // await this.create(item, group.groups, group.profiles, 'vk'); // ТУТ УБРАТЬ AWAIT ДЛЯ ИСКЛЮЧЕНИЯ ЗЕДЕРЖЕК
               const postData = {
                 count: group.count,
                 date: new Date(item.date * 1000),
                 idVk: item.owner_id,
               };
-
               this.addPostCounter(postData);
               this.givePostsToAllRepositories(item, group?.groups, group?.profiles, sendMessage,boolIndex);
             }
@@ -1193,12 +1190,4 @@ export class PostsService {
       }
     }
   }
-
-
-  //==================================================================================
-  //Комментарии постов вк
-  async getComments() {
-
-  }
-
 }
