@@ -218,8 +218,8 @@ export class TutorsService {
   }
   async sendPostToTelegram(item, tokenBot, telegramLimiter) {
     try {
-      const chatId = process.env['CHAT_TUTORS'];
-      console.log(item)
+      let chatId;
+      // console.log(item)
 
       const messageLines = [
         `Дата публикации:`,
@@ -233,20 +233,56 @@ export class TutorsService {
         `Пост: https://vk.com/wall${item?.owner_id}_${item?.id}.`,
       ];
 
-      let imageUrl; // Предполагая, что URL изображения хранится в свойстве photo_url объекта item
-      if (item?.text?.includes('матем' || 'матан' || 'алгебр')) imageUrl = 'https://timgotow.ru/uploads/math.jpg';
-      if (item?.text?.includes('биологи')) imageUrl = 'https://timgotow.ru/uploads/start.jpg';
-      if (item?.text?.includes('информат')) imageUrl = 'https://timgotow.ru/uploads/inf.jpg';
-      if (item?.text?.includes('испанс')) imageUrl = 'https://timgotow.ru/uploads/esp.jpg';
-      if (item?.text?.includes('истори')) imageUrl = 'https://timgotow.ru/uploads/his.jpg';
-      if (item?.text?.includes('китайс')) imageUrl = 'https://timgotow.ru/uploads/chi.jpg';
-      if (item?.text?.includes('литер')) imageUrl = 'https://timgotow.ru/uploads/lit.jpg';
-      if (item?.text?.includes('немецк')) imageUrl = 'https://timgotow.ru/uploads/ger.jpg';
-      if (item?.text?.includes('обществ')) imageUrl = 'https://timgotow.ru/uploads/soci.jpg';
-      if (item?.text?.includes('русск')) imageUrl = 'https://timgotow.ru/uploads/ru.jpg';
-      if (item?.text?.includes('физик')) imageUrl = 'https://timgotow.ru/uploads/phy.jpg';
-      if (item?.text?.includes('англий')) imageUrl = `https://timgotow.ru/uploads/en.jpg`;
-      if (item?.text?.includes('2 класс' || '1 класс')) imageUrl = `https://timgotow.ru/uploads/start.jpg`;
+      let imageUrl;
+
+      if (item?.text?.includes('матем' || 'матан' || 'алгебр')) {
+        imageUrl = 'https://timgotow.ru/uploads/math.jpg';
+        chatId = process.env['CHAT_MATH'];
+      }
+      if (item?.text?.includes('биологи')) {
+        imageUrl = 'https://timgotow.ru/uploads/start.jpg';
+        chatId = process.env['CHAT_BIOLOGY'];
+      }
+      if (item?.text?.includes('информат')) {
+        imageUrl = 'https://timgotow.ru/uploads/inf.jpg';
+        chatId = process.env['CHAT_INFORM'];
+      }
+      if (item?.text?.includes('испанс')) {
+        imageUrl = 'https://timgotow.ru/uploads/esp.jpg';
+      }
+      if (item?.text?.includes('истори')) {
+        imageUrl = 'https://timgotow.ru/uploads/his.jpg';
+        chatId = process.env['CHAT_HISTORY'];
+      }
+      if (item?.text?.includes('китайс')) {
+        imageUrl = 'https://timgotow.ru/uploads/chi.jpg';
+      }
+      if (item?.text?.includes('литер')) {
+        imageUrl = 'https://timgotow.ru/uploads/lit.jpg';
+      }
+      if (item?.text?.includes('немецк')) {
+        imageUrl = 'https://timgotow.ru/uploads/ger.jpg';
+      }
+      if (item?.text?.includes('обществ')) {
+        imageUrl = 'https://timgotow.ru/uploads/soci.jpg';
+        chatId = process.env['CHAT_SOCIAL'];
+      }
+      if (item?.text?.includes('русс')) {
+        imageUrl = 'https://timgotow.ru/uploads/ru.jpg';
+        chatId = process.env['CHAT_RUS'];
+      }
+      if (item?.text?.includes('физи')) {
+        imageUrl = 'https://timgotow.ru/uploads/phy.jpg';
+        chatId = process.env['CHAT_PHYSIC'];
+      }
+      if (item?.text?.includes('анг')) {
+        imageUrl = `https://timgotow.ru/uploads/en.jpg`;
+        chatId = process.env['CHAT_ENG'];
+      }
+      if (item?.text?.includes('2 класс' || '1 класс')) {
+        imageUrl = `https://timgotow.ru/uploads/start.jpg`;
+        chatId = process.env['CHAT_START'];
+      }
 
       let messageText;
 
@@ -254,7 +290,7 @@ export class TutorsService {
         messageText = messageLines.filter((line) => line !== null).join('\n');
       }
 
-      if (messageLines) {
+      if (messageLines && chatId) {
         await telegramLimiter.schedule(() =>
           this.sendToChat(chatId, messageText, imageUrl, tokenBot),
         );

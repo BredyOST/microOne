@@ -606,12 +606,12 @@ export class PostsService {
   // №1 стратовая функция
   async processGroups(indicator, start, pass, boolIndex, ip) {
     try {
-      // this.logsServicePostsAdd.log(`${new Date().toTimeString()} ${(indicator == 1 && !boolIndex) ? 'СОЗДАНИЕ' : indicator == 2 ? 'ОБНОВЛЕНИЕ' : 'ОБНОВЛЕНИЕ КОНКРЕТНО'}`,);
+      this.logsServicePostsAdd.log(`${new Date().toTimeString()} ${(indicator == 1 && !boolIndex) ? 'СОЗДАНИЕ' : indicator == 2 ? 'ОБНОВЛЕНИЕ' : 'ОБНОВЛЕНИЕ КОНКРЕТНО'}`,);
 
       // получаем группы с репозитория в формате масcива объектов
       const groups = await this.getGroups(start, pass);
 
-      // this.logsServicePostsAdd.log(`№1 получено ${groups.length} групп`);
+      this.logsServicePostsAdd.log(`№1 получено ${groups.length} групп`);
 
       if (!groups || !groups?.length) {
         await this.logsServicePostsAdd.error('№1 ERROR', `группы с бд не получены`,);
@@ -631,7 +631,7 @@ export class PostsService {
       //   `№1 Разбивка групп по ${mainBatchSize} завершена в : ${new Date().toTimeString()} +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++`,
       // );
     } catch (err) {
-      await this.logsServicePostsAdd.error(`№1 ERROR - ${err.message}`, `Ошибка на ШАГЕ №1: ${err.stack}`,);
+      this.logsServicePostsAdd.error(`№1 ERROR - ${err.message}`, `Ошибка на ШАГЕ №1: ${err.stack}`,);
     }
   }
   // №2 вспомогательная к стартовой функции
@@ -675,7 +675,7 @@ export class PostsService {
       const openGroups = groups.filter((group) => !closedGroupIds.includes(group?.idVk),);
 
       if (!openGroups || !openGroups.length) {
-        await this.logsServicePostsAdd.error(`№2 ERROR для групп ${i} - ${i + mainBatchSize}, закрытые ${closedGroupIds} из ${groups.length}`, `openGroups не получены`,);
+        this.logsServicePostsAdd.error(`№2 ERROR для групп ${i} - ${i + mainBatchSize}, закрытые ${closedGroupIds} из ${groups.length}`, `openGroups не получены`,);
         return;
       }
 
@@ -696,7 +696,7 @@ export class PostsService {
       }
 
       if (!groupsForNextFunction || !groupsForNextFunction?.length) {
-        await this.logsServicePostsAdd.error(
+        this.logsServicePostsAdd.error(
           `№2 ERROR для групп ${i} - ${i + mainBatchSize} - после фильтрации в groupsForNextFunction нет групп ${groupsForNextFunction.length}, открытые ${openGroups.length}`,
           `groupsForNextFunction `,
         );
@@ -711,7 +711,7 @@ export class PostsService {
         this.createAndCheckVk(indicator, groupBatch, i, u, mainBatchSize, batchSize, boolIndex, ip);
       }
     } catch (err) {
-      await this.logsServicePostsAdd.error(
+      this.logsServicePostsAdd.error(
           `№2 Функция processMainBatch по получению постов с вк - ошибка ШАГ №1 ERROR, для групп ${i} - ${i + mainBatchSize}`,
         `${err}`,
       );
@@ -720,9 +720,6 @@ export class PostsService {
   // №3 подготавливаем к запросам
   async createAndCheckVk(indicator, owner, i, u, mainBatchSize, batchSize, boolIndex, ip) {
     // owner - тут группы с бд со всей инфой что в бд
-    // this.logsServicePostsAdd.log(
-    //   `№3 createAndCheckVk запуск третьей функции в ${new Date().toTimeString()} для групп ${i} ${i + mainBatchSize}, количество групп ${owner.length}, пачка ${u} - ${u + batchSize} +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++`,
-    // );
 
     try {
       const IfNoPostsInRepository = `80`; // если нет постов в нашем репозитории, то будем запрашивать по 100 постов
@@ -1048,6 +1045,7 @@ export class PostsService {
               // если не с закрепа то
               if (!item.is_pinned) {
                 remainingGroups.push(item.owner_id);
+                console.log('1')
                 // this.logsServicePostsAdd.log(`${group.items[0].owner_id} групп ${ii} -${ii + mainBatchSize} пачка ${u} - ${u + batchSize}  ${new Date(item.date * 1000).getMonth()} -------------------------------- BREAK--------------  на итерации ${i}`,);
                 this.changePostsDateToDateUpdateWhenBreak(groupInfo);
                 break;

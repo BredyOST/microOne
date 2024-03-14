@@ -31,10 +31,11 @@ export class PostsController {
   }
 
   // обновление постов
-  @Cron('0 */10 * * * *')
+  // @Cron('0 */10 * * * *')
   @Get('/addNewPosts')
   addNewPostsVk() {
     if(serverConfig?.servers?.length >= 1 ){
+      console.log('1')
       const countPosts = process.env['COUNTER_POSTS'];
       let pass = 0;
       const end = process.env['SEARCH_END'];
