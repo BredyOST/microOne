@@ -165,8 +165,8 @@ export class TutorsService {
       const profileInfo = profiles?.find(
         (element) => element.id == item.signer_id,
       );
-
-      // if (sendMessage) this.sendPostToTelegram(item, tokenBot, telegramLimiter);
+      console.log('start')
+      if (sendMessage) this.sendPostToTelegram(item, tokenBot, telegramLimiter);
 
       return this.repository.save({
         identification_post: 'vk',
@@ -217,9 +217,9 @@ export class TutorsService {
     });
   }
   async sendPostToTelegram(item, tokenBot, telegramLimiter) {
+    console.log('2222')
     try {
       let chatId;
-      // console.log(item)
 
       const messageLines = [
         `Дата публикации:`,
@@ -285,7 +285,6 @@ export class TutorsService {
       }
 
       let messageText;
-
       if (messageLines) {
         messageText = messageLines.filter((line) => line !== null).join('\n');
       }
@@ -309,6 +308,7 @@ export class TutorsService {
     token: string,
   ) {
     try {
+
       let url;
       let dataToSend;
       if (photoUrl) {
@@ -343,11 +343,14 @@ export class TutorsService {
               `Функция проверки и получению постов с вк - ошибка`,
               `${error}`,
             );
+            console.log(error)
             throw 'An error happened!';
           }),
         ),
       );
+      console.log(data)
     } catch (err) {
+      console.log(err)
       this.logsService.error(
           `Функция отправки в телегу sendToChat - ошибка`,
           `${err}`,
