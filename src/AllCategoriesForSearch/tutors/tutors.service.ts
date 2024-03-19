@@ -165,7 +165,7 @@ export class TutorsService {
       const profileInfo = profiles?.find(
         (element) => element.id == item.signer_id,
       );
-      console.log('start')
+
       if (sendMessage) this.sendPostToTelegram(item, tokenBot, telegramLimiter);
 
       return this.repository.save({
@@ -217,7 +217,7 @@ export class TutorsService {
     });
   }
   async sendPostToTelegram(item, tokenBot, telegramLimiter) {
-    console.log('2222')
+
     try {
       let chatId;
 
