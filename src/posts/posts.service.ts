@@ -209,7 +209,7 @@ export class PostsService {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ size: start, offset: pass}),
+        body: JSON.stringify({ size: start, offset: pass }),
       });
 
       if (!response.ok) {
@@ -219,6 +219,7 @@ export class PostsService {
       }
 
       const responseData = await response.json();
+
       return responseData;
     } catch (err) {
       this.logsServicePostsAdd.error(`getGroups`, ` ${err}`);
@@ -249,6 +250,7 @@ export class PostsService {
     }
   }
   async addPostCounter(info) {
+    console.log(info)
     try {
       const link = process.env['API_URL'];
 
@@ -607,7 +609,6 @@ export class PostsService {
   async processGroups(indicator, start, pass, boolIndex, ip) {
     try {
       this.logsServicePostsAdd.log(`${new Date().toTimeString()} ${(indicator == 1 && !boolIndex) ? 'СОЗДАНИЕ' : indicator == 2 ? 'ОБНОВЛЕНИЕ' : 'ОБНОВЛЕНИЕ КОНКРЕТНО'}`,);
-
       // получаем группы с репозитория в формате масcива объектов
       const groups = await this.getGroups(start, pass);
 
@@ -1086,7 +1087,7 @@ export class PostsService {
     // this.logsServicePostsAdd.log(
     //     `№6 функция получения и добавления постов для групп ${ii} -${ii + mainBatchSize} пачка ${u} - ${u + batchSize}  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++`,
     // );
-
+    console.log('1')
     try {
       const currentMonth = new Date().getMonth(); // текущий месяц
       const currentYear = new Date().getFullYear(); // текущий год

@@ -223,7 +223,7 @@ export class TutorsService {
 
       const messageLines = [
         `Дата публикации:`,
-        `${new Date(item?.date * 1000)}.`,
+        `${new Date(item?.date * 1000).toDateString()}.`,
         `Текст поста:`,
         `${item?.text}.`,
         (item?.signer_id && !String(item.signer_id).includes('-')) ||
