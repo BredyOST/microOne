@@ -143,4 +143,18 @@ export class RedisService {
     return await this.client.del(key);
   }
 
+  async deleteKeysByPattern(pattern: string): Promise<void> {
+    try {
+      const keysToDelete = await this.getAllKeys(pattern);
+
+      if (keysToDelete.length > 0) {
+        await this.del(keysToDelete);
+        console.log(`Deleted ${keysToDelete.length} keys matching pattern: ${pattern}`);
+      } else {
+        console.log(`No keys found matching pattern: ${pattern}`);
+      }
+    } catch (error) {
+      console.error(`Error deleting keys with pattern ${pattern}:`, error);
+    }
+  }
 }

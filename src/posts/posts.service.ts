@@ -53,102 +53,12 @@ export class PostsService {
     private videoCreaterService: VideoCreaterService,
   ) {}
 
-  // async getAllKeysRedis() {
-  //   const pattern = await this.redisService.getAllKeys(`id:1*`);
-  //   console.log(pattern)
-  //   return pattern;
-  // }
   async getPostsFromRedis(dto) {
     try {
       const posts = await this.redisService.get(dto.str);
       return posts;
     } catch (err) {
       this.logsServicePostsAdd.error(`getPostsFromRedis`, ` ${err}`);
-    }
-  }
-  // получить все
-  async getAll() {
-    return await this.repository.find();
-  }
-  // получить посты одной группы из общего репозитория
-  async getAllPostsById(post_owner_id: string) {
-    return await this.repository.find({
-      where: {
-        post_owner_id,
-      },
-    });
-  }
-  // получить последний пост одной группы из общего репозитория
-  async getLatestPostByIdForThisGroup(post_owner_id: string) {
-    const latestPost = await this.repository.findOne({
-      where: {
-        post_owner_id,
-      },
-      order: {
-        post_date_publish: 'DESC',
-      },
-    });
-    return latestPost;
-  }
-  // получаем все с пагинацией
-  async getPaginationAll(dto: { limit: number; page: number }) {
-    const [result, total] = await this.repository.findAndCount({
-      skip: (+dto.page - 1) * +dto.limit,
-      take: +dto.limit,
-      order: {
-        post_date_publish: 'DESC',
-      },
-    });
-
-    return {
-      data: result,
-      page: +dto.page,
-      total,
-      pageCount: Math.ceil(total / +dto.limit),
-    };
-  }
-  // найти конкретный пост по id
-  async getPostById(post_id) {
-    return await this.repository.find({
-      where: {
-        post_id,
-      },
-    });
-  }
-  // когда добавляем посты в репозиторий общий
-  async create(item, groups, profiles, identificator) {
-    try {
-      const ownerId = String(item.owner_id).replace('-', '');
-      const groupInfo = groups?.find((element) => element.id == ownerId);
-      const profileInfo = profiles?.find(
-        (element) => element.id == item.signer_id,
-      );
-
-      return this.repository.save({
-        identification_post: identificator,
-        id_group: groupInfo?.id || item.owner_id || '',
-        name_group: groupInfo?.name || '',
-        city_group: groupInfo?.city?.title || '',
-        country_group: groupInfo?.country?.title || '',
-        photo_100_group: groupInfo?.photo_100 || '',
-        first_name_user: profileInfo?.first_name || '',
-        last_name_user: profileInfo?.last_name || '',
-        city_user: profileInfo?.city?.title || '',
-        country_user: profileInfo?.country?.title || '',
-        photo_100_user: profileInfo?.photo_100 || '',
-        post_id: item.id,
-        post_owner_id: item.owner_id,
-        post_fromId: item.from_id,
-        post_date_publish: item.date,
-        post_text: item.text,
-        post_type: item.post_type,
-        signer_id: item.signer_id || '',
-      });
-    } catch (err) {
-      await this.logsServicePostsAdd.error(
-        `№1 ERROR - ${err}`,
-        `Ошибка create в общий`,
-      );
     }
   }
 
@@ -481,14 +391,6 @@ export class PostsService {
           `ошибка получения постов в группе проверяем ids ${new Date().toTimeString()} для ${err}`, 'ERRORS',
       );
     }
-  }
-
-  // есть ли посты в общем репозитории по искомой группе перед формированием запросов
-  async hasPosts(group) {
-    const latestPostsDates = await this.getLatestPostByIdForThisGroup(
-      group.idVk,
-    );
-    return latestPostsDates != null;
   }
 
   //===========================================================================================
@@ -1151,6 +1053,7 @@ export class PostsService {
   // Redis
   async getKeysRedis() {
     const keys = await this.redisService.getAllKeys('*');
+    await this.redisService.deleteKeysByPattern("id:10-*");
     return keys;
   }
   async getRedisPosts() {

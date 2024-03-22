@@ -1,6 +1,5 @@
 import { Controller, Get, Post, Body } from '@nestjs/common'
 import { PostsService } from './posts.service'
-import { Cron } from '@nestjs/schedule';
 import {serverConfig} from "./serverConfig";
 import * as process from "process";
 
@@ -32,7 +31,7 @@ export class PostsController {
   }
 
   // обновление постов
-  @Cron('0 */10 * * * *')
+  // @Cron('0 */10 * * * *')
   @Get('/addNewPosts')
   addNewPostsVk() {
     if(serverConfig?.servers?.length >= 1 ){
@@ -82,9 +81,9 @@ export class PostsController {
   }
 
   // для очистки
-  @Get('/getRedisPosts')
-  async getRedisPosts() {
-    return this.postsService.getRedisPosts()
-  }
+  // @Get('/getRedisPosts')
+  // async getRedisPosts() {
+  //   return this.postsService.getRedisPosts()
+  // }
 
 }
