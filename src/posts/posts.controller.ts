@@ -2,6 +2,7 @@ import { Controller, Get, Post, Body } from '@nestjs/common'
 import { PostsService } from './posts.service'
 import {serverConfig} from "./serverConfig";
 import * as process from "process";
+import {Cron} from "@nestjs/schedule";
 
 @Controller('posts')
 export class PostsController {
@@ -31,7 +32,7 @@ export class PostsController {
   }
 
   // обновление постов
-  // @Cron('0 */10 * * * *')
+  @Cron('0 */10 * * * *')
   @Get('/addNewPosts')
   addNewPostsVk() {
     if(serverConfig?.servers?.length >= 1 ){
