@@ -160,7 +160,6 @@ export class PostsService {
     }
   }
   async addPostCounter(info) {
-    console.log(info)
     try {
       const link = process.env['API_URL'];
 
@@ -400,7 +399,6 @@ export class PostsService {
 
       const allCategories = await this.getCategories();
       if (!allCategories || !allCategories?.length) {
-        // await this.logsServicePostsAdd.error(`получение категорий`, `не получены категории в развилке`)
         return
       }
 
@@ -460,6 +458,7 @@ export class PostsService {
         const negativeWords = await category.negativeWords;
 
         const filter = await this.filterOnePostForOthersRepositories(item, positiveWords, negativeWords, 1,);
+
         if (filter) {
           await categoryInfo.service?.createFromVkDataBase(
             item,
@@ -481,6 +480,7 @@ export class PostsService {
   }
   //№3 фильтруем пост по ключевым словам
   async filterOnePostForOthersRepositories(post, positiveKeywords, negativeKeywords, indicator,) {
+
     try {
       let postText;
 

@@ -160,6 +160,7 @@ export class TutorsService {
     telegramLimiter,
   ) {
     try {
+
       const ownerId = String(item.owner_id).replace('-', '');
       const groupInfo = groups?.find((element) => element.id == ownerId);
       const profileInfo = profiles?.find(
@@ -241,10 +242,10 @@ export class TutorsService {
 
 
       if (item?.text?.includes('матем' || 'матан' || 'алгебр')) {
-        console.log('1')
+        // console.log('1')
         imageUrl = 'https://timgotow.ru/uploads/math.jpg';
         chatId = process.env['CHAT_MATH'];
-        console.log(chatId)
+        // console.log(chatId)
         if (messageLines && chatId) {
           await telegramLimiter.schedule(() =>
               this.sendToChat(chatId, messageText, imageUrl, tokenBot),
@@ -252,10 +253,10 @@ export class TutorsService {
         }
       }
       if (item?.text?.includes('геоме' || 'профил')) {
-        console.log('2')
+        // console.log('2')
         // imageUrl = 'https://timgotow.ru/uploads/math.jpg';
         chatId = process.env['CHAT_MATH'];
-        console.log(chatId)
+        // console.log(chatId)
         if (messageLines && chatId) {
           await telegramLimiter.schedule(() =>
               this.sendToChat(chatId, messageText, imageUrl, tokenBot),
@@ -263,10 +264,10 @@ export class TutorsService {
         }
       }
       if (item?.text?.includes('биологи')) {
-        console.log('3')
+        // console.log('3')
         imageUrl = 'https://timgotow.ru/uploads/bio.jpg';
         chatId = process.env['CHAT_BIOLOGY'];
-        console.log(chatId)
+        // console.log(chatId)
         if (messageLines && chatId) {
           await telegramLimiter.schedule(() =>
               this.sendToChat(chatId, messageText, imageUrl, tokenBot),
@@ -274,10 +275,10 @@ export class TutorsService {
         }
       }
       if (item?.text?.includes('хими')) {
-        console.log('4')
+        // console.log('4')
         imageUrl = 'https://timgotow.ru/uploads/chem.jpg';
         chatId = process.env['CHAT_BIOLOGY'];
-        console.log(chatId)
+        // console.log(chatId)
         if (messageLines && chatId) {
           await telegramLimiter.schedule(() =>
               this.sendToChat(chatId, messageText, imageUrl, tokenBot),
@@ -286,10 +287,10 @@ export class TutorsService {
       }
 
       if (item?.text?.includes('информат')) {
-        console.log('5')
+        // console.log('5')
         imageUrl = 'https://timgotow.ru/uploads/inf.jpg';
         chatId = process.env['CHAT_INFORM'];
-        console.log(chatId)
+        // console.log(chatId)
         if (messageLines && chatId) {
           await telegramLimiter.schedule(() =>
               this.sendToChat(chatId, messageText, imageUrl, tokenBot),
@@ -297,10 +298,10 @@ export class TutorsService {
         }
       }
       if (item?.text?.includes('истори')) {
-        console.log('6')
+        // console.log('6')
         imageUrl = 'https://timgotow.ru/uploads/his.jpg';
         chatId = process.env['CHAT_SOCIAL_HISTORY'];
-        console.log(chatId)
+        // console.log(chatId)
         if (messageLines && chatId) {
           await telegramLimiter.schedule(() =>
               this.sendToChat(chatId, messageText, imageUrl, tokenBot),
@@ -308,10 +309,10 @@ export class TutorsService {
         }
       }
       if (item?.text?.includes('обществ')) {
-        console.log('7')
+        // console.log('7')
         imageUrl = 'https://timgotow.ru/uploads/soci.jpg';
         chatId = process.env['CHAT_SOCIAL_HISTORY'];
-        console.log(chatId)
+        // console.log(chatId)
         if (messageLines && chatId) {
           await telegramLimiter.schedule(() =>
               this.sendToChat(chatId, messageText, imageUrl, tokenBot),
@@ -319,10 +320,10 @@ export class TutorsService {
         }
       }
       if (item?.text?.includes('литер')) {
-        console.log('8')
+        // console.log('8')
         imageUrl = 'https://timgotow.ru/uploads/lit.jpg';
         chatId = process.env['CHAT_RUS'];
-        console.log(chatId)
+        // console.log(chatId)
         if (messageLines && chatId) {
           await telegramLimiter.schedule(() =>
               this.sendToChat(chatId, messageText, imageUrl, tokenBot),
@@ -330,10 +331,10 @@ export class TutorsService {
         }
       }
       if (item?.text?.includes('рус')) {
-        console.log('9')
+        // console.log('9')
         imageUrl = 'https://timgotow.ru/uploads/ru.jpg';
         chatId = process.env['CHAT_RUS'];
-        console.log(chatId)
+        // console.log(chatId)
         if (messageLines && chatId) {
           await telegramLimiter.schedule(() =>
               this.sendToChat(chatId, messageText, imageUrl, tokenBot),
@@ -341,10 +342,10 @@ export class TutorsService {
         }
       }
       if (item?.text?.includes('испанс')) {
-        console.log('10')
+        // console.log('10')
         imageUrl = 'https://timgotow.ru/uploads/esp.jpg';
         chatId = process.env['CHAT_LANGUAGE'];
-        console.log(chatId)
+        // console.log(chatId)
         if (messageLines && chatId) {
           await telegramLimiter.schedule(() =>
               this.sendToChat(chatId, messageText, imageUrl, tokenBot),
@@ -352,10 +353,10 @@ export class TutorsService {
         }
       }
       if (item?.text?.includes('китайс')) {
-        console.log('11')
+        // console.log('11')
         // imageUrl = 'https://timgotow.ru/uploads/esp.jpg';
         chatId = process.env['CHAT_LANGUAGE'];
-        console.log(chatId)
+        // console.log(chatId)
         if (messageLines && chatId) {
           await telegramLimiter.schedule(() =>
               this.sendToChat(chatId, messageText, imageUrl, tokenBot),
@@ -363,10 +364,10 @@ export class TutorsService {
         }
       }
       if (item?.text?.includes('англ')) {
-        console.log('12')
+        // console.log('12')
         imageUrl = 'https://timgotow.ru/uploads/en.jpg';
         chatId = process.env['CHAT_LANGUAGE'];
-        console.log(chatId)
+        // console.log(chatId)
         if (messageLines && chatId) {
           await telegramLimiter.schedule(() =>
               this.sendToChat(chatId, messageText, imageUrl, tokenBot),
@@ -374,10 +375,10 @@ export class TutorsService {
         }
       }
       if (item?.text?.includes('немец')) {
-        console.log('13')
+        // console.log('13')
         imageUrl = 'https://timgotow.ru/uploads/ger.jpg';
         chatId = process.env['CHAT_LANGUAGE'];
-        console.log(chatId)
+        // console.log(chatId)
         if (messageLines && chatId) {
           await telegramLimiter.schedule(() =>
               this.sendToChat(chatId, messageText, imageUrl, tokenBot),
@@ -386,10 +387,10 @@ export class TutorsService {
       }
 
       if (item?.text?.includes('физи')) {
-        console.log('14')
+        // console.log('14')
         imageUrl = 'https://timgotow.ru/uploads/phy.jpg';
         chatId = process.env['CHAT_PHYSIC'];
-        console.log(chatId)
+        // console.log(chatId)
         if (messageLines && chatId) {
           await telegramLimiter.schedule(() =>
               this.sendToChat(chatId, messageText, imageUrl, tokenBot),
@@ -397,20 +398,18 @@ export class TutorsService {
         }
       }
       if (item?.text?.includes('2 класс' || '1 кл' || '3 кл' || '4 кл' || 'чтени' || 'первокла' || 'второкла' || 'треьекл' || 'четверок' || 'начал' || 'к школе' || 'школ')) {
-        console.log('15')
+        // console.log('15')
         imageUrl = `https://timgotow.ru/uploads/start.jpg`;
         chatId = process.env['CHAT_START'];
-        console.log(chatId)
+        // console.log(chatId)
         if (messageLines && chatId) {
           await telegramLimiter.schedule(() =>
               this.sendToChat(chatId, messageText, imageUrl, tokenBot),
           );
         }
       }
-
-
     } catch (err) {
-      console.log(err)
+
       this.logsService.error(
         `Функция sendPostToTelegram - ошибка`,
         `${err}`,
