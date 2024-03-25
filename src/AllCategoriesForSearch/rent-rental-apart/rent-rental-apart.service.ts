@@ -1,25 +1,25 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { AppService } from '../../app.service';
 import { InjectRepository } from '@nestjs/typeorm';
-import { HandymanAndBuilderEntity } from './entities/handyman-and-builder.entity';
 import { Repository } from 'typeorm';
 import { HttpService } from '@nestjs/axios';
 import { LogsService } from '../../otherServices/logger.service';
 import { RedisService } from '../../redis/redis.service';
 import * as process from 'process';
+import {RentRentalApartEntity} from "./entities/rent-rental-apart.entity";
 
 @Injectable()
-export class HandymanAndBuilderService {
+export class RentRentalApartService {
   private readonly logger = new Logger(AppService.name);
   private id: string | number;
   constructor(
-    @InjectRepository(HandymanAndBuilderEntity)
-    private repository: Repository<HandymanAndBuilderEntity>,
+    @InjectRepository(RentRentalApartEntity)
+    private repository: Repository<RentRentalApartEntity>,
     private readonly httpService: HttpService,
     private logsService: LogsService,
     private redisService: RedisService,
   ) {
-    this.id = process.env['ID_BUILDER']; // 4й
+    this.id = process.env['ID_RENTAL_RENT']; // 5й
   }
 
   // получаем последний пост из репозитория с сортировкой
@@ -56,11 +56,11 @@ export class HandymanAndBuilderService {
   // получить весь репозиторий c Redis
   async getAll() {
     const posts = await this.redisService.get(
-        '1dd67c02cf41f00cde6819e97c3752d91b742a1b99c8bc209252ad028c35bbba',
+      '1dd67c02cf41f00cde6819e97c3752d91b742a1b99c8bc209252ad028c35bbba',
     );
     if (posts && posts !== null) {
       return JSON.parse(posts).sort(
-          (a, b) => b.post_date_publish - a.post_date_publish,
+        (a, b) => b.post_date_publish - a.post_date_publish,
       );
     }
   }
@@ -73,8 +73,8 @@ export class HandymanAndBuilderService {
       const postCountInKey = 300;
       const queryBuilder = this.repository.createQueryBuilder('posts');
       const sortedPosts = await queryBuilder
-          .orderBy('posts.post_date_publish', 'DESC')
-          .getMany();
+        .orderBy('posts.post_date_publish', 'DESC')
+        .getMany();
 
       const pattern = await this.redisService.getAllKeys(`id:${this.id}-*`);
       const counterNow = Math.ceil(sortedPosts.length / postCountInKey);
@@ -139,19 +139,19 @@ export class HandymanAndBuilderService {
   }
   // создание для ВК
   async createFromVkDataBase(
-      item,
-      groups,
-      profiles,
-      identificator,
-      sendMessage,
-      tokenBot,
-      telegramLimiter,
+    item,
+    groups,
+    profiles,
+    identificator,
+    sendMessage,
+    tokenBot,
+    telegramLimiter,
   ) {
     try {
       const ownerId = String(item.owner_id).replace('-', '');
       const groupInfo = groups?.find((element) => element.id == ownerId);
       const profileInfo = profiles?.find(
-          (element) => element.id == item.signer_id,
+        (element) => element.id == item.signer_id,
       );
 
       // if (sendMessage) this.sendPostToTelegram(item, tokenBot, telegramLimiter);
@@ -178,8 +178,8 @@ export class HandymanAndBuilderService {
       });
     } catch (err) {
       this.logsService.error(
-          `Функция добавление постов тюторс- ошибка`,
-          `${err}`,
+        `Функция добавление постов тюторс- ошибка`,
+        `${err}`,
       );
     }
   }
@@ -207,102 +207,4 @@ export class HandymanAndBuilderService {
       signer_id: item.signer_id || '',
     });
   }
-
-  // async sendPostToTelegram(item, tokenBot, telegramLimiter) {
-  //
-  //   try {
-  //     let chatId;
-  //
-  //     const messageLines = [
-  //       `Дата публикации:`,
-  //       `${new Date(item?.date * 1000).toLocaleString()}.`,
-  //       `Текст поста:`,
-  //       `${item?.text}.`,
-  //       (item?.signer_id && !String(item.signer_id).includes('-')) ||
-  //       (item?.from_id && !String(item.from_id).includes('-'))
-  //           ? `Пользователь: https://vk.com/id${item?.signer_id || item?.from_id}.`
-  //           : null,
-  //       `Пост: https://vk.com/wall${item?.owner_id}_${item?.id}.`,
-  //     ];
-  //
-  //     let imageUrl;
-  //     let messageText;
-  //     if (messageLines) {
-  //       messageText = messageLines.filter((line) => line !== null).join('\n');
-  //     }
-  //
-  //
-  //     if (item?.text?.includes('матем' || 'матан' || 'алгебр')) {
-  //       imageUrl = 'https://timgotow.ru/uploads/math.jpg';
-  //       chatId = process.env['CHAT_MATH'];
-  //       if (messageLines && chatId) {
-  //         await telegramLimiter.schedule(() =>
-  //             this.sendToChat(chatId, messageText, imageUrl, tokenBot),
-  //         );
-  //       }
-  //     }
-  //
-  //   } catch (err) {
-  //
-  //     this.logsService.error(
-  //         `Функция sendPostToTelegram - ошибка`,
-  //         `${err}`,
-  //     );
-  //   }
-  // }
-  // async sendToChat(
-  //     chatId: string,
-  //     messageText: string,
-  //     photoUrl: string,
-  //     token: string,
-  // ) {
-  //   try {
-  //
-  //     let url;
-  //     let dataToSend;
-  //     if (photoUrl) {
-  //       url = `https://api.telegram.org/bot${token}/sendPhoto`;
-  //       dataToSend = {
-  //         chat_id: chatId,
-  //         caption: messageText,
-  //         photo: photoUrl,
-  //       };
-  //     } else {
-  //       url = `https://api.telegram.org/bot${token}/sendMessage`;
-  //       dataToSend = {
-  //         chat_id: chatId,
-  //         text: messageText,
-  //       };
-  //     }
-  //
-  //     const { data } = await firstValueFrom(
-  //         this.httpService.post<any>(url, dataToSend).pipe(
-  //             catchError((error: AxiosError) => {
-  //               if (
-  //                   error.response &&
-  //                   'data' in error.response &&
-  //                   error.response.data != undefined
-  //               ) {
-  //                 this.logsService.error(
-  //                     `Функция проверки и получению постов с вк - ошибка`,
-  //                     `${error}`,
-  //                 );
-  //               }
-  //               this.logsService.error(
-  //                   `Функция проверки и получению постов с вк - ошибка`,
-  //                   `${error}`,
-  //               );
-  //               console.log(error)
-  //               throw 'An error happened!';
-  //             }),
-  //         ),
-  //     );
-  //   } catch (err) {
-  //
-  //     this.logsService.error(
-  //         `Функция отправки в телегу sendToChat - ошибка`,
-  //         `${err}`,
-  //     );
-  //   }
-  // }
 }

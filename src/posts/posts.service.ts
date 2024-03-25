@@ -9,14 +9,12 @@ import { LogsService } from '../otherServices/logger.service';
 import { RedisService } from '../redis/redis.service';
 import { TutorsService } from '../AllCategoriesForSearch/tutors/tutors.service';
 import { NanniesService } from '../AllCategoriesForSearch/nannies/nannies.service';
-import { DesignersService } from '../AllCategoriesForSearch/designers/designers.service';
-import { DriverService } from '../AllCategoriesForSearch/driver/driver.service';
-import { ItService } from '../AllCategoriesForSearch/it/it.service';
 import { HandymanAndBuilderService } from '../AllCategoriesForSearch/handyman-and-builder/handyman-and-builder.service';
-import { LawyerService } from '../AllCategoriesForSearch/lawyer/lawyer.service';
-import { RealtorService } from '../AllCategoriesForSearch/realtor/realtor.service';
-import { SeoService } from '../AllCategoriesForSearch/seo/seo.service';
-import { VideoCreaterService } from '../AllCategoriesForSearch/video-creater/video-creater.service';
+import {PurchaseSaleApartService} from "../AllCategoriesForSearch/purchase-sale-apart/purchase-sale-apart.service";
+import {RentRentalApartService} from "../AllCategoriesForSearch/rent-rental-apart/rent-rental-apart.service";
+import {
+  EquipRepairMaintenanceService
+} from "../AllCategoriesForSearch/equip-repair-maintenance/equip-repair-maintenance.service";
 
 const Bottleneck = require('bottleneck');
 
@@ -43,14 +41,11 @@ export class PostsService {
     private redisService: RedisService,
     private tutorService: TutorsService,
     private nanniesService: NanniesService,
-    private designersService: DesignersService,
-    private driverService: DriverService,
-    private itService: ItService,
     private handymanAndBuilderService: HandymanAndBuilderService,
-    private lawyerService: LawyerService,
-    private realtorService: RealtorService,
-    private seoService: SeoService,
-    private videoCreaterService: VideoCreaterService,
+    private purchaseSaleApartService: PurchaseSaleApartService,
+    private rentRentalApartService: RentRentalApartService,
+    private equipRepairMaintenanceService: EquipRepairMaintenanceService,
+
   ) {}
 
   async getPostsFromRedis(dto) {
@@ -111,6 +106,7 @@ export class PostsService {
     }
   }
   async getGroups(start, pass) {
+
     try {
       const link = process.env['API_URL'];
 
@@ -284,7 +280,7 @@ export class PostsService {
   async getPostsFromVK(postsForRequst, ip) {
     const access = process.env['ACCESS_TOKEN'];
     const versionVk = process.env['VERSION_VK'];
-    // console.log(ip)
+
     try {
       const { data } = await firstValueFrom(
           this.httpService.get<any>(`${ip}`, { headers: {
@@ -382,7 +378,7 @@ export class PostsService {
         );
       }
       const data = response.data;
-      // console.log(data)
+
       return data;
     } catch (err) {
       // console.error('Error:', err.request_params);
@@ -412,6 +408,7 @@ export class PostsService {
         );
       }
       if (boolIndex) {
+
         await Promise.all(
             allCategories.map(async (category) => {
               if (category?.create) this.addNewPostToOtherRepositories(item, groupInfo, profilesInfo, sendMessage, category, telegramLimiter,);
@@ -435,14 +432,10 @@ export class PostsService {
       const categories = [
         { id: 1, name: 'Для репетиторов', service: this.tutorService },
         { id: 2, name: 'Поиск домашнего персонала', service: this.nanniesService,},
-        { id: 3, name: 'для мастеров на все руки', service: this.handymanAndBuilderService,},
-        { id: 4, name: 'Для дизайнеров', service: this.designersService },
-        { id: 5, name: 'Для SEO специалистов', service: this.seoService },
-        { id: 6, name: 'IT/WEB', service: this.itService },
-        { id: 7, name: 'Фото и видеомонтаж', service: this.videoCreaterService,},
-        { id: 8, name: 'Для риелтеров', service: this.realtorService },
-        { id: 9, name: 'Для юристов', service: this.lawyerService },
-        { id: 10, name: 'Для водителей', service: this.driverService },
+        { id: 3, name: 'Ремонт и обслуживание техники', service: this.equipRepairMaintenanceService,},
+        { id: 4, name: 'Ремонт и строительство', service: this.handymanAndBuilderService,},
+        { id: 5, name: 'Аренда, сдача недвижимости', service: this.rentRentalApartService,},
+        { id: 6, name: 'Покупка, продажа недвижимости', service: this.purchaseSaleApartService,},
       ];
 
       const categoryInfo = categories.find((cat) => cat.id === category.id);
@@ -510,6 +503,7 @@ export class PostsService {
   // №1 стратовая функция
   async processGroups(indicator, start, pass, boolIndex, ip) {
     try {
+
       this.logsServicePostsAdd.log(`${new Date().toTimeString()} ${(indicator == 1 && !boolIndex) ? 'СОЗДАНИЕ' : indicator == 2 ? 'ОБНОВЛЕНИЕ' : 'ОБНОВЛЕНИЕ КОНКРЕТНО'}`,);
       // получаем группы с репозитория в формате масcива объектов
       const groups = await this.getGroups(start, pass);
@@ -586,7 +580,8 @@ export class PostsService {
       let groupsForNextFunction = [];
       // группы, постов которых нет в бд.Проверяем есть ли посты в БД
       if (indicator == 1 && !boolIndex) {
-        groupsForNextFunction = await Promise.all(openGroups.filter((group) => (group.postsLastDate == null || !group.postsLastDate)),);
+        groupsForNextFunction = await Promise.all(
+            openGroups?.filter((group) => (group.postsLastDate == null || !group.postsLastDate)),);
       }
       if (indicator == 1 && boolIndex) {
         groupsForNextFunction = openGroups;
@@ -594,7 +589,7 @@ export class PostsService {
       // группы посты которых есть в бд
       if (indicator == 2) {
         groupsForNextFunction = await Promise.all(
-          openGroups.filter((group) => group.postsLastDate !== null && group.postsLastDate !== undefined,),
+          openGroups?.filter((group) => group.postsLastDate !== null && group.postsLastDate !== undefined,),
         );
       }
 
@@ -989,7 +984,7 @@ export class PostsService {
     // this.logsServicePostsAdd.log(
     //     `№6 функция получения и добавления постов для групп ${ii} -${ii + mainBatchSize} пачка ${u} - ${u + batchSize}  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++`,
     // );
-    console.log('1')
+    console.log('for')
     try {
       const currentMonth = new Date().getMonth(); // текущий месяц
       const currentYear = new Date().getFullYear(); // текущий год
@@ -1084,4 +1079,5 @@ export class PostsService {
       }
     }
   }
+
 }

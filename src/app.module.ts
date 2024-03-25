@@ -13,21 +13,13 @@ import { NannyEntity } from './AllCategoriesForSearch/nannies/entities/nanny.ent
 import { TutorsModule } from './AllCategoriesForSearch/tutors/tutors.module';
 import { NanniesModule } from './AllCategoriesForSearch/nannies/nannies.module';
 import { HandymanAndBuilderModule } from './AllCategoriesForSearch/handyman-and-builder/handyman-and-builder.module';
-import { HandymanAndBuilderEntity } from "./AllCategoriesForSearch/handyman-and-builder/entities/handyman-and-builder.entity";
-import { DesignersModule } from './AllCategoriesForSearch/designers/designers.module';
-import {DesignerEntity} from "./AllCategoriesForSearch/designers/entities/designer.entity";
-import {SeoModule} from "./AllCategoriesForSearch/seo/seo.module";
-import {SeoEntity} from "./AllCategoriesForSearch/seo/entities/seo.entity";
-import {ItModule} from "./AllCategoriesForSearch/it/it.module";
-import {ItEntity} from "./AllCategoriesForSearch/it/entities/it.entity";
-import {VideoCreaterEntity} from "./AllCategoriesForSearch/video-creater/entities/video-creater.entity";
-import {VideoCreaterModule} from "./AllCategoriesForSearch/video-creater/video-creater.module";
-import {RealtorEntity} from "./AllCategoriesForSearch/realtor/entities/realtor.entity";
-import {RealtorModule} from "./AllCategoriesForSearch/realtor/realtor.module";
-import {LawyerEntity} from "./AllCategoriesForSearch/lawyer/entities/lawyer.entity";
-import {LawyerModule} from "./AllCategoriesForSearch/lawyer/lawyer.module";
-import {DriverEntity} from "./AllCategoriesForSearch/driver/entities/driver.entity";
-import {DriverModule} from "./AllCategoriesForSearch/driver/driver.module";
+import { HandymanAndBuilderEntity } from './AllCategoriesForSearch/handyman-and-builder/entities/handyman-and-builder.entity';
+import { EquipRepairMaintenanceEntity } from './AllCategoriesForSearch/equip-repair-maintenance/entities/equip-repair-maintenance.entity';
+import { EquipRepairMaintenanceModule } from './AllCategoriesForSearch/equip-repair-maintenance/equip-repair-maintenance.module';
+import { RentRentalApartEntity } from './AllCategoriesForSearch/rent-rental-apart/entities/rent-rental-apart.entity';
+import { RentRentalApartModule } from './AllCategoriesForSearch/rent-rental-apart/rent-rental-apart.module';
+import { PurchaseSaleApartEntity } from './AllCategoriesForSearch/purchase-sale-apart/entities/purchase-sale-apart.entity';
+import { PurchaseSaleApartModule } from './AllCategoriesForSearch/purchase-sale-apart/purchase-sale-apart.module';
 
 @Module({
   imports: [
@@ -50,14 +42,10 @@ import {DriverModule} from "./AllCategoriesForSearch/driver/driver.module";
             PostEntity,
             TutorEntity,
             NannyEntity,
+            EquipRepairMaintenanceEntity,
             HandymanAndBuilderEntity,
-            DesignerEntity,
-            SeoEntity,
-            ItEntity,
-            VideoCreaterEntity,
-            RealtorEntity,
-            LawyerEntity,
-            DriverEntity,
+            RentRentalApartEntity,
+            PurchaseSaleApartEntity,
           ],
         };
       },
@@ -65,16 +53,11 @@ import {DriverModule} from "./AllCategoriesForSearch/driver/driver.module";
     PostsModule,
     TutorsModule,
     NanniesModule,
-    HandymanAndBuilderModule,
     LogsModule,
-    DesignersModule,
-    DesignersModule,
-    SeoModule,
-    ItModule,
-    VideoCreaterModule,
-    RealtorModule,
-    LawyerModule,
-    DriverModule,
+    HandymanAndBuilderModule,
+    EquipRepairMaintenanceModule,
+    RentRentalApartModule,
+    PurchaseSaleApartModule,
   ],
   controllers: [AppController],
   providers: [AppService],

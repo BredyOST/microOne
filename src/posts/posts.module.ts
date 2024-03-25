@@ -12,13 +12,9 @@ import { LogsService } from '../otherServices/logger.service';
 import { NanniesModule } from '../AllCategoriesForSearch/nannies/nannies.module';
 import { TutorsModule } from '../AllCategoriesForSearch/tutors/tutors.module';
 import { HandymanAndBuilderModule } from '../AllCategoriesForSearch/handyman-and-builder/handyman-and-builder.module';
-import { DesignersModule } from '../AllCategoriesForSearch/designers/designers.module';
-import { SeoModule } from '../AllCategoriesForSearch/seo/seo.module';
-import { ItModule } from '../AllCategoriesForSearch/it/it.module';
-import { VideoCreaterModule } from '../AllCategoriesForSearch/video-creater/video-creater.module';
-import { RealtorModule } from '../AllCategoriesForSearch/realtor/realtor.module';
-import { LawyerModule } from '../AllCategoriesForSearch/lawyer/lawyer.module';
-import { DriverModule } from '../AllCategoriesForSearch/driver/driver.module';
+import { EquipRepairMaintenanceModule } from '../AllCategoriesForSearch/equip-repair-maintenance/equip-repair-maintenance.module';
+import { PurchaseSaleApartModule } from '../AllCategoriesForSearch/purchase-sale-apart/purchase-sale-apart.module';
+import { RentRentalApartModule } from '../AllCategoriesForSearch/rent-rental-apart/rent-rental-apart.module';
 
 @Module({
   imports: [
@@ -30,22 +26,12 @@ import { DriverModule } from '../AllCategoriesForSearch/driver/driver.module';
     NanniesModule,
     LogsModule,
     HandymanAndBuilderModule,
-    DesignersModule,
-    DesignersModule,
-    SeoModule,
-    ItModule,
-    VideoCreaterModule,
-    RealtorModule,
-    LawyerModule,
-    DriverModule,
+    EquipRepairMaintenanceModule,
+    PurchaseSaleApartModule,
+    RentRentalApartModule,
   ],
   controllers: [PostsController],
-  providers: [
-    PostsService,
-    LogsService,
-    RedisService,
-    RepositoryPostsAdd
-  ],
+  providers: [PostsService, LogsService, RedisService, RepositoryPostsAdd],
   exports: [PostsService],
 })
 export class PostsModule {}

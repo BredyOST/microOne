@@ -7,10 +7,6 @@ export class NanniesController {
       private readonly nanniesService: NanniesService,
   ) {}
 
-  @Get('/getPostForStatic')
-  async getPostForStatic() {
-    return this.nanniesService.getPostForStatic()
-  }
   @Cron('0 */10 * * * *')
   @Get('/forRedis')
   async savePostsToRedis() {

@@ -9,12 +9,7 @@ export class HandymanAndBuilderController {
       private readonly handymanAndBuilderService: HandymanAndBuilderService
   ) {}
 
-  // для статики - 50 постов
-  @Get('/getPostForStatic')
-  async getPostForStatic() {
-    return this.handymanAndBuilderService.getPostForStatic()
-  }
-  @Cron('0 */10 * * * *')
+  @Cron('0 */5 * * * *')
   @Get('/forRedis')
   async savePostsToRedis() {
     return this.handymanAndBuilderService.savePostsToRedis()

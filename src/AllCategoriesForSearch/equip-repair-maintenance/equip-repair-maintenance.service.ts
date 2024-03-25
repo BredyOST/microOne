@@ -1,25 +1,26 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { AppService } from '../../app.service';
 import { InjectRepository } from '@nestjs/typeorm';
-import { HandymanAndBuilderEntity } from './entities/handyman-and-builder.entity';
 import { Repository } from 'typeorm';
 import { HttpService } from '@nestjs/axios';
 import { LogsService } from '../../otherServices/logger.service';
 import { RedisService } from '../../redis/redis.service';
 import * as process from 'process';
+import { EquipRepairMaintenanceEntity } from './entities/equip-repair-maintenance.entity';
 
 @Injectable()
-export class HandymanAndBuilderService {
+export class EquipRepairMaintenanceService {
   private readonly logger = new Logger(AppService.name);
+
   private id: string | number;
   constructor(
-    @InjectRepository(HandymanAndBuilderEntity)
-    private repository: Repository<HandymanAndBuilderEntity>,
+    @InjectRepository(EquipRepairMaintenanceEntity)
+    private repository: Repository<EquipRepairMaintenanceEntity>,
     private readonly httpService: HttpService,
     private logsService: LogsService,
     private redisService: RedisService,
   ) {
-    this.id = process.env['ID_BUILDER']; // 4й
+    this.id = process.env['ID_REPAIR_MAIN']; // 3й
   }
 
   // получаем последний пост из репозитория с сортировкой
@@ -56,11 +57,11 @@ export class HandymanAndBuilderService {
   // получить весь репозиторий c Redis
   async getAll() {
     const posts = await this.redisService.get(
-        '1dd67c02cf41f00cde6819e97c3752d91b742a1b99c8bc209252ad028c35bbba',
+      '1dd67c02cf41f00cde6819e97c3752d91b742a1b99c8bc209252ad028c35bbba',
     );
     if (posts && posts !== null) {
       return JSON.parse(posts).sort(
-          (a, b) => b.post_date_publish - a.post_date_publish,
+        (a, b) => b.post_date_publish - a.post_date_publish,
       );
     }
   }
@@ -73,8 +74,8 @@ export class HandymanAndBuilderService {
       const postCountInKey = 300;
       const queryBuilder = this.repository.createQueryBuilder('posts');
       const sortedPosts = await queryBuilder
-          .orderBy('posts.post_date_publish', 'DESC')
-          .getMany();
+        .orderBy('posts.post_date_publish', 'DESC')
+        .getMany();
 
       const pattern = await this.redisService.getAllKeys(`id:${this.id}-*`);
       const counterNow = Math.ceil(sortedPosts.length / postCountInKey);
@@ -139,19 +140,19 @@ export class HandymanAndBuilderService {
   }
   // создание для ВК
   async createFromVkDataBase(
-      item,
-      groups,
-      profiles,
-      identificator,
-      sendMessage,
-      tokenBot,
-      telegramLimiter,
+    item,
+    groups,
+    profiles,
+    identificator,
+    sendMessage,
+    tokenBot,
+    telegramLimiter,
   ) {
     try {
       const ownerId = String(item.owner_id).replace('-', '');
       const groupInfo = groups?.find((element) => element.id == ownerId);
       const profileInfo = profiles?.find(
-          (element) => element.id == item.signer_id,
+        (element) => element.id == item.signer_id,
       );
 
       // if (sendMessage) this.sendPostToTelegram(item, tokenBot, telegramLimiter);
@@ -178,8 +179,8 @@ export class HandymanAndBuilderService {
       });
     } catch (err) {
       this.logsService.error(
-          `Функция добавление постов тюторс- ошибка`,
-          `${err}`,
+        `Функция добавление постов тюторс- ошибка`,
+        `${err}`,
       );
     }
   }
