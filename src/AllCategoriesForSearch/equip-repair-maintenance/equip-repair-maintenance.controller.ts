@@ -1,7 +1,6 @@
 import { Controller, Get} from '@nestjs/common';
-import { HandymanAndBuilderService } from '../handyman-and-builder/handyman-and-builder.service';
 import { Cron } from '@nestjs/schedule';
-import {EquipRepairMaintenanceService} from "./equip-repair-maintenance.service";
+import { EquipRepairMaintenanceService } from './equip-repair-maintenance.service';
 
 @Controller('equip-repair-maintenance')
 export class EquipRepairMaintenanceController {

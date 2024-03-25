@@ -5,5 +5,13 @@ export const serverConfig = {
     { ip: 'https://micro-one-first.ru/service3/', ipTwo:'https://micro-one-first.ru/send1/', port: 7000 },
     { ip: 'https://micro-one-first.ru/service4/', ipTwo:'https://micro-one-first.ru/send1/', port: 7000 },
     { ip: 'https://micro-one-first.ru/service5/', ipTwo:'https://micro-one-first.ru/send1/', port: 7000 },
+    { ip: 'https://micro-one-first.ru/service6/', ipTwo:'https://micro-one-first.ru/send1/', port: 7000 },
+    { ip: 'https://micro-one-first.ru/service7/', ipTwo:'https://micro-one-first.ru/send1/', port: 7000 },
+    { ip: 'https://micro-one-first.ru/service8/', ipTwo:'https://micro-one-first.ru/send1/', port: 7000 },
+    { ip: 'https://micro-one-first.ru/service9/', ipTwo:'https://micro-one-first.ru/send1/', port: 7000 },
+    { ip: 'https://micro-one-first.ru/service10/', ipTwo:'https://micro-one-first.ru/send1/', port: 7000 },
+
+
+
   ],
 };

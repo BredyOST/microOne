@@ -32,7 +32,7 @@ export class PostsController {
   }
 
   // обновление постов
-  @Cron('0 */10 * * * *')
+  // @Cron('0 */10 * * * *')
   @Get('/addNewPosts')
   addNewPostsVk() {
     if(serverConfig?.servers?.length >= 1 ){
@@ -53,7 +53,7 @@ export class PostsController {
 
   @Get('/createPostsForNewCategory')
   async createPostsForNewCategory(){
-    console.log('2')
+
     if(serverConfig?.servers?.length >= 1 ){
       const countPosts = process.env['COUNTER_POSTS'];
       let pass = 0;
