@@ -39,7 +39,6 @@ export class PostsController {
       const countPosts = process.env['COUNTER_POSTS'];
       let pass = 0;
       const end = process.env['SEARCH_END'];
-
       for (let i = 1; pass <= +end; i++) {
         if(+pass > +end) break;
         serverConfig?.servers?.map((item) => {
@@ -53,7 +52,6 @@ export class PostsController {
 
   @Get('/createPostsForNewCategory')
   async createPostsForNewCategory(){
-
     if(serverConfig?.servers?.length >= 1 ){
       const countPosts = process.env['COUNTER_POSTS'];
       let pass = 0;

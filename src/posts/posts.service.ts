@@ -78,6 +78,7 @@ export class PostsService {
       const responseData = await response.json();
       return responseData;
     } catch (err) {
+
       this.logsServicePostsAdd.error(`getCategories`, ` ${err}`);
     }
   }
@@ -280,7 +281,6 @@ export class PostsService {
   async getPostsFromVK(postsForRequst, ip) {
     const access = process.env['ACCESS_TOKEN'];
     const versionVk = process.env['VERSION_VK'];
-
     try {
       const { data } = await firstValueFrom(
           this.httpService.get<any>(`${ip}`, { headers: {
@@ -707,7 +707,6 @@ export class PostsService {
             .map((_, index) => `group${index}: response${index}`)
             .join(', ') +
           ' };';
-
         if (codeIfPostsYes && codeIfPostsYes?.length)
           this.addPostsToCommonOrUpdate(codeIfPostsYes, IfPostsAreInRepository, numberOffset, partOfGroupsIfPostsAre, indicator, i, u, mainBatchSize, batchSize,boolIndex, ip);
       }
@@ -809,7 +808,7 @@ export class PostsService {
   }
   // №5 распределяем куда дальше - создаем или обновляем
   async filterGroups(posts, indicator, i, u, mainBatchSize, batchSize, boolIndex) {
-
+    console.log('22222')
     try {
       let remainingGroups = [];
 
@@ -892,7 +891,7 @@ export class PostsService {
   }
   // № 6.2 для обновления
   async forFuncfilterGroupsIfUpadete(posts, ii, u, mainBatchSize, batchSize, boolIndex) {
-
+    console.log('2')
     // this.logsServicePostsAdd.log(
     //   `№6 функция обновления постов для групп ${ii} -${ii + mainBatchSize} пачка ${u} - ${u + batchSize}  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++`,
     // );
@@ -984,7 +983,7 @@ export class PostsService {
     // this.logsServicePostsAdd.log(
     //     `№6 функция получения и добавления постов для групп ${ii} -${ii + mainBatchSize} пачка ${u} - ${u + batchSize}  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++`,
     // );
-    console.log('for')
+
     try {
       const currentMonth = new Date().getMonth(); // текущий месяц
       const currentYear = new Date().getFullYear(); // текущий год
