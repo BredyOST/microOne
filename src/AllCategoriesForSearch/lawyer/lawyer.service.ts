@@ -1,28 +1,28 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { AppService } from '../../app.service';
 import { InjectRepository } from '@nestjs/typeorm';
+import { HandymanAndBuilderEntity } from '../handyman-and-builder/entities/handyman-and-builder.entity';
 import { Repository } from 'typeorm';
 import { HttpService } from '@nestjs/axios';
 import { LogsService } from '../../otherServices/logger.service';
 import { RedisService } from '../../redis/redis.service';
+import { LawyerEntity } from './entities/lawyer.entity';
 import * as process from 'process';
-import { EquipRepairMaintenanceEntity } from './entities/equip-repair-maintenance.entity';
 import {CitiesService} from "../../cities/cities.service";
 
 @Injectable()
-export class EquipRepairMaintenanceService {
+export class LawyerService {
   private readonly logger = new Logger(AppService.name);
-
   private id: string | number;
   constructor(
-    @InjectRepository(EquipRepairMaintenanceEntity)
-    private repository: Repository<EquipRepairMaintenanceEntity>,
+    @InjectRepository(LawyerEntity)
+    private repository: Repository<LawyerEntity>,
     private readonly httpService: HttpService,
     private logsService: LogsService,
     private redisService: RedisService,
     private citiesService: CitiesService,
   ) {
-    this.id = process.env['ID_REPAIR_MAIN']; // 3й
+    this.id = process.env['ID_LAWYER']; // 7й
   }
 
   // получаем последний пост из репозитория с сортировкой

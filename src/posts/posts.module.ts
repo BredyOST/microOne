@@ -15,6 +15,7 @@ import { HandymanAndBuilderModule } from '../AllCategoriesForSearch/handyman-and
 import { EquipRepairMaintenanceModule } from '../AllCategoriesForSearch/equip-repair-maintenance/equip-repair-maintenance.module';
 import { PurchaseSaleApartModule } from '../AllCategoriesForSearch/purchase-sale-apart/purchase-sale-apart.module';
 import { RentRentalApartModule } from '../AllCategoriesForSearch/rent-rental-apart/rent-rental-apart.module';
+import { LawyerModule } from '../AllCategoriesForSearch/lawyer/lawyer.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { RentRentalApartModule } from '../AllCategoriesForSearch/rent-rental-apa
     EquipRepairMaintenanceModule,
     PurchaseSaleApartModule,
     RentRentalApartModule,
+    LawyerModule,
   ],
   controllers: [PostsController],
   providers: [PostsService, LogsService, RedisService, RepositoryPostsAdd],

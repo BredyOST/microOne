@@ -18,4 +18,9 @@ export class TutorsController {
   async getAll() {
     return this.tutorsService.getAll()
   }
+
+  // @Get('/checkComments')
+  // async checkComments() {
+  //   return this.tutorsService.checkComments()
+  // }
 }

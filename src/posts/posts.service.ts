@@ -15,6 +15,7 @@ import {RentRentalApartService} from "../AllCategoriesForSearch/rent-rental-apar
 import {
   EquipRepairMaintenanceService
 } from "../AllCategoriesForSearch/equip-repair-maintenance/equip-repair-maintenance.service";
+import {LawyerService} from "../AllCategoriesForSearch/lawyer/lawyer.service";
 
 const Bottleneck = require('bottleneck');
 
@@ -45,6 +46,7 @@ export class PostsService {
     private purchaseSaleApartService: PurchaseSaleApartService,
     private rentRentalApartService: RentRentalApartService,
     private equipRepairMaintenanceService: EquipRepairMaintenanceService,
+    private lawyerService: LawyerService,
 
   ) {}
 
@@ -106,32 +108,31 @@ export class PostsService {
       this.logsServicePostsAdd.error(`findByIdCategory`, ` ${err}`);
     }
   }
+
   async getGroups(start, pass) {
 
     try {
       const link = process.env['API_URL'];
-
-      const response = await fetch(`${link}/groups-from-vk/getPartOfGroup`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ size: start, offset: pass }),
+      const response = await fetch(`${link}/groups-from-vk/getPartOfGroup?size=${start}&offset=${pass}`, {
+        method: 'GET',
       });
 
+      // headers: {'Content-Type': 'application/json',},
+      // body: JSON.stringify({ size: start, offset: pass }),
+
       if (!response.ok) {
-        throw new Error(
-          `Failed to fetch categories. Status: ${response.status}`,
-        );
+        throw new Error(`Failed to fetch categories. Status: ${response.status}`,);
       }
 
       const responseData = await response.json();
-
       return responseData;
+
     } catch (err) {
+      console.log(err)
       this.logsServicePostsAdd.error(`getGroups`, ` ${err}`);
     }
   }
+
   async addInfoAboutClosedGroupMain(groups: string[]) {
     try {
       const link = process.env['API_URL'];
@@ -156,6 +157,7 @@ export class PostsService {
       this.logsServicePostsAdd.error(`addInfoAboutClosedGroupMain`, ` ${err}`);
     }
   }
+
   async addPostCounter(info) {
     try {
       const link = process.env['API_URL'];
@@ -177,6 +179,7 @@ export class PostsService {
       this.logsServicePostsAdd.error(`addPostCounter`, ` ${err}`);
     }
   }
+
   async findByIdVk(id) {
     try {
       const link = process.env['API_URL'];
@@ -201,6 +204,7 @@ export class PostsService {
       this.logsServicePostsAdd.error(`findByIdVk`, ` ${err}`);
     }
   }
+
   async updateThis(info) {
     try {
       const link = process.env['API_URL'];
@@ -222,6 +226,7 @@ export class PostsService {
       this.logsServicePostsAdd.error(`updateThis`, ` ${err}`);
     }
   }
+
   async changePostsDateToDateUpdateWhenBreak(info) {
     try {
       const link = process.env['API_URL'];
@@ -249,6 +254,7 @@ export class PostsService {
       );
     }
   }
+
   async addPostDateWhenUpdate(info) {
     try {
       const link = process.env['API_URL'];
@@ -387,10 +393,11 @@ export class PostsService {
       );
     }
   }
-
+  //получить город на русском
   //===========================================================================================
   // № 1разводящая функция когда появляется новый пост, направляет в другие репозитории
   async givePostsToAllRepositories(item, groupInfo, profilesInfo, sendMessage, boolIndex) {
+    console.log(item.text)
     try {
 
       const allCategories = await this.getCategories();
@@ -411,7 +418,9 @@ export class PostsService {
 
         await Promise.all(
             allCategories.map(async (category) => {
-              if (category?.create) this.addNewPostToOtherRepositories(item, groupInfo, profilesInfo, sendMessage, category, telegramLimiter,);
+              if (category?.create) {
+                this.addNewPostToOtherRepositories(item, groupInfo, profilesInfo, sendMessage, category, telegramLimiter,);
+              }
             }),
         );
       }
@@ -425,6 +434,7 @@ export class PostsService {
   }
   // №2 проверяем
   async addNewPostToOtherRepositories(item, groupInfo, profilesInfo, sendMessage, category, telegramLimiter,) {
+
     try {
       // токен бота
       const tokenBot = process.env['TOKEN_BOT'];
@@ -436,9 +446,11 @@ export class PostsService {
         { id: 4, name: 'Ремонт и строительство', service: this.handymanAndBuilderService,},
         { id: 5, name: 'Аренда, сдача недвижимости', service: this.rentRentalApartService,},
         { id: 6, name: 'Покупка, продажа недвижимости', service: this.purchaseSaleApartService,},
+        { id: 7, name: 'Тест', service: this.lawyerService,},
       ];
 
       const categoryInfo = categories.find((cat) => cat.id === category.id);
+
       if (!categoryInfo) return
 
       if (categoryInfo) {
@@ -447,8 +459,8 @@ export class PostsService {
           if (isSamePost) return;
         }
 
-        const positiveWords = await category.positiveWords;
-        const negativeWords = await category.negativeWords;
+        const positiveWords = await category?.positiveWords;
+        const negativeWords = await category?.negativeWords;
 
         const filter = await this.filterOnePostForOthersRepositories(item, positiveWords, negativeWords, 1,);
 
@@ -473,7 +485,7 @@ export class PostsService {
   }
   //№3 фильтруем пост по ключевым словам
   async filterOnePostForOthersRepositories(post, positiveKeywords, negativeKeywords, indicator,) {
-
+    console.log(post.text)
     try {
       let postText;
 
@@ -486,7 +498,9 @@ export class PostsService {
       const containsNegativeKeyword = negativeKeywords.some((keyword) =>
         postText.includes(keyword),
       );
+
       return containsPositiveKeyword && !containsNegativeKeyword;
+
     } catch (err) {
       await this.logsServicePostsAdd.error(
         `filterOnePostForOthersRepositories ERROR - ${err}`,
@@ -505,8 +519,8 @@ export class PostsService {
     try {
 
       this.logsServicePostsAdd.log(`${new Date().toTimeString()} ${(indicator == 1 && !boolIndex) ? 'СОЗДАНИЕ' : indicator == 2 ? 'ОБНОВЛЕНИЕ' : 'ОБНОВЛЕНИЕ КОНКРЕТНО'}`,);
-      // получаем группы с репозитория в формате масcива объектов
-      const groups = await this.getGroups(start, pass);
+      // получаем группы с репозитория в формате масcива объектов на указанный диапазон start-pass
+      let groups = await this.getGroups(start, pass);
 
       this.logsServicePostsAdd.log(`№1 получено ${groups.length} групп`);
 
@@ -518,15 +532,12 @@ export class PostsService {
       // размер пакета групп для запроса в вк. ограничение от вк в 450
       const mainBatchSize = 450;
 
-      // Разделение groupBatch на подгруппы по 450 групп
+      // Полученный groups делим на подгруппы в кличестве указанной в mainBatchSize, стоит 450 групп
       for (let i = 0; i < groups.length; i += mainBatchSize) {
         // this.logsServicePostsAdd.log(`№1 обработка пакета группы ${i} - ${i + mainBatchSize}, всего групп ${groups.length} групп, делим по ${mainBatchSize} групп в пачке`,);
         this.processMainBatch(groups.slice(i, i + mainBatchSize), indicator, i, mainBatchSize, boolIndex, ip);
       }
 
-      // this.logsServicePostsAdd.log(
-      //   `№1 Разбивка групп по ${mainBatchSize} завершена в : ${new Date().toTimeString()} +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++`,
-      // );
     } catch (err) {
       this.logsServicePostsAdd.error(`№1 ERROR - ${err.message}`, `Ошибка на ШАГЕ №1: ${err.stack}`,);
     }
@@ -536,83 +547,81 @@ export class PostsService {
     // this.logsServicePostsAdd.log(`№2 processMainBatch, запуск второй функции  для групп ${i} - ${i + mainBatchSize}, количество групп ${groups.length} ******************************************************************************************`,);
 
     try {
-      // делим на более мелкие пакеты по 10 и 25 групп в каждом, ограничение по мб от вк
+      // делим из-за ограничения по мб от вк
       let batchSize;
-      if (indicator == 1) batchSize = 10; // для создания группы - т.е. когда ее нет, только добавили
-      if (indicator == 2) batchSize = 25; // если требуется только обновить
+      if (indicator == 1) batchSize = 10; // пакеты по 10 групп в один запрос, когда постов группы нет в бд
+      if (indicator == 2) batchSize = 25; // пакеты по 25 групп в один запрос, когда посты группы есть в бд
 
-      // подготовливаем все id в строку 130459324,213267337,67332874, ... для запросв в вк и проверку на закрытость
-      const groupIds = groups
-        .map((group) => group.idVk.replace('-', ''))
-        .join(',');
+      // оставляем все id групп в строку 130459324,213267337,67332874, ... для запросов в вк
+      // const groupIds = groups
+      //   .map((group) => group.idVk.replace('-', ''))
+      //   .join(',');
+      //
+      // const code = `
+      //       var groupInfo = API.groups.getById({group_ids: "${groupIds}", fields: "is_closed"});
+      //       return { groupInfo: groupInfo };`;
+      //
+      // // получаем инфу о группах в массиве и в каждом объекте есть свойство is_closed по которому определяем закрыта группа или нет
+      // const groupsInfo = await limiterTwo.schedule(() => this.checkIsClosedGroup(code, ip),);
+      //
+      // if (!groupsInfo) {
+      //   this.logsServicePostsAdd.error(`№2 для групп ${i} - ${i + mainBatchSize} - не получено инфа о закрытости для ${groupsInfo}`,`groupsInfo` );
+      //   return
+      // }
+      //
+      // // выделяем все закрытые группы, оставляем их id и помечаем их в БД
+      // const closedGroupIds = groupsInfo?.response?.groupInfo?.groups
+      //   .filter((group) => group.is_closed)
+      //   .map((group) => `-${group.id}`);
+      //
+      // // помечаем в БД
+      // if (closedGroupIds && closedGroupIds?.length) {
+      //   this.addInfoAboutClosedGroupMain(closedGroupIds);
+      // }
+      // // Выделяем открытые группы для дальнейшей обработки (тут массив данных по группам из БД)
+      // const openGroups = groups.filter((group) => !closedGroupIds.includes(group?.idVk),);
+      // if (!openGroups || !openGroups.length) {
+      //   this.logsServicePostsAdd.error(`№2 ERROR для групп ${i} - ${i + mainBatchSize}, закрытые ${closedGroupIds} из ${groups.length}`, `openGroups не получены`,);
+      //   return;
+      // }
 
-      const code = `
-            var groupInfo = API.groups.getById({group_ids: "${groupIds}", fields: "is_closed"});
-            return { groupInfo: groupInfo };`;
-
-      // получаем инфу о группах в массиве и в каждом объекте есть свойство is_closed по которому определяем закрыта группа или нет
-      const groupsInfo = await limiterTwo.schedule(() => this.checkIsClosedGroup(code, ip),);
-
-      if (!groupsInfo) {
-        this.logsServicePostsAdd.error(`№2 для групп ${i} - ${i + mainBatchSize} - не получено инфа о закрытости для ${groupsInfo}`,`groupsInfo` );
-        return
-      }
-
-      // выделяем все закрытые группы, оставляем их id и помечаем их в БД
-      const closedGroupIds = groupsInfo?.response?.groupInfo?.groups
-        .filter((group) => group.is_closed)
-        .map((group) => `-${group.id}`);
-
-      // помечаем в БД
-      if (closedGroupIds && closedGroupIds?.length) {
-        this.addInfoAboutClosedGroupMain(closedGroupIds);
-      }
-
-      // Выделяем открытые группы для дальнейшей обработки (тут массив данных по группам из БД)
-      const openGroups = groups.filter((group) => !closedGroupIds.includes(group?.idVk),);
-
-      if (!openGroups || !openGroups.length) {
-        this.logsServicePostsAdd.error(`№2 ERROR для групп ${i} - ${i + mainBatchSize}, закрытые ${closedGroupIds} из ${groups.length}`, `openGroups не получены`,);
-        return;
-      }
-
-      // массив для групп, в котором будут группы после фильтрации. Если indicator = 1, то будут группы, постов которых нет в базе и наоборот
       let groupsForNextFunction = [];
-      // группы, постов которых нет в бд.Проверяем есть ли посты в БД
+
+      // добавление новых постов с групп, постов которых нет в бд
       if (indicator == 1 && !boolIndex) {
-        groupsForNextFunction = await Promise.all(
-            openGroups?.filter((group) => (group.postsLastDate == null || !group.postsLastDate)),);
+        groupsForNextFunction = await groups?.filter((group) => (group.postsLastDate == null || !group.postsLastDate))
+      } else {
+        groupsForNextFunction = groups;
       }
-      if (indicator == 1 && boolIndex) {
-        groupsForNextFunction = openGroups;
-      }
-      // группы посты которых есть в бд
-      if (indicator == 2) {
-        groupsForNextFunction = await Promise.all(
-          openGroups?.filter((group) => group.postsLastDate !== null && group.postsLastDate !== undefined,),
-        );
-      }
+
+      // создание новой категории и обновление групп
+      // if (indicator == 1 && boolIndex) {
+      //   groupsForNextFunction = groups;
+      // }
+      // // Обновление постов,
+      // if (indicator == 2) {
+      //   groupsForNextFunction = await Promise.all(
+      //       groups?.filter((group) => group.postsLastDate !== null && group.postsLastDate !== undefined,),
+      //   );
+      // }
 
       if (!groupsForNextFunction || !groupsForNextFunction?.length) {
         this.logsServicePostsAdd.error(
-          `№2 ERROR для групп ${i} - ${i + mainBatchSize} - после фильтрации в groupsForNextFunction нет групп ${groupsForNextFunction.length}, открытые ${openGroups.length}`,
+          `№2 ERROR для групп ${i} - ${i + mainBatchSize} - после фильтрации в groupsForNextFunction нет групп ${groupsForNextFunction.length}, открытые ${groups.length}`,
           `groupsForNextFunction `,
         );
         return;
       }
 
       // this.logsServicePostsAdd.log(`К дальнейшей обработке  ${groupsForNextFunction.length} из ${groups.length}, делим ${batchSize} для групп ${i} - ${i + mainBatchSize}.`,);
-
+      //разделяем все группы на пачки и передаем дальше под обработку
       for (let u = 0; u < groupsForNextFunction.length; u += batchSize) {
         // this.logsServicePostsAdd.log(`№2 Обработка пакета мелкого №${u / batchSize + 1} из ${Math.ceil(groupsForNextFunction.length / batchSize)} для групп ${i} - ${i + mainBatchSize}`,);
         const groupBatch = groupsForNextFunction.slice(u, u + batchSize);
         this.createAndCheckVk(indicator, groupBatch, i, u, mainBatchSize, batchSize, boolIndex, ip);
       }
     } catch (err) {
-      this.logsServicePostsAdd.error(
-          `№2 Функция processMainBatch по получению постов с вк - ошибка ШАГ №1 ERROR, для групп ${i} - ${i + mainBatchSize}`,
-        `${err}`,
-      );
+      this.logsServicePostsAdd.error(`№2 Функция processMainBatch по получению постов с вк - ошибка ШАГ №1 ERROR, для групп ${i} - ${i + mainBatchSize}`, `${err}`,);
     }
   }
   // №3 подготавливаем к запросам
@@ -623,31 +632,24 @@ export class PostsService {
       const IfNoPostsInRepository = `80`; // если нет постов в нашем репозитории, то будем запрашивать по 100 постов
       const IfPostsAreInRepository = `10`; // если есть посты в нашем репозитории, то запрашиваем по 10
       const numberOffset = process.env['OFFSET_POST']; // начальное смещение для получения постов = 0
+      let numberPost = `0`;   // количество запрашиваемых постов
 
       if (!owner || !owner?.length) {
-        await this.logsServicePostsAdd.error(
-          `№3 ERROR для групп ${i} ${i + mainBatchSize} пачка  - ${u + batchSize} - не получены группы из второй функции`,
-          ` с первого щага получил пустой owner`,
-        );
+        await this.logsServicePostsAdd.error(`№3 ERROR для групп ${i} ${i + mainBatchSize} пачка  - ${u + batchSize} - не получены группы из второй функции`, ` с первого щага получил пустой owner`,);
         return;
       }
 
       // массивы для хранения данных когда нет постов групп
       const prepereRequestIfNoPostsInRepository = []; // запрос по группам для постов
-      const partOfGroupsIfPostsNo = []; // массив объетов групп которых еще нет - будем запрашивать максимум  - 100 постов
+      const partOfGroupsIfPostsNo = []; // массив объкетов групп которых еще нет - будем запрашивать максимум  - 100 постов
       // массивы для хранения данных когда есть посты групп - нужно только обновить
       const prepereRequestIfPostsAreInRepository = []; // запрос по группам для постов
       const partOfGroupsIfPostsAre = []; // которые есть - запрашивать будем по 10 постов
-      // количество запрашиваемых постов
-      let numberPost = `0`;
 
       if (indicator == 1) numberPost = IfNoPostsInRepository; // 100
       if (indicator == 2) numberPost = IfPostsAreInRepository; // 10
 
-      if (numberPost == `0`) {
-        await this.logsServicePostsAdd.error(
-          `№3 ERROR третьей функции для групп ${i} ${i + mainBatchSize} пачка  - ${u + batchSize} - numberPost == 0, не поменялось значение`, `ШАГ №3 ERROR`,
-        );
+      if (numberPost == `0`) {await this.logsServicePostsAdd.error(`№3 ERROR третьей функции для групп ${i} ${i + mainBatchSize} пачка  - ${u + batchSize} - numberPost == 0, не поменялось значение`, `ШАГ №3 ERROR`,);
         return;
       }
 
@@ -680,9 +682,7 @@ export class PostsService {
           return;
         }
 
-        const codeIfPostsNo =
-          prepereRequestIfNoPostsInRepository.join('\n') +
-          '\nreturn { ' +
+        const codeIfPostsNo = prepereRequestIfNoPostsInRepository.join('\n') + '\nreturn { ' +
           prepereRequestIfNoPostsInRepository
             .map((_, index) => `group${index}: response${index}`)
             .join(', ') +
@@ -700,9 +700,7 @@ export class PostsService {
           return;
         }
 
-        const codeIfPostsYes =
-          prepereRequestIfPostsAreInRepository.join('\n') +
-          '\nreturn { ' +
+        const codeIfPostsYes = prepereRequestIfPostsAreInRepository.join('\n') + '\nreturn { ' +
           prepereRequestIfPostsAreInRepository
             .map((_, index) => `group${index}: response${index}`)
             .join(', ') +
@@ -711,10 +709,7 @@ export class PostsService {
           this.addPostsToCommonOrUpdate(codeIfPostsYes, IfPostsAreInRepository, numberOffset, partOfGroupsIfPostsAre, indicator, i, u, mainBatchSize, batchSize,boolIndex, ip);
       }
     } catch (err) {
-      await this.logsServicePostsAdd.error(
-        `№3 Функция проверки и получению постов с вк - ошибка для групп ${i} ${i + mainBatchSize} пачка  - ${u + batchSize} ***************************************************** ШАГ №2 ERROR,`,
-        `${err}`,
-      );
+      await this.logsServicePostsAdd.error(`№3 Функция проверки и получению постов с вк - ошибка для групп ${i} ${i + mainBatchSize} пачка  - ${u + batchSize} ***************************************************** ШАГ №2 ERROR,`, `${err}`,);
     }
   }
   // №4 тут уже цикл с передачей в функции добавления
@@ -730,9 +725,7 @@ export class PostsService {
       let startOffset = +numberOffset; // изнчально  офсет 0
 
       // получаем первые посты. тут будет объект в котором будет находится инфа о группе {group0: { count: 8267, items: [Array], profiles: [Array], groups: [Array] }, group1:{...}}
-      const posts = await limiter.schedule(() =>
-        this.getPostsFromVK(postsForRequst, ip),
-      );
+      const posts = await limiter.schedule(() => this.getPostsFromVK(postsForRequst, ip),);
 
       if (!posts || Object.keys(posts?.response)?.length == 0) {
         // this.logsServicePostsAdd.log(`№4 не получены группы или ключи для групп ${i} ${i + mainBatchSize} пачка  - ${u + batchSize} - останов`,
@@ -808,7 +801,7 @@ export class PostsService {
   }
   // №5 распределяем куда дальше - создаем или обновляем
   async filterGroups(posts, indicator, i, u, mainBatchSize, batchSize, boolIndex) {
-    console.log('22222')
+
     try {
       let remainingGroups = [];
 
@@ -891,7 +884,7 @@ export class PostsService {
   }
   // № 6.2 для обновления
   async forFuncfilterGroupsIfUpadete(posts, ii, u, mainBatchSize, batchSize, boolIndex) {
-    console.log('2')
+
     // this.logsServicePostsAdd.log(
     //   `№6 функция обновления постов для групп ${ii} -${ii + mainBatchSize} пачка ${u} - ${u + batchSize}  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++`,
     // );
@@ -943,7 +936,6 @@ export class PostsService {
               // если не с закрепа то
               if (!item.is_pinned) {
                 remainingGroups.push(item.owner_id);
-
                 // this.logsServicePostsAdd.log(`${group.items[0].owner_id} групп ${ii} -${ii + mainBatchSize} пачка ${u} - ${u + batchSize}  ${new Date(item.date * 1000).getMonth()} -------------------------------- BREAK--------------  на итерации ${i}`,);
                 this.changePostsDateToDateUpdateWhenBreak(groupInfo);
                 break;
@@ -965,6 +957,10 @@ export class PostsService {
                 sendMessage,
                 boolIndex
               );
+            }
+            if (new Date(item.date * 1000).getTime() == latestPostsDates && !item.is_pinned) {
+                remainingGroups.push(item.owner_id);
+                break;
             }
           }
         }
@@ -1043,11 +1039,66 @@ export class PostsService {
     }
   }
 
+  //6.3 это чтобы пробежать текущий день, если есть подозрение что что-то не то и посты не все добавлены
+  // async forFuncfilterGroupsIfCreate(posts, ii, u, mainBatchSize, batchSize, boolIndex) {
+  //
+  //   try {
+  //     const currentDay = new Date().getDate() // текущий месяц
+  //     const currentYear = new Date().getFullYear(); // текущий год
+  //     // const searchFromCurrentMonth = currentMonth == 0 ? 0 : currentMonth - 1; // месяц до которого будем просматривать все посты с каждой группы
+  //     const sendMessage = false;
+  //
+  //     const remainingGroups = []; // Массив для хранения групп, циклы которых были прерваны break, не прошли по датам
+  //
+  //     // в key мы получаем все названия групп, group0,1,2,3...
+  //     for (const key in posts.response) {
+  //       // проверка, есть ли у объекта posts.response собственное свойство с ключом key.
+  //       if (Object.prototype.hasOwnProperty.call(posts.response, key)) {
+  //         const group = posts.response[key]; // получаем инфу о конкретной группе из общего объекта
+  //         if (!group) return;
+  //         // this.logsServicePostsAdd.log(`'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''№6 проверяем посты группы ${group.items[0].owner_id} групп ${i} -${i + mainBatchSize} пачка ${u} - ${u + batchSize}`)
+  //
+  //         for (let i = 0; i < group.items?.length; i++) {
+  //           const item = group.items[i];
+  //           // если год поста меньше года искомого и это не с закрепа то останавливаемся
+  //           if (new Date(item.date * 1000).getFullYear() < currentYear && !item.is_pinned) {
+  //             remainingGroups.push(item.owner_id);
+  //             break;
+  //           }
+  //
+  //           if (new Date(item.date * 1000).getDate() < currentDay) {
+  //             // если месяц меньше искомого, то проверяем не закреп ли это
+  //             if (item.is_pinned) {
+  //               // this.logsServicePostsAdd.log(`${group.items[0].owner_id} групп ${ii} -${ii + mainBatchSize} пачка ${u} - ${u + batchSize} дата ${new Date(item.date * 1000).getMonth()} ------------------------------------ ISPING ==== на итерации ${i}`,);
+  //               continue;
+  //             }
+  //             // если не с закрепа то то кидаем в массив и прекращаем итерацию
+  //             if (!item.is_pinned) {
+  //               remainingGroups.push(item.owner_id);
+  //               // this.logsServicePostsAdd.log(`${group.items[0].owner_id} групп ${ii} -${ii + mainBatchSize} пачка ${u} - ${u + batchSize}  ${new Date(item.date * 1000).getMonth()} -------------------------------- BREAK--------------  на итерации ${i}`,);
+  //               break;
+  //             }
+  //           }
+  //           // Если же дата больше искомой то добавляем в репозиторий
+  //           if (new Date(item.date * 1000).getDate() >= currentDay && currentYear == new Date(item.date * 1000).getFullYear()) {
+  //             this.givePostsToAllRepositories(item, group?.groups, group?.profiles, sendMessage,boolIndex);
+  //           }
+  //         }
+  //       }
+  //     }
+  //     return remainingGroups;
+  //   } catch (err) {
+  //     this.logsServicePostsAdd.error(
+  //         `№6.1 error групп ${ii} -${ii + mainBatchSize} пачка ${u} - ${u + batchSize}`,
+  //         `ошибка при фильтрации постов для создания 22 : ${err}!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!`,
+  //     );
+  //   }
+  // }
   // =================================================================================
   // Redis
   async getKeysRedis() {
-    const keys = await this.redisService.getAllKeys('id:3-*');
-    await this.redisService.deleteKeysByPattern("id:3-*");
+    const keys = await this.redisService.getAllKeys('id:7-*');
+    await this.redisService.deleteKeysByPattern("id:7-*");
     return keys;
   }
   async getRedisPosts() {

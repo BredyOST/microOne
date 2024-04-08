@@ -9,6 +9,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { RedisService } from '../../redis/redis.service';
 import { LogsService } from '../../otherServices/logger.service';
 import { RepositoryPostsAdd } from '../../otherServices/logger.module';
+import {CitiesModule} from "../../cities/cities.module";
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { RepositoryPostsAdd } from '../../otherServices/logger.module';
     TypeOrmModule.forFeature([HandymanAndBuilderEntity]),
     ScheduleModule.forRoot(),
     ConfigModule.forRoot(),
+    CitiesModule,
   ],
   controllers: [HandymanAndBuilderController],
   providers: [

@@ -20,6 +20,10 @@ import { RentRentalApartEntity } from './AllCategoriesForSearch/rent-rental-apar
 import { RentRentalApartModule } from './AllCategoriesForSearch/rent-rental-apart/rent-rental-apart.module';
 import { PurchaseSaleApartEntity } from './AllCategoriesForSearch/purchase-sale-apart/entities/purchase-sale-apart.entity';
 import { PurchaseSaleApartModule } from './AllCategoriesForSearch/purchase-sale-apart/purchase-sale-apart.module';
+import {LawyerEntity} from "./AllCategoriesForSearch/lawyer/entities/lawyer.entity";
+import {LawyerModule} from "./AllCategoriesForSearch/lawyer/lawyer.module";
+import { CitiesModule } from './cities/cities.module';
+import {CityEntity} from "./cities/entities/city.entity";
 
 @Module({
   imports: [
@@ -46,6 +50,8 @@ import { PurchaseSaleApartModule } from './AllCategoriesForSearch/purchase-sale-
             HandymanAndBuilderEntity,
             RentRentalApartEntity,
             PurchaseSaleApartEntity,
+            LawyerEntity,
+            CityEntity,
           ],
         };
       },
@@ -58,6 +64,8 @@ import { PurchaseSaleApartModule } from './AllCategoriesForSearch/purchase-sale-
     EquipRepairMaintenanceModule,
     RentRentalApartModule,
     PurchaseSaleApartModule,
+    LawyerModule,
+    CitiesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

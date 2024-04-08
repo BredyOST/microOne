@@ -9,6 +9,7 @@ import { NanniesService } from './nannies.service';
 import { RedisService } from '../../redis/redis.service';
 import { LogsService } from '../../otherServices/logger.service';
 import { RepositoryPostsAdd } from '../../otherServices/logger.module';
+import {CitiesModule} from "../../cities/cities.module";
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { RepositoryPostsAdd } from '../../otherServices/logger.module';
     TypeOrmModule.forFeature([NannyEntity]),
     ScheduleModule.forRoot(),
     ConfigModule.forRoot(),
+    CitiesModule,
   ],
   controllers: [NanniesController],
   providers: [

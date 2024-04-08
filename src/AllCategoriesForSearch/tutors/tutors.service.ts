@@ -9,6 +9,7 @@ import { AxiosError } from 'axios/index';
 import { RedisService } from '../../redis/redis.service';
 import { LogsService } from '../../otherServices/logger.service';
 import * as process from 'process';
+import { CitiesService } from '../../cities/cities.service';
 
 @Injectable()
 export class TutorsService {
@@ -20,6 +21,7 @@ export class TutorsService {
     private readonly httpService: HttpService,
     private logsService: LogsService,
     private redisService: RedisService,
+    private citiesService: CitiesService,
   ) {
     this.id = process.env['ID_CHAT_TUTORS']; // 1й
   }
@@ -140,16 +142,16 @@ export class TutorsService {
       signer_id: item.signer_id || '',
     });
   }
+  //проверяем язык
+  async containsEnglishLetters(str) {
+    // Регулярное выражение для поиска букв английского алфавита
+    const englishLettersRegex = /^[A-Za-z]+$/;
+    // Проверяем строку на соответствие регулярному выражению
+    return englishLettersRegex.test(str);
+  }
+
   // создание для ВК
-  async createFromVkDataBase(
-    item,
-    groups,
-    profiles,
-    identificator,
-    sendMessage,
-    tokenBot,
-    telegramLimiter,
-  ) {
+  async createFromVkDataBase(item, groups, profiles, identificator, sendMessage, tokenBot, telegramLimiter,) {
     try {
 
       const ownerId = String(item.owner_id).replace('-', '');
@@ -158,18 +160,41 @@ export class TutorsService {
         (element) => element.id == item.signer_id,
       );
 
+      const cityGroupEng = this.containsEnglishLetters(groupInfo?.city?.title);
+      const cityUserEng = this.containsEnglishLetters(profileInfo?.city?.title);
+      let groupCityName = null;
+      let userCityName = null;
+
+      if(cityGroupEng && cityUserEng) {
+        if(groupInfo?.city?.id == profileInfo?.city?.id) {
+          const city = await this.citiesService.findByIdVk(groupInfo?.city?.id)
+          groupCityName = city.title
+          userCityName = city.title
+        }
+      } else {
+        if(cityGroupEng) {
+          const city = await this.citiesService.findByIdVk(groupInfo?.city?.id)
+          groupCityName = city.title
+        }
+        if(cityUserEng) {
+          const city = await this.citiesService.findByIdVk(profileInfo?.city?.id)
+          userCityName = city.title
+        }
+      }
+
+
       if (sendMessage) this.sendPostToTelegram(item, tokenBot, telegramLimiter);
 
       return this.repository.save({
         identification_post: 'vk',
         id_group: groupInfo?.id || item.owner_id || '',
         name_group: groupInfo?.name || '',
-        city_group: groupInfo?.city?.title || '',
+        city_group: groupCityName || groupInfo?.city?.title || '',
         country_group: groupInfo?.country?.title || '',
         photo_100_group: groupInfo?.photo_100 || '',
         first_name_user: profileInfo?.first_name || '',
         last_name_user: profileInfo?.last_name || '',
-        city_user: profileInfo?.city?.title || '',
+        city_user: userCityName || profileInfo?.city?.title || '',
         country_user: profileInfo?.country?.title || '',
         photo_100_user: profileInfo?.photo_100 || '',
         post_id: item.id,
@@ -375,12 +400,7 @@ export class TutorsService {
       );
     }
   }
-  async sendToChat(
-    chatId: string,
-    messageText: string,
-    photoUrl: string,
-    token: string,
-  ) {
+  async sendToChat(chatId: string, messageText: string, photoUrl: string, token: string,) {
     try {
 
       let url;
@@ -430,5 +450,31 @@ export class TutorsService {
       );
     }
   }
+
+  // async checkComments () {
+  //
+  //   try {
+  //
+  //     const posts = await this.repository.find({
+  //       order: { id: 'DESC' }, // Сортировка по убыванию идентификатора
+  //       take: 30, // Берем 30 записей
+  //     })
+  //
+  //     const ids = posts.map((item) => item.post_id)
+  //     const code = `
+  //           var groupInfo = API.wall.getComments({owner_id: "${ids}", fields: "is_closed", extended: 1});
+  //           return { groupInfo: groupInfo };`;
+  //
+  //     return posts
+  //
+  //
+  //   } catch (err) {
+  //     console.log(err)
+  //   }
+  //
+  //
+  //
+  // }
+
 
 }
