@@ -397,7 +397,6 @@ export class PostsService {
   //===========================================================================================
   // № 1разводящая функция когда появляется новый пост, направляет в другие репозитории
   async givePostsToAllRepositories(item, groupInfo, profilesInfo, sendMessage, boolIndex) {
-    console.log(item.text)
     try {
 
       const allCategories = await this.getCategories();
@@ -485,7 +484,6 @@ export class PostsService {
   }
   //№3 фильтруем пост по ключевым словам
   async filterOnePostForOthersRepositories(post, positiveKeywords, negativeKeywords, indicator,) {
-    console.log(post.text)
     try {
       let postText;
 
