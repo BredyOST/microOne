@@ -160,25 +160,37 @@ export class TutorsService {
         (element) => element.id == item.signer_id,
       );
 
-      const cityGroupEng = this.containsEnglishLetters(groupInfo?.city?.title);
-      const cityUserEng = this.containsEnglishLetters(profileInfo?.city?.title);
+      const cityGroup = groupInfo?.city
+      const cityUser = profileInfo?.city
+
+      const cityGroupEng = await this.containsEnglishLetters(cityGroup?.title);
+      const cityUserEng = await this.containsEnglishLetters(cityUser?.title);
       let groupCityName = null;
       let userCityName = null;
 
       if(cityGroupEng && cityUserEng) {
-        if(groupInfo?.city?.id == profileInfo?.city?.id) {
-          const city = await this.citiesService.findByIdVk(groupInfo?.city?.id)
-          groupCityName = city.title
-          userCityName = city.title
+        if(cityGroup?.id == cityUser?.id) {
+          const city = await this.citiesService.findByIdVk(cityGroup?.id)
+          groupCityName = city?.title
+          userCityName = city?.title
+        } else {
+          if(cityGroupEng) {
+            const city = await this.citiesService.findByIdVk(cityGroup?.id)
+            groupCityName = city?.title
+          }
+          if(cityUserEng) {
+            const city = await this.citiesService.findByIdVk(cityUser?.id)
+            userCityName = city?.title
+          }
         }
       } else {
         if(cityGroupEng) {
-          const city = await this.citiesService.findByIdVk(groupInfo?.city?.id)
-          groupCityName = city.title
+          const city = await this.citiesService.findByIdVk(cityGroup?.id)
+          groupCityName = city?.title
         }
         if(cityUserEng) {
-          const city = await this.citiesService.findByIdVk(profileInfo?.city?.id)
-          userCityName = city.title
+          const city = await this.citiesService.findByIdVk(cityUser?.id)
+          userCityName = city?.title
         }
       }
 

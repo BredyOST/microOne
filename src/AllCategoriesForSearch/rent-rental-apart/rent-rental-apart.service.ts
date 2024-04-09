@@ -167,43 +167,38 @@ export class RentRentalApartService {
       );
       const cityGroup = groupInfo?.city
       const cityUser = profileInfo?.city
-      console.log('НАЧАЛО!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
-      console.log('название города группы')
-      console.log(cityGroup)
-      console.log('название города юзера')
-      console.log(cityUser)
+
       const cityGroupEng = await this.containsEnglishLetters(cityGroup?.title);
       const cityUserEng = await this.containsEnglishLetters(cityUser?.title);
       let groupCityName = null;
       let userCityName = null;
-      console.log('проверка на английский язык')
-      console.log(`группа на англ ${cityGroupEng}`)
-      console.log(`юзер на англ ${cityUserEng}`)
 
       if(cityGroupEng && cityUserEng) {
         if(cityGroup?.id == cityUser?.id) {
-          console.log('1')
           const city = await this.citiesService.findByIdVk(cityGroup?.id)
-          console.log(city)
           groupCityName = city?.title
           userCityName = city?.title
+        } else {
+          if(cityGroupEng) {
+            const city = await this.citiesService.findByIdVk(cityGroup?.id)
+            groupCityName = city?.title
+          }
+          if(cityUserEng) {
+            const city = await this.citiesService.findByIdVk(cityUser?.id)
+            userCityName = city?.title
+          }
         }
       } else {
         if(cityGroupEng) {
-          console.log('2')
           const city = await this.citiesService.findByIdVk(cityGroup?.id)
-          console.log(city)
           groupCityName = city?.title
         }
         if(cityUserEng) {
-          console.log('3')
           const city = await this.citiesService.findByIdVk(cityUser?.id)
-          console.log(city)
           userCityName = city?.title
         }
       }
-      console.log(`у группы город${groupCityName}`)
-      console.log(`у юзера город ${userCityName}`)
+
       // if (sendMessage) this.sendPostToTelegram(item, tokenBot, telegramLimiter);
 
       return this.repository.save({
