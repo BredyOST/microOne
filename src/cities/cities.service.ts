@@ -70,7 +70,6 @@ export class CitiesService {
   }
 
   async findByIdVk(idVkCity) {
-    console.log(`==============А ТУТ ДЛЯ ЗАПРОСЫ ДАННЫЕ ${idVkCity}`)
     return await this.repository.findOne({
       where: {
         idVkCity,

@@ -1,26 +1,26 @@
 import { Module } from '@nestjs/common';
-import { LawyerService } from './lawyer.service';
-import { LawyerController } from './lawyer.controller';
+import { ItWebService } from './it-web.service';
+import { ItWebController } from './it-web.controller';
 import { HttpModule } from '@nestjs/axios';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ScheduleModule } from '@nestjs/schedule';
 import { ConfigModule } from '@nestjs/config';
-import { LawyerEntity } from './entities/lawyer.entity';
+import { CitiesModule } from '../../cities/cities.module';
+import { ItWebEntity } from './entities/it-web.entity';
 import { RedisService } from '../../redis/redis.service';
 import { LogsService } from '../../otherServices/logger.service';
 import { RepositoryPostsAdd } from '../../otherServices/logger.module';
-import { CitiesModule } from '../../cities/cities.module';
 
 @Module({
   imports: [
     HttpModule,
-    TypeOrmModule.forFeature([LawyerEntity]),
+    TypeOrmModule.forFeature([ItWebEntity]),
     ScheduleModule.forRoot(),
     ConfigModule.forRoot(),
     CitiesModule,
   ],
-  controllers: [LawyerController],
-  providers: [LawyerService, RedisService, LogsService, RepositoryPostsAdd],
-  exports:[LawyerService]
+  controllers: [ItWebController],
+  providers: [ItWebService, RedisService, LogsService, RepositoryPostsAdd],
+  exports: [ItWebService],
 })
-export class LawyerModule {}
+export class ItWebModule {}

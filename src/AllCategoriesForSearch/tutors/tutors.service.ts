@@ -120,36 +120,39 @@ export class TutorsService {
       console.log(err);
     }
   }
-  async create(identificator, item) {
+  async createTg(item, groups, profiles, identificator, sendMessage, tokenBot, telegramLimiter,) {
+
+    if (sendMessage) this.sendPostToTelegramFromTg(item,groups,profiles, tokenBot, telegramLimiter);
+
     return this.repository.save({
       identification_post: identificator,
-      id_group: item.id_group,
-      name_group: item.name_group || '',
-      city_group: item.city_group || '',
-      country_group: item.country_group || '',
-      photo_100_group: item.photo_100_group || '',
-      first_name_user: item.first_name_user || '',
-      last_name_user: item.last_name_user || '',
-      city_user: item.city_user || '',
-      country_user: item.country_user || '',
-      photo_100_user: item.photo_100_user || '',
-      post_id: item.post_id,
-      post_owner_id: item.post_owner_id,
-      post_fromId: item.post_fromId,
-      post_date_publish: item.post_date_publish,
-      post_text: item.post_text,
-      post_type: item.post_type,
-      signer_id: item.signer_id || '',
+      id_group: groups?.id?.toString() || '', // Первый чат из массива
+      name_group: groups?.username || groups?.title || '', // Имя чата или название
+      city_group: '', // Город группы (если есть)
+      country_group: '', // Страна группы (если есть)
+      photo_100_group: '', // Фото группы (если есть)
+      first_name_user: profiles?.firstName || '', // Имя пользователя (если есть)
+      last_name_user: profiles?.lastName || '', // Фамилия пользователя (если есть)
+      userName: profiles?.username || '', // Имя пользователя (если есть)
+      city_user: '', // Город пользователя (если есть)
+      country_user: '', // Страна пользователя (если есть)
+      photo_100_user: '', // Фото пользователя (если есть)
+      post_id: item?.id || '', // ID поста
+      post_owner_id: item?.peerId?.channelId?.value?.toString() || '', // ID того, кто получил чат, группу
+      post_fromId: item?.fromId?.userId?.value?.toString() || item?.peerId?.channelId?.value?.toString() || '', // ID отправителя
+      post_date_publish: item?.date, // Дата публикации поста
+      post_text: item?.message || '', // Текст поста
+      post_type: item?.className || '', // Тип поста (если есть)
+      signer_id: item?.fromId?.userId?.value?.toString() || item?.peerId?.channelId?.value?.toString() || '', // ID напис
     });
   }
   //проверяем язык
   async containsEnglishLetters(str) {
     // Регулярное выражение для поиска букв английского алфавита
-    const englishLettersRegex = /^[A-Za-z]+$/;
+    const englishLettersRegex = /[A-Za-z]/;
     // Проверяем строку на соответствие регулярному выражению
     return englishLettersRegex.test(str);
   }
-
   // создание для ВК
   async createFromVkDataBase(item, groups, profiles, identificator, sendMessage, tokenBot, telegramLimiter,) {
     try {
@@ -157,43 +160,27 @@ export class TutorsService {
       const ownerId = String(item.owner_id).replace('-', '');
       const groupInfo = groups?.find((element) => element.id == ownerId);
       const profileInfo = profiles?.find(
-        (element) => element.id == item.signer_id,
+          (element) => element.id == item.signer_id,
       );
-
       const cityGroup = groupInfo?.city
       const cityUser = profileInfo?.city
+      let cityGroupEng;
+      let cityUserEng;
 
-      const cityGroupEng = await this.containsEnglishLetters(cityGroup?.title);
-      const cityUserEng = await this.containsEnglishLetters(cityUser?.title);
+      if(cityGroup?.title?.length >= 1) cityGroupEng = await this.containsEnglishLetters(cityGroup?.title);
+      if(cityUser?.title?.length >= 1) cityUserEng = await this.containsEnglishLetters(cityUser?.title);
+
       let groupCityName = null;
       let userCityName = null;
 
-      if(cityGroupEng && cityUserEng) {
-        if(cityGroup?.id == cityUser?.id) {
-          const city = await this.citiesService.findByIdVk(cityGroup?.id)
-          groupCityName = city?.title
-          userCityName = city?.title
-        } else {
-          if(cityGroupEng) {
-            const city = await this.citiesService.findByIdVk(cityGroup?.id)
-            groupCityName = city?.title
-          }
-          if(cityUserEng) {
-            const city = await this.citiesService.findByIdVk(cityUser?.id)
-            userCityName = city?.title
-          }
-        }
-      } else {
-        if(cityGroupEng) {
-          const city = await this.citiesService.findByIdVk(cityGroup?.id)
-          groupCityName = city?.title
-        }
-        if(cityUserEng) {
-          const city = await this.citiesService.findByIdVk(cityUser?.id)
-          userCityName = city?.title
-        }
+      if(cityGroupEng) {
+        const city = await this.citiesService.findByIdVk(cityGroup?.id)
+        groupCityName = city?.title
       }
-
+      if(cityUserEng) {
+        const city = await this.citiesService.findByIdVk(cityUser?.id)
+        userCityName = city?.title
+      }
 
       if (sendMessage) this.sendPostToTelegram(item, tokenBot, telegramLimiter);
 
@@ -409,6 +396,172 @@ export class TutorsService {
       this.logsService.error(
         `Функция sendPostToTelegram - ошибка`,
         `${err}`,
+      );
+    }
+  }
+  async sendPostToTelegramFromTg(item, groups, profiles, tokenBot, telegramLimiter) {
+
+    try {
+      let chatId;
+
+      const messageLines = [
+        `Дата публикации:`,
+        `${new Date(item?.date * 1000).toLocaleString()}.`,
+        `Текст поста:`,
+        `${item?.message}.`,
+        (profiles?.userName)
+            ? `Пользователь: https://t.me/${profiles?.userName}.`
+            : null,
+        `Пост: https://t.me/${groups.name_group}/${item.post_id}.`,
+      ];
+
+      let imageUrl;
+      let messageText;
+      if (messageLines) {
+        messageText = messageLines.filter((line) => line !== null).join('\n');
+      }
+
+
+      if (item?.message?.includes('матем' || 'матан' || 'алгебр')) {
+        imageUrl = 'https://timgotow.ru/uploads/math.jpg';
+        chatId = process.env['CHAT_MATH'];
+        if (messageLines && chatId) {
+          await telegramLimiter.schedule(() =>
+              this.sendToChat(chatId, messageText, imageUrl, tokenBot),
+          );
+        }
+      }
+      if (item?.message?.includes('геоме' || 'профил')) {
+        chatId = process.env['CHAT_MATH'];
+        if (messageLines && chatId) {
+          await telegramLimiter.schedule(() =>
+              this.sendToChat(chatId, messageText, imageUrl, tokenBot),
+          );
+        }
+      }
+      if (item?.message?.includes('биологи')) {
+        imageUrl = 'https://timgotow.ru/uploads/bio.jpg';
+        chatId = process.env['CHAT_BIOLOGY'];
+        if (messageLines && chatId) {
+          await telegramLimiter.schedule(() =>
+              this.sendToChat(chatId, messageText, imageUrl, tokenBot),
+          );
+        }
+      }
+      if (item?.message?.includes('хими')) {
+        imageUrl = 'https://timgotow.ru/uploads/chem.jpg';
+        chatId = process.env['CHAT_BIOLOGY'];
+        if (messageLines && chatId) {
+          await telegramLimiter.schedule(() =>
+              this.sendToChat(chatId, messageText, imageUrl, tokenBot),
+          );
+        }
+      }
+
+      if (item?.message?.includes('информат')) {
+        imageUrl = 'https://timgotow.ru/uploads/inf.jpg';
+        chatId = process.env['CHAT_INFORM'];
+        if (messageLines && chatId) {
+          await telegramLimiter.schedule(() =>
+              this.sendToChat(chatId, messageText, imageUrl, tokenBot),
+          );
+        }
+      }
+      if (item?.message?.includes('истори')) {
+        imageUrl = 'https://timgotow.ru/uploads/his.jpg';
+        chatId = process.env['CHAT_SOCIAL_HISTORY'];
+        if (messageLines && chatId) {
+          await telegramLimiter.schedule(() =>
+              this.sendToChat(chatId, messageText, imageUrl, tokenBot),
+          );
+        }
+      }
+      if (item?.message?.includes('обществ')) {
+        imageUrl = 'https://timgotow.ru/uploads/soci.jpg';
+        chatId = process.env['CHAT_SOCIAL_HISTORY'];
+        if (messageLines && chatId) {
+          await telegramLimiter.schedule(() =>
+              this.sendToChat(chatId, messageText, imageUrl, tokenBot),
+          );
+        }
+      }
+      if (item?.message?.includes('литер')) {
+        imageUrl = 'https://timgotow.ru/uploads/lit.jpg';
+        chatId = process.env['CHAT_RUS'];
+        if (messageLines && chatId) {
+          await telegramLimiter.schedule(() =>
+              this.sendToChat(chatId, messageText, imageUrl, tokenBot),
+          );
+        }
+      }
+      if (item?.message?.includes('рус')) {
+        imageUrl = 'https://timgotow.ru/uploads/ru.jpg';
+        chatId = process.env["CHAT_RUS"];
+        if (messageLines && chatId) {
+          await telegramLimiter.schedule(() =>
+              this.sendToChat(chatId, messageText, imageUrl, tokenBot),
+          );
+        }
+      }
+      if (item?.message?.includes('испанс')) {
+        imageUrl = 'https://timgotow.ru/uploads/esp.jpg';
+        chatId = process.env['CHAT_LANGUAGE'];
+        if (messageLines && chatId) {
+          await telegramLimiter.schedule(() =>
+              this.sendToChat(chatId, messageText, imageUrl, tokenBot),
+          );
+        }
+      }
+      if (item?.message?.includes('китайс')) {
+        chatId = process.env['CHAT_LANGUAGE'];
+        if (messageLines && chatId) {
+          await telegramLimiter.schedule(() =>
+              this.sendToChat(chatId, messageText, imageUrl, tokenBot),
+          );
+        }
+      }
+      if (item?.message?.includes('англ')) {
+        imageUrl = 'https://timgotow.ru/uploads/en.jpg';
+        chatId = process.env['CHAT_LANGUAGE'];
+        if (messageLines && chatId) {
+          await telegramLimiter.schedule(() =>
+              this.sendToChat(chatId, messageText, imageUrl, tokenBot),
+          );
+        }
+      }
+      if (item?.message?.includes('немец')) {
+        imageUrl = 'https://timgotow.ru/uploads/ger.jpg';
+        chatId = process.env['CHAT_LANGUAGE'];
+        if (messageLines && chatId) {
+          await telegramLimiter.schedule(() =>
+              this.sendToChat(chatId, messageText, imageUrl, tokenBot),
+          );
+        }
+      }
+
+      if (item?.message?.includes('физи')) {
+        imageUrl = 'https://timgotow.ru/uploads/phy.jpg';
+        chatId = process.env['CHAT_PHYSIC'];
+        if (messageLines && chatId) {
+          await telegramLimiter.schedule(() =>
+              this.sendToChat(chatId, messageText, imageUrl, tokenBot),
+          );
+        }
+      }
+      if (item?.message?.includes('2 класс' || '1 кл' || '3 кл' || '4 кл' || 'чтени' || 'первокла' || 'второкла' || 'треьекл' || 'четверок' || 'начал' || 'к школе' || 'школ')) {
+        imageUrl = `https://timgotow.ru/uploads/start.jpg`;
+        chatId = process.env['CHAT_START'];
+        if (messageLines && chatId) {
+          await telegramLimiter.schedule(() =>
+              this.sendToChat(chatId, messageText, imageUrl, tokenBot),
+          );
+        }
+      }
+    } catch (err) {
+
+      this.logsService.error(
+          `Функция sendPostToTelegram - ошибка`,
+          `${err}`,
       );
     }
   }

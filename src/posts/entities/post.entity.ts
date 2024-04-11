@@ -20,6 +20,8 @@ export class PostEntity {
   first_name_user: string
   @Column()
   last_name_user: string
+  @Column({default: null})
+  userName: string
   @Column()
   city_user: string
   @Column()

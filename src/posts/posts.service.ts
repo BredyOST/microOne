@@ -16,6 +16,7 @@ import {
   EquipRepairMaintenanceService
 } from "../AllCategoriesForSearch/equip-repair-maintenance/equip-repair-maintenance.service";
 import {LawyerService} from "../AllCategoriesForSearch/lawyer/lawyer.service";
+import {ItWebService} from "../AllCategoriesForSearch/it-web/it-web.service";
 
 const Bottleneck = require('bottleneck');
 
@@ -47,7 +48,7 @@ export class PostsService {
     private rentRentalApartService: RentRentalApartService,
     private equipRepairMaintenanceService: EquipRepairMaintenanceService,
     private lawyerService: LawyerService,
-
+    private itWebService: ItWebService,
   ) {}
 
   async getPostsFromRedis(dto) {
@@ -445,7 +446,8 @@ export class PostsService {
         { id: 4, name: 'Ремонт и строительство', service: this.handymanAndBuilderService,},
         { id: 5, name: 'Аренда, сдача недвижимости', service: this.rentRentalApartService,},
         { id: 6, name: 'Покупка, продажа недвижимости', service: this.purchaseSaleApartService,},
-        { id: 7, name: 'Тест', service: this.lawyerService,},
+        { id: 7, name: 'Для юристов', service: this.lawyerService },
+        { id: 8, name: 'IT/Web', service: this.itWebService },
       ];
 
       const categoryInfo = categories.find((cat) => cat.id === category.id);
@@ -1095,8 +1097,8 @@ export class PostsService {
   // =================================================================================
   // Redis
   async getKeysRedis() {
-    const keys = await this.redisService.getAllKeys('id:7-*');
-    await this.redisService.deleteKeysByPattern("id:7-*");
+    const keys = await this.redisService.getAllKeys('id:8-*');
+    await this.redisService.deleteKeysByPattern("id:8-*");
     return keys;
   }
   async getRedisPosts() {

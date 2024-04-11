@@ -20,10 +20,14 @@ import { RentRentalApartEntity } from './AllCategoriesForSearch/rent-rental-apar
 import { RentRentalApartModule } from './AllCategoriesForSearch/rent-rental-apart/rent-rental-apart.module';
 import { PurchaseSaleApartEntity } from './AllCategoriesForSearch/purchase-sale-apart/entities/purchase-sale-apart.entity';
 import { PurchaseSaleApartModule } from './AllCategoriesForSearch/purchase-sale-apart/purchase-sale-apart.module';
-import {LawyerEntity} from "./AllCategoriesForSearch/lawyer/entities/lawyer.entity";
-import {LawyerModule} from "./AllCategoriesForSearch/lawyer/lawyer.module";
+import { LawyerEntity } from './AllCategoriesForSearch/lawyer/entities/lawyer.entity';
+import { LawyerModule } from './AllCategoriesForSearch/lawyer/lawyer.module';
 import { CitiesModule } from './cities/cities.module';
-import {CityEntity} from "./cities/entities/city.entity";
+import { CityEntity } from './cities/entities/city.entity';
+import { ItWebEntity } from './AllCategoriesForSearch/it-web/entities/it-web.entity';
+import { ItWebModule } from './AllCategoriesForSearch/it-web/it-web.module';
+import { TelegramPostsModule } from './telegram-posts/telegram-posts.module';
+import {TelegramPostEntity} from "./telegram-posts/entities/telegram-post.entity";
 
 @Module({
   imports: [
@@ -52,6 +56,8 @@ import {CityEntity} from "./cities/entities/city.entity";
             PurchaseSaleApartEntity,
             LawyerEntity,
             CityEntity,
+            ItWebEntity,
+            TelegramPostEntity,
           ],
         };
       },
@@ -66,6 +72,8 @@ import {CityEntity} from "./cities/entities/city.entity";
     PurchaseSaleApartModule,
     LawyerModule,
     CitiesModule,
+    ItWebModule,
+    TelegramPostsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
