@@ -8,13 +8,13 @@ export class TelegramPostsController {
   constructor(
       private readonly telegramPostsService: TelegramPostsService
   ) {}
-  @Get('/createGroupsVk')
+  @Get('/createGroupsTg')
   createGroupsVk() {
        this.telegramPostsService.getLogIn()
   }
   //добавление постов новой группы
   // @Cron('0 */10 * * * *')
-  @Get('/createGroupsVkPosts')
+  @Get('/createGroupsTgPosts')
   createGroups() {
     if(serverConfig?.servers?.length >= 1 ){
       const countPosts = process.env['COUNTER_POSTS_TG'];
@@ -37,38 +37,39 @@ export class TelegramPostsController {
   @Get('/addNewPosts')
   addNewPostsVk() {
     if(serverConfig?.servers?.length >= 1 ){
-      const countPosts = process.env['COUNTER_POSTS'];
+      const countPosts = process.env['COUNTER_POSTS_TG'];
       let pass = 0;
-      const end = process.env['SEARCH_END'];
-      for (let i = 1; pass <= +end; i++) {
-        if(+pass > +end) break;
+      const end = process.env['SEARCH_END_TG'];
+      // for (let i = 1; pass <= +end; i++) {
+        console.log(pass <= +end)
+        // if(+pass > +end) break;
         serverConfig?.servers?.map((item) => {
           if(+pass > +end) return;
           this.telegramPostsService.processGroups(`2`, countPosts, pass, false, item.ip);
-          pass += +countPosts;
+          // pass += +countPosts;
         });
-      }
+      // }
     }
   }
 
-  @Get('/createPostsForNewCategory')
-  async createPostsForNewCategory(){
-    if(serverConfig?.servers?.length >= 1 ){
-      const countPosts = process.env['COUNTER_POSTS'];
-      let pass = 0;
-      const end = process.env['SEARCH_END'];
-
-      for (let i = 1; pass <= +end; i++) {
-        if(+pass > +end) break;
-        serverConfig?.servers?.map((item) => {
-          if(+pass > +end) return;
-
-          this.telegramPostsService.processGroups(`1`, countPosts, pass, true, item.ip)
-          pass += +countPosts;
-        });
-      }
-    }
-  }
+  // @Get('/createPostsForNewCategory')
+  // async createPostsForNewCategory(){
+  //   if(serverConfig?.servers?.length >= 1 ){
+  //     const countPosts = process.env['COUNTER_POSTS'];
+  //     let pass = 0;
+  //     const end = process.env['SEARCH_END'];
+  //
+  //     for (let i = 1; pass <= +end; i++) {
+  //       if(+pass > +end) break;
+  //       serverConfig?.servers?.map((item) => {
+  //         if(+pass > +end) return;
+  //
+  //         this.telegramPostsService.processGroups(`1`, countPosts, pass, true, item.ip)
+  //         pass += +countPosts;
+  //       });
+  //     }
+  //   }
+  // }
 
 
 

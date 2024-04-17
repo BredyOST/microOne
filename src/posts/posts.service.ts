@@ -3,7 +3,7 @@ import { Repository } from 'typeorm';
 import { HttpService } from '@nestjs/axios';
 import { PostEntity } from './entities/post.entity';
 import * as process from 'process';
-import { catchError, firstValueFrom } from 'rxjs';
+import {catchError, firstValueFrom, pipe} from 'rxjs';
 import { AxiosError } from 'axios';
 import { LogsService } from '../otherServices/logger.service';
 import { RedisService } from '../redis/redis.service';
@@ -29,7 +29,7 @@ const limiterTwo = new Bottleneck({
 
 const telegramLimiter = new Bottleneck({
   maxConcurrent: 1, // Максимальное количество одновременных запросов
-  minTime: 10000, // Минимальное время между запросами (в миллисекундах)
+  minTime: 1000, // Минимальное время между запросами (в миллисекундах)
 });
 
 export class PostsService {
@@ -109,7 +109,6 @@ export class PostsService {
       this.logsServicePostsAdd.error(`findByIdCategory`, ` ${err}`);
     }
   }
-
   async getGroups(start, pass) {
 
     try {
@@ -133,7 +132,6 @@ export class PostsService {
       this.logsServicePostsAdd.error(`getGroups`, ` ${err}`);
     }
   }
-
   async addInfoAboutClosedGroupMain(groups: string[]) {
     try {
       const link = process.env['API_URL'];
@@ -158,7 +156,6 @@ export class PostsService {
       this.logsServicePostsAdd.error(`addInfoAboutClosedGroupMain`, ` ${err}`);
     }
   }
-
   async addPostCounter(info) {
     try {
       const link = process.env['API_URL'];
@@ -180,7 +177,6 @@ export class PostsService {
       this.logsServicePostsAdd.error(`addPostCounter`, ` ${err}`);
     }
   }
-
   async findByIdVk(id) {
     try {
       const link = process.env['API_URL'];
@@ -205,7 +201,6 @@ export class PostsService {
       this.logsServicePostsAdd.error(`findByIdVk`, ` ${err}`);
     }
   }
-
   async updateThis(info) {
     try {
       const link = process.env['API_URL'];
@@ -227,7 +222,28 @@ export class PostsService {
       this.logsServicePostsAdd.error(`updateThis`, ` ${err}`);
     }
   }
+  async updateTCategory(category) {
 
+    try {
+      const link = process.env['API_URL'];
+
+      const response = await fetch(`${link}/categories/updateThis`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ category }),
+      });
+      console.log(response)
+      // if (!response.ok) {
+      //   throw new Error(
+      //       `Failed to fetch categories. Status: ${response.status}`,
+      //   );
+      // }
+    } catch (err) {
+      this.logsServicePostsAdd.error(`updateThis`, ` ${err}`);
+    }
+  }
   async changePostsDateToDateUpdateWhenBreak(info) {
     try {
       const link = process.env['API_URL'];
@@ -255,7 +271,6 @@ export class PostsService {
       );
     }
   }
-
   async addPostDateWhenUpdate(info) {
     try {
       const link = process.env['API_URL'];
@@ -286,6 +301,7 @@ export class PostsService {
   // Второстепенные функции при обновлении и добавлении
   // получаем посты с вк
   async getPostsFromVK(postsForRequst, ip) {
+
     const access = process.env['ACCESS_TOKEN'];
     const versionVk = process.env['VERSION_VK'];
     try {
@@ -345,6 +361,7 @@ export class PostsService {
           );
         }),
       );
+
       return filteredData;
     } catch (err) {
       this.logsServicePostsAdd.error(
@@ -397,33 +414,32 @@ export class PostsService {
   //получить город на русском
   //===========================================================================================
   // № 1разводящая функция когда появляется новый пост, направляет в другие репозитории
-  async givePostsToAllRepositories(item, groupInfo, profilesInfo, sendMessage, boolIndex) {
+  async givePostsToAllRepositories(item, groupInfo, profilesInfo,category, sendMessage) {
+
     try {
 
-      const allCategories = await this.getCategories();
-      if (!allCategories || !allCategories?.length) {
-        return
-      }
+      if (!category) return
 
-      if (!boolIndex) {
-        await Promise.all(
-            allCategories.map(async (category) => {
-              if (!category?.disabled) {
-                this.addNewPostToOtherRepositories(item, groupInfo, profilesInfo, sendMessage, category, telegramLimiter,);
-              }
-            }),
-        );
-      }
-      if (boolIndex) {
+      this.addNewPostToOtherRepositories(item, groupInfo, profilesInfo, sendMessage, category, telegramLimiter,);
 
-        await Promise.all(
-            allCategories.map(async (category) => {
-              if (category?.create) {
-                this.addNewPostToOtherRepositories(item, groupInfo, profilesInfo, sendMessage, category, telegramLimiter,);
-              }
-            }),
-        );
-      }
+      // if (!boolIndex) {
+      //   await Promise.all(
+      //       allCategories.map(async (category) => {
+      //         if (!category?.disabled) {
+      //           this.addNewPostToOtherRepositories(item, groupInfo, profilesInfo, sendMessage, category, telegramLimiter,);
+      //         }
+      //       }),
+      //   );
+      // }
+      // if (boolIndex) {
+      //   await Promise.all(
+      //       allCategories.map(async (category) => {
+      //         if (category?.create) {
+      //           this.addNewPostToOtherRepositories(item, groupInfo, profilesInfo, sendMessage, category, telegramLimiter,);
+      //         }
+      //       }),
+      //   );
+      // }
 
     } catch (err) {
       await this.logsServicePostsAdd.error(
@@ -456,14 +472,15 @@ export class PostsService {
 
       if (categoryInfo) {
         if (categoryInfo.service) {
-          const isSamePost = await categoryInfo.service.getPostById(item.id);
+          const isSamePost = await categoryInfo.service.getPostById(item?.id);
+          // console.log(item)
           if (isSamePost) return;
         }
 
         const positiveWords = await category?.positiveWords;
         const negativeWords = await category?.negativeWords;
 
-        const filter = await this.filterOnePostForOthersRepositories(item, positiveWords, negativeWords, 1,);
+        const filter = await this.filterOnePostForOthersRepositories(item, positiveWords, negativeWords);
 
         if (filter) {
           await categoryInfo.service?.createFromVkDataBase(
@@ -485,12 +502,12 @@ export class PostsService {
     }
   }
   //№3 фильтруем пост по ключевым словам
-  async filterOnePostForOthersRepositories(post, positiveKeywords, negativeKeywords, indicator,) {
+  async filterOnePostForOthersRepositories(post, positiveKeywords, negativeKeywords) {
     try {
       let postText;
 
-      if (indicator == 1) postText = post.text.toLowerCase();
-      if (indicator == 2) postText = post.post_text.toLowerCase();
+      if (post.text.length >= 1) postText = post.text.toLowerCase();
+      if (post?.post_text?.length >=1 ) postText = post.post_text.toLowerCase();
 
       const containsPositiveKeyword = positiveKeywords.some((keyword) =>
         postText.includes(keyword),
@@ -505,6 +522,176 @@ export class PostsService {
       await this.logsServicePostsAdd.error(
         `filterOnePostForOthersRepositories ERROR - ${err}`,
         `${err.stack}`,
+      );
+    }
+  }
+  // получаем посты по ключевым словам
+  async getPostKeySearch(word, ip) {
+    const access = process.env['ACCESS_TOKEN'];
+    const versionVk = process.env['VERSION_VK'];
+    const currentTimeUnix = Math.floor(Date.now() / 1000); // Текущее время в Unixtime
+    const startOfDayUnix = Math.floor(new Date().setHours(0, 0, 0, 0) / 1000); // Время начала текущего дня в Unixtime
+    const counter = 20;
+
+    // const aa = `https://api.vk.com/method/newsfeed.search?q=${word}&count=${counter}&latitude=-90&longitude=-180&start_time=${startOfDayUnix}&end_time=${currentTimeUnix}&fields=city,country,photo_50&access_token=${access}&v=${versionVk}&extended=1`
+
+    try {
+
+      const { data } = await firstValueFrom(
+      // this.httpService.get<any>(`https://api.vk.com/method/newsfeed.search?q=${word}&count=${counter}&latitude=-90&longitude=-180&start_time=${startOfDayUnix}&end_time=${currentTimeUnix}&fields=city,country,photo_50&access_token=${access}&v=${versionVk}&extended=1`
+
+          this.httpService.get<any>(`${ip}`, { headers: {
+              'code': `${encodeURIComponent(word)}`,
+              'version':versionVk,
+              'access': `${encodeURIComponent(access)}`,
+              'count': counter.toString(),
+              'latitude': '-90',
+              'longitude': '-180',
+              'starttime': startOfDayUnix.toString(),
+              'endtime': currentTimeUnix.toString(),
+              'fields': 'city,country,photo_50',
+              'extended': '1',
+            },
+          })
+      // )
+              .pipe(
+                  catchError((error: AxiosError) => {
+                    console.log(error)
+                    if (
+                        error.response &&
+                        'data' in error.response &&
+                        error.response.data != undefined
+                    ) {
+                      console.log(error)
+                      this.logsServicePostsAdd.error(
+                          `getPostsFromVK error`,
+                          `ошибка получения постов в группе ${error.response} запрос и ответ`,
+                      );
+                    }
+                    throw new Error(
+                        `getPostsFromVK An error happened!`,
+                    );
+                  }),
+              ),
+      );
+      if (!data || !data.response || typeof data.response !== 'object') {
+        this.logsServicePostsAdd.error(
+            `getPostsFromVK error`,
+            `Неверный формат данных от VK API ${data}`,
+        );
+      }
+
+      // очищаем ответ, удаляя лишнее
+      if (data?.response && typeof data.response === 'object') {
+        if ('execute_errors' in data.response) {
+          delete data.response.execute_errors;
+        }
+      }
+
+      const filteredData = { response: {} };
+
+      return data.response
+
+      filteredData.response = Object.fromEntries(
+          Object.entries(data.response).filter(([key, value]: [string, any]) => {
+            return (
+                value !== false &&
+                (!value.count || value.count !== 0) &&
+                value.items &&
+                value.items.length > 0
+            );
+          }),
+      );
+
+      return filteredData;
+    } catch (err) {
+      console.log(err)
+      this.logsServicePostsAdd.error(
+          `getPostsFromVK error`,
+          `ошибка получения постов в группе ${err}`,
+      );
+    }
+  }
+  async getPostKeySearchNext(word, nextRate,ip) {
+
+    const access = process.env['ACCESS_TOKEN'];
+    const versionVk = process.env['VERSION_VK'];
+    const currentTimeUnix = Math.floor(Date.now() / 1000); // Текущее время в Unixtime
+    const startOfDayUnix = Math.floor(new Date().setHours(0, 0, 0, 0) / 1000); // Время начала текущего дня в Unixtime
+    const counter=20
+
+    try {
+      // this.httpService.get<any>(`https://api.vk.com/method/newsfeed.search?q=${word}&count=${counter}&latitude=-90&longitude=-180&start_time=${startOfDayUnix}&end_time=${currentTimeUnix}&start_from=${nextRate}&fields=city,country,photo_50&access_token=${access}&v=${versionVk}&extended=1`,
+
+      const { data } = await firstValueFrom(
+          this.httpService.get<any>(`${ip}`, { headers: {
+              // 'code': `${encodeURIComponent(request)}`,
+              'code': `${encodeURIComponent(word)}`,
+              'version':versionVk,
+              'access': `${encodeURIComponent(access)}`,
+              'count': counter.toString(),
+              'latitude': '-90',
+              'longitude': '-180',
+              'starttime': startOfDayUnix.toString(),
+              'endtime': currentTimeUnix.toString(),
+              'fields': 'city,country,photo_50',
+              'extended': '1',
+              'startfrom':`${encodeURIComponent(nextRate)}`,
+            },
+          })
+              .pipe(
+                  catchError((error: AxiosError) => {
+                    if (
+                        error.response &&
+                        'data' in error.response &&
+                        error.response.data != undefined
+                    ) {
+                      this.logsServicePostsAdd.error(
+                          `getPostsFromVK error`,
+                          `ошибка получения постов в группе ${error.response} запрос и ответ ${data}`,
+                      );
+                    }
+                    console.log(error)
+                    throw new Error(
+                        `getPostsFromVK An error happened! ${data} `,
+                    );
+                  }),
+              ),
+      );
+      if (!data || !data.response || typeof data.response !== 'object') {
+        this.logsServicePostsAdd.error(
+            `getPostsFromVK error`,
+            `Неверный формат данных от VK API ${data}`,
+        );
+      }
+
+      // очищаем ответ, удаляя лишнее
+      if (data?.response && typeof data.response === 'object') {
+        if ('execute_errors' in data.response) {
+          delete data.response.execute_errors;
+        }
+      }
+
+      const filteredData = { response: {} };
+
+      return data.response
+
+      filteredData.response = Object.fromEntries(
+          Object.entries(data.response).filter(([key, value]: [string, any]) => {
+            return (
+                value !== false &&
+                (!value.count || value.count !== 0) &&
+                value.items &&
+                value.items.length > 0
+            );
+          }),
+      );
+
+      return filteredData;
+    } catch (err) {
+      this.logsServicePostsAdd.error(
+          `getPostsFromVK error`,
+          `ошибка получения постов в группе ${err}`,
       );
     }
   }
@@ -632,7 +819,7 @@ export class PostsService {
       const IfNoPostsInRepository = `80`; // если нет постов в нашем репозитории, то будем запрашивать по 100 постов
       const IfPostsAreInRepository = `10`; // если есть посты в нашем репозитории, то запрашиваем по 10
       const numberOffset = process.env['OFFSET_POST']; // начальное смещение для получения постов = 0
-      let numberPost = `0`;   // количество запрашиваемых постов
+      let numberPost = `0`; // количество запрашиваемых постов
 
       if (!owner || !owner?.length) {
         await this.logsServicePostsAdd.error(`№3 ERROR для групп ${i} ${i + mainBatchSize} пачка  - ${u + batchSize} - не получены группы из второй функции`, ` с первого щага получил пустой owner`,);
@@ -975,7 +1162,282 @@ export class PostsService {
     }
   }
   //6.3 для новой категоррии создание
+
+  // async forFuncfilterGroupsIfCreate(posts, ii, u, mainBatchSize, batchSize, boolIndex) {
+  //   // this.logsServicePostsAdd.log(
+  //   //     `№6 функция получения и добавления постов для групп ${ii} -${ii + mainBatchSize} пачка ${u} - ${u + batchSize}  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++`,
+  //   // );
+  //
+  //   try {
+  //     const currentMonth = new Date().getMonth(); // текущий месяц
+  //     const currentYear = new Date().getFullYear(); // текущий год
+  //     const searchFromCurrentMonth = currentMonth == 0 ? 0 : currentMonth - 1; // месяц до которого будем просматривать все посты с каждой группы
+  //     const sendMessage = false;
+  //
+  //     const remainingGroups = []; // Массив для хранения групп, циклы которых были прерваны break, не прошли по датам
+  //
+  //     // в key мы получаем все названия групп, group0,1,2,3...
+  //     for (const key in posts.response) {
+  //       // проверка, есть ли у объекта posts.response собственное свойство с ключом key.
+  //       if (Object.prototype.hasOwnProperty.call(posts.response, key)) {
+  //         const group = posts.response[key]; // получаем инфу о конкретной группе из общего объекта
+  //         if (!group) return;
+  //         // this.logsServicePostsAdd.log(`'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''№6 проверяем посты группы ${group.items[0].owner_id} групп ${i} -${i + mainBatchSize} пачка ${u} - ${u + batchSize}`)
+  //
+  //         for (let i = 0; i < group.items?.length; i++) {
+  //           const item = group.items[i];
+  //           // если год поста меньше года искомого и это не с закрепа то останавливаемся
+  //           if (new Date(item.date * 1000).getFullYear() < currentYear && !item.is_pinned) {
+  //             remainingGroups.push(item.owner_id);
+  //             break;
+  //           }
+  //
+  //           if (new Date(item.date * 1000).getMonth() < searchFromCurrentMonth) {
+  //             // если месяц меньше искомого, то проверяем не закреп ли это
+  //             if (item.is_pinned) {
+  //               // this.logsServicePostsAdd.log(`${group.items[0].owner_id} групп ${ii} -${ii + mainBatchSize} пачка ${u} - ${u + batchSize} дата ${new Date(item.date * 1000).getMonth()} ------------------------------------ ISPING ==== на итерации ${i}`,);
+  //               continue;
+  //             }
+  //             // если не с закрепа то то кидаем в массив и прекращаем итерацию
+  //             if (!item.is_pinned) {
+  //               remainingGroups.push(item.owner_id);
+  //               // this.logsServicePostsAdd.log(`${group.items[0].owner_id} групп ${ii} -${ii + mainBatchSize} пачка ${u} - ${u + batchSize}  ${new Date(item.date * 1000).getMonth()} -------------------------------- BREAK--------------  на итерации ${i}`,);
+  //               break;
+  //             }
+  //           }
+  //           // Если же дата больше искомой то добавляем в репозиторий
+  //           if (new Date(item.date * 1000).getMonth() >= searchFromCurrentMonth && currentYear == new Date(item.date * 1000).getFullYear()) {
+  //             // await this.create(item, group.groups, group.profiles, 'vk'); // ТУТ УБРАТЬ AWAIT ДЛЯ ИСКЛЮЧЕНИЯ ЗЕДЕРЖЕК
+  //             const postData = {
+  //               count: group.count,
+  //               date: new Date(item.date * 1000),
+  //               idVk: item.owner_id,
+  //             };
+  //             this.givePostsToAllRepositories(item, group?.groups, group?.profiles, sendMessage,boolIndex);
+  //           }
+  //         }
+  //       }
+  //     }
+  //     return remainingGroups;
+  //   } catch (err) {
+  //     this.logsServicePostsAdd.error(
+  //         `№6.1 error групп ${ii} -${ii + mainBatchSize} пачка ${u} - ${u + batchSize}`,
+  //         `ошибка при фильтрации постов для создания 22 : ${err}!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!`,
+  //     );
+  //   }
+  // }
+
+  //6.3 это чтобы пробежать текущий день, если есть подозрение что что-то не то и посты не все добавлены
   async forFuncfilterGroupsIfCreate(posts, ii, u, mainBatchSize, batchSize, boolIndex) {
+
+    try {
+      const currentDay = new Date().getDate() // текущий день
+      const currentYear = new Date().getFullYear(); // текущий год
+      // const searchFromCurrentMonth = currentMonth == 0 ? 0 : currentMonth - 1; // месяц до которого будем просматривать все посты с каждой группы
+      const sendMessage = false;
+
+      const remainingGroups = []; // Массив для хранения групп, циклы которых были прерваны break, не прошли по датам
+
+      // в key мы получаем все названия групп, group0,1,2,3...
+      for (const key in posts.response) {
+        // проверка, есть ли у объекта posts.response собственное свойство с ключом key.
+        if (Object.prototype.hasOwnProperty.call(posts.response, key)) {
+          const group = posts.response[key]; // получаем инфу о конкретной группе из общего объекта
+          if (!group) return;
+          // this.logsServicePostsAdd.log(`'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''№6 проверяем посты группы ${group.items[0].owner_id} групп ${i} -${i + mainBatchSize} пачка ${u} - ${u + batchSize}`)
+
+          for (let i = 0; i < group.items?.length; i++) {
+            const item = group.items[i];
+            // если год поста меньше года искомого и это не с закрепа то останавливаемся
+            if (new Date(item.date * 1000).getFullYear() < currentYear && !item.is_pinned) {
+              remainingGroups.push(item.owner_id);
+              break;
+            }
+
+            if (new Date(item.date * 1000).getDate() < currentDay) {
+              // если месяц меньше искомого, то проверяем не закреп ли это
+              if (item.is_pinned) {
+                // this.logsServicePostsAdd.log(`${group.items[0].owner_id} групп ${ii} -${ii + mainBatchSize} пачка ${u} - ${u + batchSize} дата ${new Date(item.date * 1000).getMonth()} ------------------------------------ ISPING ==== на итерации ${i}`,);
+                continue;
+              }
+              // если не с закрепа то то кидаем в массив и прекращаем итерацию
+              if (!item.is_pinned) {
+                remainingGroups.push(item.owner_id);
+                // this.logsServicePostsAdd.log(`${group.items[0].owner_id} групп ${ii} -${ii + mainBatchSize} пачка ${u} - ${u + batchSize}  ${new Date(item.date * 1000).getMonth()} -------------------------------- BREAK--------------  на итерации ${i}`,);
+                break;
+              }
+            }
+            // Если же дата больше искомой то добавляем в репозиторий
+            if (new Date(item.date * 1000).getDate() >= currentDay && currentYear == new Date(item.date * 1000).getFullYear()) {
+              this.givePostsToAllRepositories(item, group?.groups, group?.profiles, sendMessage,boolIndex);
+            }
+          }
+        }
+      }
+      return remainingGroups;
+    } catch (err) {
+      this.logsServicePostsAdd.error(
+          `№6.1 error групп ${ii} -${ii + mainBatchSize} пачка ${u} - ${u + batchSize}`,
+          `ошибка при фильтрации постов для создания 22 : ${err}!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!`,
+      );
+    }
+  }
+  // =================================================================================
+  // Redis
+  async getKeysRedis() {
+    const keys = await this.redisService.getAllKeys('id:8-*');
+    await this.redisService.deleteKeysByPattern("id:8-*");
+    return keys;
+  }
+  async getRedisPosts() {
+
+    const groups = 50;
+    const text = `post_date_publish`
+    const year = new Date().getFullYear() - 1;
+
+    try {
+
+      for (let i = 1; i <= groups; i++) {
+        const pattern = await this.redisService.getAllKeys(`id:${i}-*`);
+
+        pattern.forEach(async (item) => {
+          const posts = await this.redisService.get(`${item}`)
+          const date = posts[0][text]
+
+          if (new Date(date *1000).getFullYear() < year) {
+            await this.redisService.del(item);
+          }
+
+        })
+      }
+
+    } catch (err) {
+      if (err.response === 'Пользователь не найден') {
+        throw err
+      }
+    }
+  }
+
+
+  // ТУТ ДАЛЬШЕ НА ПЕРИОД УКОМПЛЕКТОВАНИЯ ГРУПП
+  /*
+  async addGroupFromVk(owner, ip) {
+    // owner - тут группы с бд со всей инфой что в бд
+
+    try {
+      const IfNoPostsInRepository = `100`; // если нет постов в нашем репозитории, то будем запрашивать по 100 постов
+      const numberOffset = process.env['OFFSET_POST']; // начальное смещение для получения постов = 0
+      let numberPost = `0`; // количество запрашиваемых постов
+
+      // массивы для хранения данных когда нет постов групп
+      const prepereRequestIfNoPostsInRepository = []; // запрос по группам для постов
+      // const partOfGroupsIfPostsNo = owner; // массив объкетов групп которых еще нет - будем запрашивать максимум  - 100 постов
+
+      // перебираем все объекты в массиве и формируем переменную для отправки запроса на получение постов, а также разбиваем на группы
+      await Promise.all(
+          owner.map(async (group, index) => {
+            const obj = `-${group}`
+            const query = `var response${index} = API.wall.get({owner_id: ${obj}, count: ${numberPost}, offset: ${numberOffset}});`;
+
+              prepereRequestIfNoPostsInRepository.push(query);
+              // partOfGroupsIfPostsNo.push(
+              //     owner.find((item) => item === group),
+              // );
+          }),
+      );
+
+        const codeIfPostsNo = prepereRequestIfNoPostsInRepository.join('\n') + '\nreturn { ' +
+            prepereRequestIfNoPostsInRepository
+                .map((_, index) => `group${index}: response${index}`)
+                .join(', ') +
+            ' };';
+
+        if (codeIfPostsNo && codeIfPostsNo?.length)
+          this.addPostsTo( codeIfPostsNo, IfNoPostsInRepository, numberOffset, owner, ip);
+
+
+    } catch (err) {
+      await this.logsServicePostsAdd.error(`№3 Функция проверки и получению постов с вк - ошибка для групп ***************************************************** ШАГ №2 ERROR,`, `${err}`,);
+    }
+  }
+  async addPostsTo(postsForRequst, numberPost, numberOffset, owner, ip) {
+    //owner - группы по 25 шт
+    //postsForRequst - запрос для вк
+
+    try {
+
+      let startOffset = +numberOffset; // изнчально  офсет 0
+
+      // получаем первые посты. тут будет объект в котором будет находится инфа о группе {group0: { count: 8267, items: [Array], profiles: [Array], groups: [Array] }, group1:{...}}
+      const posts = await limiter.schedule(() => this.getPostsFromVK(postsForRequst, ip),);
+
+      if (!posts || Object.keys(posts?.response)?.length == 0) {
+        // this.logsServicePostsAdd.log(`№4 не получены группы или ключи для групп ${i} ${i + mainBatchSize} пачка  - ${u + batchSize} - останов`,
+        // );
+        return;
+      }
+
+      // массив для id групп которые не прошли по датам
+      let filterGroups = await this.filterGroupsPosts(posts);
+
+      // все группы для старта, проверки и от сюда будем удалять те которые не прошли по датам
+      let allGroups = owner;
+
+      // запускаем бесконечный цикл пока allGroup не будет пустым
+      for (let i = 1; i < Infinity; i++) {
+
+        // если есть id групп которые не прошли по датам то фильтруем
+        if (filterGroups && filterGroups?.length) {
+          //получаем все группы с предыдущего раза
+          // получаем то что остается
+
+          const groupsForNest = allGroups.filter((groupItem) => {
+            const result = !filterGroups.includes(Number(groupItem?.idVk));
+            return result;
+          });
+
+          // обновили весь массив то с чем работаем
+          allGroups = groupsForNest;
+        }
+
+        if (!allGroups || !allGroups?.length) {
+          // this.logsServicePostsAdd.log(`№4 allGroups нет для групп ${i} ${i + mainBatchSize} пачка  - ${u + batchSize} итерация № ${i} внутри цикла allGroups = ${allGroups.length} итерация № ${i} ${new Date()}`,);
+          break;
+        }
+
+        startOffset += +numberPost; // увеличиваем офсет
+        // формируем запрос на сл посты в вк
+        const requestPosts = [];
+
+        for (let index = 0; index < allGroups?.length; index++) {
+          const query = `var response${index} = API.wall.get({owner_id: ${allGroups[index].idVk}, count: ${numberPost}, offset: ${startOffset}, fields: "city,country,first_name_nom,photo_100", extended: 1});`;
+          requestPosts.push(query);
+        }
+        const codeMany =
+            requestPosts.join('\n') +
+            '\nreturn { ' +
+            requestPosts
+                .map((_, index) => `group${index}: response${index}`)
+                .join(', ') +
+            ' };';
+        const posts = await limiter.schedule(() =>
+            this.getPostsFromVK(codeMany, ip),
+        );
+
+        if (!posts || Object.keys(posts.response)?.length == 0) {
+          // this.logsServicePostsAdd.log(`№4 ВНУТРИ В ЦИКЛЕ ПРИ ПОВТОРНОМ ЗАПРОСЕ для групп ${i} ${i + mainBatchSize} пачка  - ${u + batchSize} - posts =  ${posts?.length}`,);
+          break;
+        }
+        filterGroups = await this.filter(posts, indicator, i, u, mainBatchSize, batchSize,boolIndex);
+      }
+
+      // this.logsServicePostsAdd.log(`№4 Завершен беспонечный цикл для групп ${i} ${i + mainBatchSize} пачка  - ${u + batchSize} - ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++`,);
+    } catch (err) {
+      this.logsServicePostsAdd.error(`№4 error`, `ошибка где входы в цикл: для групп ${i} ${i + mainBatchSize} пачка  - ${u + batchSize} ${err} для групп`);
+      this.logsServicePostsAdd.error(`№4 error`, `Stack Trace: ${err.stack}`);  // Добавить стек вызова ошибки в лог
+    }
+  }
+  async filterGroupsPosts(posts) {
     // this.logsServicePostsAdd.log(
     //     `№6 функция получения и добавления постов для групп ${ii} -${ii + mainBatchSize} пачка ${u} - ${u + batchSize}  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++`,
     // );
@@ -1020,12 +1482,41 @@ export class PostsService {
             // Если же дата больше искомой то добавляем в репозиторий
             if (new Date(item.date * 1000).getMonth() >= searchFromCurrentMonth && currentYear == new Date(item.date * 1000).getFullYear()) {
               // await this.create(item, group.groups, group.profiles, 'vk'); // ТУТ УБРАТЬ AWAIT ДЛЯ ИСКЛЮЧЕНИЯ ЗЕДЕРЖЕК
-              const postData = {
-                count: group.count,
-                date: new Date(item.date * 1000),
-                idVk: item.owner_id,
-              };
-              this.givePostsToAllRepositories(item, group?.groups, group?.profiles, sendMessage,boolIndex);
+              if (item.text.includes(
+                  'ищу' ||
+                  'подскажите' ||
+                  'посоветуйте' ||
+                  'необходимо' ||
+                  'требуется' ||
+                  'продаю' ||
+                  'продам' ||
+                  'куплю' ||
+                  'купим' ||
+                  'покупаю' ||
+                  'репетит' ||
+                  'ищу' ||
+                  'без посредников' ||
+                  'аренд' ||
+                  'работа' ||
+                  'продай' ||
+                  'спроси' ||
+                  'совет' ||
+                  'ЕГЭ' ||
+                  'ОГЭ' ||
+                  'вакансии' ||
+                  'посуточн' ||
+                  "аренд"
+              )) {
+                const sameGroup = await this.findByIdVkGroup(`-${item.id}`)
+                if (!sameGroup) {
+                  await this.repository.save({
+                    idVk: `-${item.id}`,
+                  })
+                  const sameGroup = await this.findByIdVk(`-${item.id}`)
+                  sameGroup.name = item.name
+                  await this.repository.update(sameGroup.id, sameGroup)
+                }
+              }
             }
           }
         }
@@ -1038,96 +1529,150 @@ export class PostsService {
       );
     }
   }
+  async findByIdVkGroup(id) {
+    try {
+      const link = process.env['API_URL'];
 
-  //6.3 это чтобы пробежать текущий день, если есть подозрение что что-то не то и посты не все добавлены
-  // async forFuncfilterGroupsIfCreate(posts, ii, u, mainBatchSize, batchSize, boolIndex) {
-  //
-  //   try {
-  //     const currentDay = new Date().getDate() // текущий месяц
-  //     const currentYear = new Date().getFullYear(); // текущий год
-  //     // const searchFromCurrentMonth = currentMonth == 0 ? 0 : currentMonth - 1; // месяц до которого будем просматривать все посты с каждой группы
-  //     const sendMessage = false;
-  //
-  //     const remainingGroups = []; // Массив для хранения групп, циклы которых были прерваны break, не прошли по датам
-  //
-  //     // в key мы получаем все названия групп, group0,1,2,3...
-  //     for (const key in posts.response) {
-  //       // проверка, есть ли у объекта posts.response собственное свойство с ключом key.
-  //       if (Object.prototype.hasOwnProperty.call(posts.response, key)) {
-  //         const group = posts.response[key]; // получаем инфу о конкретной группе из общего объекта
-  //         if (!group) return;
-  //         // this.logsServicePostsAdd.log(`'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''№6 проверяем посты группы ${group.items[0].owner_id} групп ${i} -${i + mainBatchSize} пачка ${u} - ${u + batchSize}`)
-  //
-  //         for (let i = 0; i < group.items?.length; i++) {
-  //           const item = group.items[i];
-  //           // если год поста меньше года искомого и это не с закрепа то останавливаемся
-  //           if (new Date(item.date * 1000).getFullYear() < currentYear && !item.is_pinned) {
-  //             remainingGroups.push(item.owner_id);
-  //             break;
-  //           }
-  //
-  //           if (new Date(item.date * 1000).getDate() < currentDay) {
-  //             // если месяц меньше искомого, то проверяем не закреп ли это
-  //             if (item.is_pinned) {
-  //               // this.logsServicePostsAdd.log(`${group.items[0].owner_id} групп ${ii} -${ii + mainBatchSize} пачка ${u} - ${u + batchSize} дата ${new Date(item.date * 1000).getMonth()} ------------------------------------ ISPING ==== на итерации ${i}`,);
-  //               continue;
-  //             }
-  //             // если не с закрепа то то кидаем в массив и прекращаем итерацию
-  //             if (!item.is_pinned) {
-  //               remainingGroups.push(item.owner_id);
-  //               // this.logsServicePostsAdd.log(`${group.items[0].owner_id} групп ${ii} -${ii + mainBatchSize} пачка ${u} - ${u + batchSize}  ${new Date(item.date * 1000).getMonth()} -------------------------------- BREAK--------------  на итерации ${i}`,);
-  //               break;
-  //             }
-  //           }
-  //           // Если же дата больше искомой то добавляем в репозиторий
-  //           if (new Date(item.date * 1000).getDate() >= currentDay && currentYear == new Date(item.date * 1000).getFullYear()) {
-  //             this.givePostsToAllRepositories(item, group?.groups, group?.profiles, sendMessage,boolIndex);
-  //           }
-  //         }
-  //       }
-  //     }
-  //     return remainingGroups;
-  //   } catch (err) {
-  //     this.logsServicePostsAdd.error(
-  //         `№6.1 error групп ${ii} -${ii + mainBatchSize} пачка ${u} - ${u + batchSize}`,
-  //         `ошибка при фильтрации постов для создания 22 : ${err}!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!`,
-  //     );
-  //   }
-  // }
-  // =================================================================================
-  // Redis
-  async getKeysRedis() {
-    const keys = await this.redisService.getAllKeys('id:8-*');
-    await this.redisService.deleteKeysByPattern("id:8-*");
-    return keys;
+      const response = await fetch(`${link}/groups-from-vk/findByIdVk`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ id }),
+      });
+
+      if (!response.ok) {
+        throw new Error(
+            `Failed to fetch categories. Status: ${response.status}`,
+        );
+      }
+
+      const responseData = await response.json();
+      return responseData;
+    } catch (err) {
+      this.logsServicePostsAdd.error(`findByIdVk`, ` ${err}`);
+    }
   }
-  async getRedisPosts() {
+*/
 
-    const groups = 50;
-    const text = `post_date_publish`
-    const year = new Date().getFullYear() - 1;
+
+  // НОВЫЙ ГЛОБАЛЬНАЙ СЕРЧ
+  async processGroup(category, ip, ipTwo) {
+    //category - одна категория
 
     try {
 
-      for (let i = 1; i <= groups; i++) {
-        const pattern = await this.redisService.getAllKeys(`id:${i}-*`);
+      if(!category?.id || category?.extraWords?.length < 1) return
+      const words = category?.extraWords; // массив объектов с ключевыми словами по которым искать по одной категории
 
-        pattern.forEach(async (item) => {
-          const posts = await this.redisService.get(`${item}`)
-          const date = posts[0][text]
+      let nextRate; // для перебора следующей страницы во время поиска
+      let counter = 50; // стартовое значение для цикла, ограничение на 1000 постов
 
-          if (new Date(date *1000).getFullYear() < year) {
-            await this.redisService.del(item);
-          }
+      // for (const word of words) {
+        words.forEach(async (word) => {
 
+        // один объект формата {"id": 1, "word": "репетитор", "dateLast": null, "dateUpdate": null}
+        const thisExtraWordObject = word;
+        // дата последнего поста с БД перед началом цикла по конкретному слову с объекта {"id": 1, "word": "репетитор", "dateLast": null, "dateUpdate": null}
+        let dateLst = thisExtraWordObject?.dateLast;
+        // тут сохраняем дату на период перебора чтобы потом обновить дату в базе данных
+        let saveDateLastPostWhenSearching;
+
+        if(!dateLst) {
+          const currentDate = new Date();
+          currentDate.setHours(0, 1, 0, 0);
+          dateLst = currentDate;
+        }
+
+         for (let i = 0; i <= counter; i++) {
+          console.log(i)
+           console.log(counter)
+           let result;
+
+           if(i >= 1) {
+             result = await limiter.schedule(() => this.getPostKeySearchNext(word.word, nextRate,ipTwo),);
+             nextRate = result?.next_from
+           }
+
+           if(i == 0) {
+             result = await limiter.schedule(() => this.getPostKeySearch(word.word, ip),);
+             nextRate = result?.next_from
+           }
+
+           if (!result?.items || result?.items?.length < 1) break
+
+           // counter = Math.ceil(result?.total_count / 20)
+
+             for(let o = 0; o <= result?.items?.length; o++){
+
+             const item = result?.items?.[o]
+              // console.log(result)
+              // если есть дата последнего поста в бд то проверяем пост проходит или нет
+             if(dateLst) {
+               if(new Date(item?.date*1000).getTime() >= new Date(dateLst).getTime()) {
+                 // console.log(`${new Date(item.date*1000).toLocaleDateString()}${new Date(item.date*1000).toLocaleTimeString()}`)
+                 console.log(new Date(item?.date*1000))
+                 console.log(new Date(dateLst))
+                 console.log('=======================================')
+                 this.addNewPostToOtherRepositories(item, result.groups, result.profiles, true, category, telegramLimiter,);
+                 if (!saveDateLastPostWhenSearching) saveDateLastPostWhenSearching = item?.date;
+
+                 if(i == counter) {
+                   console.log('max')
+                   if(saveDateLastPostWhenSearching) {
+                     if (thisExtraWordObject) {
+                       thisExtraWordObject.dateLast = saveDateLastPostWhenSearching;
+                       thisExtraWordObject.dateUpdate = saveDateLastPostWhenSearching;
+                     }
+                     const newExtra = category?.extraWords?.filter((thisWord) => thisWord.id != thisExtraWordObject.id)
+                     category.extraWords = [...newExtra, thisExtraWordObject]
+                     this.updateTCategory(category)
+                     break
+                   }
+                 }
+               }
+
+               if(new Date(item?.date*1000).getTime() < new Date(dateLst).getTime()) {
+                 console.log('loose')
+                 if(saveDateLastPostWhenSearching) {
+                   if (thisExtraWordObject) {
+                     thisExtraWordObject.dateLast = saveDateLastPostWhenSearching;
+                     thisExtraWordObject.dateUpdate = saveDateLastPostWhenSearching;
+                   }
+                   const newExtra = category?.extraWords?.filter((thisWord) => thisWord.id != thisExtraWordObject.id)
+                   category.extraWords = [...newExtra, thisExtraWordObject]
+                   this.updateTCategory(category)
+                   break
+                 }
+               }
+
+               if(i == counter) {
+                 console.log('chooose')
+                 if(saveDateLastPostWhenSearching) {
+                   if (thisExtraWordObject) {
+                     thisExtraWordObject.dateLast = saveDateLastPostWhenSearching;
+                     thisExtraWordObject.dateUpdate = saveDateLastPostWhenSearching;
+                   }
+                   const newExtra = category?.extraWords?.filter((thisWord) => thisWord.id != thisExtraWordObject.id)
+                   category.extraWords = [...newExtra, thisExtraWordObject]
+                   // this.updateTCategory(category)
+                   break
+                 }
+               }
+             }
+           }
+         }
         })
-      }
 
     } catch (err) {
-      if (err.response === 'Пользователь не найден') {
-        throw err
-      }
+      this.logsServicePostsAdd.error(`№1 ERROR - ${err.message}`, `Ошибка на ШАГЕ №1: ${err.stack}`,);
     }
   }
+
+
+  //код для запроса
+
+
+
 
 }

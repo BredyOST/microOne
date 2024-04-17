@@ -155,12 +155,13 @@ export class TutorsService {
   }
   // создание для ВК
   async createFromVkDataBase(item, groups, profiles, identificator, sendMessage, tokenBot, telegramLimiter,) {
+
     try {
 
-      const ownerId = String(item.owner_id).replace('-', '');
-      const groupInfo = groups?.find((element) => element.id == ownerId);
+      const ownerId = String(item?.owner_id).replace('-', '');
+      const groupInfo = groups?.find((element) => element?.id == ownerId);
       const profileInfo = profiles?.find(
-          (element) => element.id == item.signer_id,
+          (element) => element.id == item?.signer_id,
       );
       const cityGroup = groupInfo?.city
       const cityUser = profileInfo?.city
@@ -190,19 +191,19 @@ export class TutorsService {
         name_group: groupInfo?.name || '',
         city_group: groupCityName || groupInfo?.city?.title || '',
         country_group: groupInfo?.country?.title || '',
-        photo_100_group: groupInfo?.photo_100 || '',
+        photo_100_group: groupInfo?.photo_50 || '',
         first_name_user: profileInfo?.first_name || '',
         last_name_user: profileInfo?.last_name || '',
         city_user: userCityName || profileInfo?.city?.title || '',
         country_user: profileInfo?.country?.title || '',
-        photo_100_user: profileInfo?.photo_100 || '',
-        post_id: item.id,
-        post_owner_id: item.owner_id,
-        post_fromId: item.from_id,
-        post_date_publish: item.date,
-        post_text: item.text,
-        post_type: item.post_type,
-        signer_id: item.signer_id || '',
+        photo_100_user: profileInfo?.photo_50 || '',
+        post_id: item?.id,
+        post_owner_id: item?.owner_id,
+        post_fromId: item?.from_id,
+        post_date_publish: item?.date,
+        post_text: item?.text || item?.post_text,
+        post_type: item?.type,
+        signer_id: item?.signer_id || '',
       });
     } catch (err) {
       this.logsService.error(`Функция добавление постов тюторс- ошибка`, `${err}`,);
@@ -640,6 +641,64 @@ export class TutorsService {
   //
   //
   // }
+
+
+  //НОВЫЙ
+
+  async createFromVkGlobalSearch(item, groups, profiles, identificator, sendMessage, tokenBot, telegramLimiter,) {
+    try {
+
+      const ownerId = String(item?.owner_id).replace('-', '');
+      const groupInfo = groups?.find((element) => element.id == ownerId);
+      const profileInfo = profiles?.find((element) => element.id == item.signer_id,);
+
+      const cityGroup = groupInfo?.city
+      const cityUser = profileInfo?.city
+      let cityGroupEng;
+      let cityUserEng;
+
+      if(cityGroup?.title?.length >= 1) cityGroupEng = await this.containsEnglishLetters(cityGroup?.title);
+      if(cityUser?.title?.length >= 1) cityUserEng = await this.containsEnglishLetters(cityUser?.title);
+
+      let groupCityName = null;
+      let userCityName = null;
+
+      if(cityGroupEng) {
+        const city = await this.citiesService.findByIdVk(cityGroup?.id)
+        groupCityName = city?.title
+      }
+      if(cityUserEng) {
+        const city = await this.citiesService.findByIdVk(cityUser?.id)
+        userCityName = city?.title
+      }
+
+      if (sendMessage) this.sendPostToTelegram(item, tokenBot, telegramLimiter);
+
+      return this.repository.save({
+        identification_post: 'vk',
+        id_group: groupInfo?.id || item.owner_id || '',
+        name_group: groupInfo?.name || '',
+        city_group: groupCityName || groupInfo?.city?.title || '',
+        country_group: groupInfo?.country?.title || '',
+        photo_100_group: groupInfo?.photo_100 || '',
+        first_name_user: profileInfo?.first_name || '',
+        last_name_user: profileInfo?.last_name || '',
+        city_user: userCityName || profileInfo?.city?.title || '',
+        country_user: profileInfo?.country?.title || '',
+        photo_100_user: profileInfo?.photo_100 || '',
+        post_id: item.id,
+        post_owner_id: item.owner_id,
+        post_fromId: item.from_id,
+        post_date_publish: item.date,
+        post_text: item.text,
+        post_type: item.post_type,
+        signer_id: item.signer_id || '',
+      });
+    } catch (err) {
+      this.logsService.error(`Функция добавление постов тюторс- ошибка`, `${err}`,);
+    }
+  }
+
 
 
 }
