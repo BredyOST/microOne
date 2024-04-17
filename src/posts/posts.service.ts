@@ -1570,7 +1570,7 @@ export class PostsService {
 
       // for (const word of words) {
         words.forEach(async (word) => {
-
+        console.log(word)
         // один объект формата {"id": 1, "word": "репетитор", "dateLast": null, "dateUpdate": null}
         const thisExtraWordObject = word;
         // дата последнего поста с БД перед началом цикла по конкретному слову с объекта {"id": 1, "word": "репетитор", "dateLast": null, "dateUpdate": null}
@@ -1581,12 +1581,13 @@ export class PostsService {
         if(!dateLst) {
           const currentDate = new Date();
           currentDate.setHours(0, 1, 0, 0);
-          dateLst = currentDate;
+          const unixTime = Math.floor(currentDate.getTime() / 1000); // Преобразование текущей даты и времени в Unixtime (в секундах)
+          dateLst = unixTime;
         }
 
          for (let i = 0; i <= counter; i++) {
           console.log(i)
-           console.log(counter)
+
            let result;
 
            if(i >= 1) {
@@ -1611,8 +1612,8 @@ export class PostsService {
              if(dateLst) {
                if(new Date(item?.date*1000).getTime() >= new Date(dateLst).getTime()) {
                  // console.log(`${new Date(item.date*1000).toLocaleDateString()}${new Date(item.date*1000).toLocaleTimeString()}`)
-                 console.log(new Date(item?.date*1000))
-                 console.log(new Date(dateLst))
+                 // console.log(new Date(item?.date*1000))
+                 // console.log(new Date(dateLst))
                  console.log('=======================================')
                  this.addNewPostToOtherRepositories(item, result.groups, result.profiles, true, category, telegramLimiter,);
                  if (!saveDateLastPostWhenSearching) saveDateLastPostWhenSearching = item?.date;
