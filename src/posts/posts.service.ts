@@ -1570,7 +1570,7 @@ export class PostsService {
 
       // for (const word of words) {
         words.forEach(async (word) => {
-        console.log(word)
+        // console.log(word)
         // один объект формата {"id": 1, "word": "репетитор", "dateLast": null, "dateUpdate": null}
         const thisExtraWordObject = word;
         // дата последнего поста с БД перед началом цикла по конкретному слову с объекта {"id": 1, "word": "репетитор", "dateLast": null, "dateUpdate": null}
@@ -1586,7 +1586,7 @@ export class PostsService {
         }
 
          for (let i = 0; i <= counter; i++) {
-          console.log(i)
+          // console.log(i)
 
            let result;
 
@@ -1614,12 +1614,12 @@ export class PostsService {
                  // console.log(`${new Date(item.date*1000).toLocaleDateString()}${new Date(item.date*1000).toLocaleTimeString()}`)
                  // console.log(new Date(item?.date*1000))
                  // console.log(new Date(dateLst))
-                 console.log('=======================================')
+                 // console.log('=======================================')
                  this.addNewPostToOtherRepositories(item, result.groups, result.profiles, true, category, telegramLimiter,);
                  if (!saveDateLastPostWhenSearching) saveDateLastPostWhenSearching = item?.date;
 
                  if(i == counter) {
-                   console.log('max')
+                   // console.log('max')
                    if(saveDateLastPostWhenSearching) {
                      if (thisExtraWordObject) {
                        thisExtraWordObject.dateLast = saveDateLastPostWhenSearching;
@@ -1634,7 +1634,7 @@ export class PostsService {
                }
 
                if(new Date(item?.date*1000).getTime() < new Date(dateLst).getTime()) {
-                 console.log('loose')
+                 // console.log('loose')
                  if(saveDateLastPostWhenSearching) {
                    if (thisExtraWordObject) {
                      thisExtraWordObject.dateLast = saveDateLastPostWhenSearching;
@@ -1648,7 +1648,7 @@ export class PostsService {
                }
 
                if(i == counter) {
-                 console.log('chooose')
+                 // console.log('chooose')
                  if(saveDateLastPostWhenSearching) {
                    if (thisExtraWordObject) {
                      thisExtraWordObject.dateLast = saveDateLastPostWhenSearching;
