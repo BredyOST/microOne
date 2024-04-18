@@ -27,7 +27,9 @@ import { CityEntity } from './cities/entities/city.entity';
 import { ItWebEntity } from './AllCategoriesForSearch/it-web/entities/it-web.entity';
 import { ItWebModule } from './AllCategoriesForSearch/it-web/it-web.module';
 import { TelegramPostsModule } from './telegram-posts/telegram-posts.module';
-import {TelegramPostEntity} from "./telegram-posts/entities/telegram-post.entity";
+import { TelegramPostEntity } from './telegram-posts/entities/telegram-post.entity';
+import { WordSearchEntity } from './AllCategoriesForSearch/words-search/entities/words-search.entity';
+import { WordsSearchModule } from './AllCategoriesForSearch/words-search/words-search.module';
 
 @Module({
   imports: [
@@ -58,6 +60,7 @@ import {TelegramPostEntity} from "./telegram-posts/entities/telegram-post.entity
             CityEntity,
             ItWebEntity,
             TelegramPostEntity,
+            WordSearchEntity,
           ],
         };
       },
@@ -74,6 +77,7 @@ import {TelegramPostEntity} from "./telegram-posts/entities/telegram-post.entity
     CitiesModule,
     ItWebModule,
     TelegramPostsModule,
+    WordsSearchModule,
   ],
   controllers: [AppController],
   providers: [AppService],

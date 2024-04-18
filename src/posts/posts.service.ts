@@ -17,6 +17,7 @@ import {
 } from "../AllCategoriesForSearch/equip-repair-maintenance/equip-repair-maintenance.service";
 import {LawyerService} from "../AllCategoriesForSearch/lawyer/lawyer.service";
 import {ItWebService} from "../AllCategoriesForSearch/it-web/it-web.service";
+import {WordsSearchService} from "../AllCategoriesForSearch/words-search/words-search.service";
 
 const Bottleneck = require('bottleneck');
 
@@ -49,6 +50,7 @@ export class PostsService {
     private equipRepairMaintenanceService: EquipRepairMaintenanceService,
     private lawyerService: LawyerService,
     private itWebService: ItWebService,
+    private wordsSearchService: WordsSearchService,
   ) {}
 
   async getPostsFromRedis(dto) {
@@ -502,6 +504,7 @@ export class PostsService {
     }
   }
   //№3 фильтруем пост по ключевым словам
+
   async filterOnePostForOthersRepositories(post, positiveKeywords, negativeKeywords) {
     try {
       let postText;
@@ -525,13 +528,49 @@ export class PostsService {
       );
     }
   }
+
+
+  //фильтр строгий
+  // async filterOnePostForOthersRepositories(post, positiveKeywords, negativeKeywords) {
+  //   try {
+  //     let postText;
+  //
+  //     if (post.text.length >= 1) postText = post.text.toLowerCase();
+  //     if (post?.post_text?.length >=1 ) postText = post.post_text.toLowerCase();
+  //
+  //     postText = postText.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, ' ');
+  //
+  //     let rule = /\s{1,}/g;
+  //     let stringParts = postText.split(rule);
+  //
+  //     let containsPositiveKeyword = false;
+  //     for (let word of stringParts) {
+  //       if (positiveKeywords.includes(word.toLowerCase())) {
+  //         containsPositiveKeyword = true;
+  //         break;
+  //       }
+  //     };
+  //
+  //     const containsNegativeKeyword = negativeKeywords.some((keyword) =>
+  //         postText.includes(keyword),
+  //     );
+  //
+  //     return containsPositiveKeyword && !containsNegativeKeyword;
+  //
+  //   } catch (err) {
+  //     await this.logsServicePostsAdd.error(
+  //         `filterOnePostForOthersRepositories ERROR - ${err}`,
+  //         `${err.stack}`,
+  //     );
+  //   }
+  // }
   // получаем посты по ключевым словам
-  async getPostKeySearch(word, ip) {
+  async getPostKeySearch(word, ip, countPosts) {
     const access = process.env['ACCESS_TOKEN'];
     const versionVk = process.env['VERSION_VK'];
     const currentTimeUnix = Math.floor(Date.now() / 1000); // Текущее время в Unixtime
     const startOfDayUnix = Math.floor(new Date().setHours(0, 0, 0, 0) / 1000); // Время начала текущего дня в Unixtime
-    const counter = 20;
+    const counter = +countPosts;
 
     // const aa = `https://api.vk.com/method/newsfeed.search?q=${word}&count=${counter}&latitude=-90&longitude=-180&start_time=${startOfDayUnix}&end_time=${currentTimeUnix}&fields=city,country,photo_50&access_token=${access}&v=${versionVk}&extended=1`
 
@@ -612,13 +651,13 @@ export class PostsService {
       );
     }
   }
-  async getPostKeySearchNext(word, nextRate,ip) {
+  async getPostKeySearchNext(word, nextRate, ip, countPosts) {
 
     const access = process.env['ACCESS_TOKEN'];
     const versionVk = process.env['VERSION_VK'];
     const currentTimeUnix = Math.floor(Date.now() / 1000); // Текущее время в Unixtime
     const startOfDayUnix = Math.floor(new Date().setHours(0, 0, 0, 0) / 1000); // Время начала текущего дня в Unixtime
-    const counter=20
+    const counter = +countPosts
 
     try {
       // this.httpService.get<any>(`https://api.vk.com/method/newsfeed.search?q=${word}&count=${counter}&latitude=-90&longitude=-180&start_time=${startOfDayUnix}&end_time=${currentTimeUnix}&start_from=${nextRate}&fields=city,country,photo_50&access_token=${access}&v=${versionVk}&extended=1`,
@@ -1557,119 +1596,115 @@ export class PostsService {
 
 
   // НОВЫЙ ГЛОБАЛЬНАЙ СЕРЧ
-  async processGroup(category, ip, ipTwo) {
+  async processGroup(category, ip, ipTwo, word) {
     //category - одна категория
 
     try {
 
-      if(!category?.id || category?.extraWords?.length < 1) return
-      const words = category?.extraWords; // массив объектов с ключевыми словами по которым искать по одной категории
+      if(word?.id && category?.id && ip?.ip && ipTwo?.ipTwo) return
 
       let nextRate; // для перебора следующей страницы во время поиска
-      let counter = 50; // стартовое значение для цикла, ограничение на 1000 постов
+      let counter = 20; // стартовое значение для цикла, ограничение на 1000 постов
+      const countPosts = 50;
+      // один объект формата {"id": 1, "idCategory": "1", "word": null, "dateLast": null, "createdAt":null,updateAt:null}
+      const thisExtraWordObject = word;
+      // дата последнего обновления слова
+      let dateLast = null;
+      let firstPostsDate = null;
 
-      // for (const word of words) {
-        words.forEach(async (word) => {
-        // console.log(word)
-        // один объект формата {"id": 1, "word": "репетитор", "dateLast": null, "dateUpdate": null}
-        const thisExtraWordObject = word;
-        // дата последнего поста с БД перед началом цикла по конкретному слову с объекта {"id": 1, "word": "репетитор", "dateLast": null, "dateUpdate": null}
-        let dateLst = thisExtraWordObject?.dateLast;
-        // тут сохраняем дату на период перебора чтобы потом обновить дату в базе данных
-        let saveDateLastPostWhenSearching;
+      if(word?.dateLast) {
+        dateLast = new Date(word?.dateLast).getTime() / 1000;
+      }
+      // тут сохраняем дату на период перебора чтобы потом обновить дату в базе данных по конкретному слову
+      let saveDateLastPostWhenSearching;
 
-        if(!dateLst) {
-          const currentDate = new Date();
-          currentDate.setHours(0, 1, 0, 0);
-          const unixTime = Math.floor(currentDate.getTime() / 1000); // Преобразование текущей даты и времени в Unixtime (в секундах)
-          dateLst = unixTime;
+      if(!dateLast) {
+        const currentDate = new Date();
+        currentDate.setHours(0, 1, 0, 0);
+        const unixTime = Math.floor(currentDate.getTime() / 1000); // Преобразование текущей даты и времени в Unixtime (в секундах)
+        dateLast = unixTime;
+      }
+
+      cycle: for (let i = 0; i <= counter; i++) {
+
+        let result;
+
+        if(i >= 1) {
+          result = await limiter.schedule(() => this.getPostKeySearchNext(word.word, nextRate,ipTwo, countPosts),);
+          nextRate = result?.next_from
         }
 
-         for (let i = 0; i <= counter; i++) {
-          // console.log(i)
+        if(i == 0) {
+          result = await limiter.schedule(() => this.getPostKeySearch(word.word, ip, countPosts),);
+          nextRate = result?.next_from
+        }
 
-           let result;
+        if (!result?.items || result?.items?.length < 1) break
 
-           if(i >= 1) {
-             result = await limiter.schedule(() => this.getPostKeySearchNext(word.word, nextRate,ipTwo),);
-             nextRate = result?.next_from
-           }
+        for(let o = 0; o <= result?.items?.length; o++){
 
-           if(i == 0) {
-             result = await limiter.schedule(() => this.getPostKeySearch(word.word, ip),);
-             nextRate = result?.next_from
-           }
+          const item = result?.items?.[o]
 
-           if (!result?.items || result?.items?.length < 1) break
+          if(firstPostsDate && firstPostsDate == new Date(item?.date * 1000).getTime()) {
+            if(saveDateLastPostWhenSearching && thisExtraWordObject) {
+              thisExtraWordObject.dateLast = saveDateLastPostWhenSearching;
+              thisExtraWordObject.updateAt = saveDateLastPostWhenSearching;
+              if(saveDateLastPostWhenSearching.getTime() > dateLast) this.wordsSearchService.update(thisExtraWordObject)
+              break cycle
+            }
+          }
+          if(!dateLast) break cycle
 
-           // counter = Math.ceil(result?.total_count / 20)
+          // если есть дата последнего поста в бд то проверяем пост проходит или нет
+          if(dateLast) {
+            if(new Date(item?.date*1000).getTime() > dateLast) {
+              // console.log(`${new Date(item.date*1000).toLocaleDateString()}${new Date(item.date*1000).toLocaleTimeString()}`)
+              // console.log(new Date(item?.date*1000))
+              // console.log(new Date(dateLast))
+              // console.log('=======================================')
+              this.addNewPostToOtherRepositories(item, result.groups, result.profiles, true, category, telegramLimiter,);
+              if (!saveDateLastPostWhenSearching) saveDateLastPostWhenSearching = new Date(item?.date * 1000);
+              if(!firstPostsDate) firstPostsDate = new Date(item?.date * 1000).getTime()
+              if (i == counter) {
+                if(saveDateLastPostWhenSearching && thisExtraWordObject) {
+                  thisExtraWordObject.dateLast = saveDateLastPostWhenSearching;
+                  thisExtraWordObject.updateAt = saveDateLastPostWhenSearching;
+                  if(saveDateLastPostWhenSearching.getTime() > dateLast) this.wordsSearchService.update(thisExtraWordObject)
+                  break cycle
+                }
+              }
+            }
 
-             for(let o = 0; o <= result?.items?.length; o++){
+            if(new Date(item?.date*1000).getTime() < dateLast) {
+              if(saveDateLastPostWhenSearching && thisExtraWordObject) {
+                thisExtraWordObject.dateLast = saveDateLastPostWhenSearching;
+                thisExtraWordObject.updateAt = saveDateLastPostWhenSearching;
+                if(saveDateLastPostWhenSearching.getTime() > dateLast) this.wordsSearchService.update(thisExtraWordObject)
+                break cycle
+              }
+            }
 
-             const item = result?.items?.[o]
-              // console.log(result)
-              // если есть дата последнего поста в бд то проверяем пост проходит или нет
-             if(dateLst) {
-               if(new Date(item?.date*1000).getTime() >= new Date(dateLst).getTime()) {
-                 // console.log(`${new Date(item.date*1000).toLocaleDateString()}${new Date(item.date*1000).toLocaleTimeString()}`)
-                 // console.log(new Date(item?.date*1000))
-                 // console.log(new Date(dateLst))
-                 // console.log('=======================================')
-                 this.addNewPostToOtherRepositories(item, result.groups, result.profiles, true, category, telegramLimiter,);
-                 if (!saveDateLastPostWhenSearching) saveDateLastPostWhenSearching = item?.date;
-
-                 if(i == counter) {
-                   // console.log('max')
-                   if(saveDateLastPostWhenSearching) {
-                     if (thisExtraWordObject) {
-                       thisExtraWordObject.dateLast = saveDateLastPostWhenSearching;
-                       thisExtraWordObject.dateUpdate = saveDateLastPostWhenSearching;
-                     }
-                     const newExtra = category?.extraWords?.filter((thisWord) => thisWord.id != thisExtraWordObject.id)
-                     category.extraWords = [...newExtra, thisExtraWordObject]
-                     this.updateTCategory(category)
-                     break
-                   }
-                 }
-               }
-
-               if(new Date(item?.date*1000).getTime() < new Date(dateLst).getTime()) {
-                 // console.log('loose')
-                 if(saveDateLastPostWhenSearching) {
-                   if (thisExtraWordObject) {
-                     thisExtraWordObject.dateLast = saveDateLastPostWhenSearching;
-                     thisExtraWordObject.dateUpdate = saveDateLastPostWhenSearching;
-                   }
-                   const newExtra = category?.extraWords?.filter((thisWord) => thisWord.id != thisExtraWordObject.id)
-                   category.extraWords = [...newExtra, thisExtraWordObject]
-                   this.updateTCategory(category)
-                   break
-                 }
-               }
-
-               if(i == counter) {
-                 // console.log('chooose')
-                 if(saveDateLastPostWhenSearching) {
-                   if (thisExtraWordObject) {
-                     thisExtraWordObject.dateLast = saveDateLastPostWhenSearching;
-                     thisExtraWordObject.dateUpdate = saveDateLastPostWhenSearching;
-                   }
-                   const newExtra = category?.extraWords?.filter((thisWord) => thisWord.id != thisExtraWordObject.id)
-                   category.extraWords = [...newExtra, thisExtraWordObject]
-                   // this.updateTCategory(category)
-                   break
-                 }
-               }
-             }
-           }
-         }
-        })
+            if(i == counter) {
+              if(saveDateLastPostWhenSearching && thisExtraWordObject) {
+                thisExtraWordObject.dateLast = saveDateLastPostWhenSearching;
+                thisExtraWordObject.updateAt = saveDateLastPostWhenSearching;
+                if(saveDateLastPostWhenSearching.getTime() > dateLast) this.wordsSearchService.update(thisExtraWordObject)
+                break cycle
+              }
+            }
+          }
+        }
+      }
 
     } catch (err) {
       this.logsServicePostsAdd.error(`№1 ERROR - ${err.message}`, `Ошибка на ШАГЕ №1: ${err.stack}`,);
     }
   }
 
+
+  async checkItems() {
+
+  }
 
   //код для запроса
 

@@ -2,14 +2,15 @@ import { Controller, Get, Post, Body } from '@nestjs/common'
 import { PostsService } from './posts.service'
 import {serverConfig} from "./serverConfig";
 import * as process from "process";
+import {WordsSearchService} from "../AllCategoriesForSearch/words-search/words-search.service";
 import {Cron} from "@nestjs/schedule";
 
 @Controller('posts')
 export class PostsController {
 
   constructor(
-      private readonly postsService: PostsService
-
+      private readonly postsService: PostsService,
+      private readonly wordsSearchService: WordsSearchService
   ) {
   }
 
@@ -117,21 +118,36 @@ export class PostsController {
   async createGroupsVk() {
 
     const categories = await this.postsService.getCategories()
-    if (!categories || !categories?.length) {
+    const words = await this.wordsSearchService.findAll()
+
+    if (!categories || categories?.length < 1) {
       return
     }
+    if (!words || words?.length < 1) {
+      return
+    }
+
     const nextCategory = categories?.filter((item) => !item.disabled)
+    const endLengthServer = serverConfig?.servers?.length
+    const endWordsLength = words?.length
+    let indexSearch = 0;
 
-    if (serverConfig?.servers?.length >= 1) {
+    for (let i = 0; i <= endWordsLength; i++) {
 
-      let startIndex = 0;
-      for (let item of serverConfig?.servers) {
-        const category = nextCategory[startIndex]
+      const word = words[i]
 
-        if (category?.id && category?.extraWords?.length >= 1) {
-          this.postsService.processGroup(category, item?.ip, item?.ipTwo)
-        }
-        startIndex++
+      const category = nextCategory?.find((category) => category?.id == word?.idCategory)
+      const server = serverConfig?.servers[indexSearch]
+
+      if(indexSearch < endLengthServer) {
+        indexSearch++
+      }
+      if(indexSearch == endLengthServer) {
+        indexSearch = 0
+      }
+
+      if(word?.id && category?.id && server?.ip && server?.ipTwo) {
+        this.postsService.processGroup(category, server?.ip, server?.ipTwo, word)
       }
     }
   }

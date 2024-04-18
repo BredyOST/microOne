@@ -17,6 +17,7 @@ import { PurchaseSaleApartModule } from '../AllCategoriesForSearch/purchase-sale
 import { RentRentalApartModule } from '../AllCategoriesForSearch/rent-rental-apart/rent-rental-apart.module';
 import { LawyerModule } from '../AllCategoriesForSearch/lawyer/lawyer.module';
 import {ItWebModule} from "../AllCategoriesForSearch/it-web/it-web.module";
+import {WordsSearchModule} from "../AllCategoriesForSearch/words-search/words-search.module";
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import {ItWebModule} from "../AllCategoriesForSearch/it-web/it-web.module";
     RentRentalApartModule,
     LawyerModule,
     ItWebModule,
+    WordsSearchModule,
   ],
   controllers: [PostsController],
   providers: [PostsService, LogsService, RedisService, RepositoryPostsAdd],

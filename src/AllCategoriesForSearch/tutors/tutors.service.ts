@@ -158,6 +158,12 @@ export class TutorsService {
 
     try {
 
+      const postText = item?.text || item?.post_text;
+      if(postText?.text?.length >= 250) {
+        return
+      }
+
+
       const ownerId = String(item?.owner_id).replace('-', '');
       const groupInfo = groups?.find((element) => element?.id == ownerId);
       const profileInfo = profiles?.find(
