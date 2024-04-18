@@ -159,7 +159,7 @@ export class TutorsService {
     try {
 
       const postText = item?.text || item?.post_text;
-      if(postText?.text?.length >= 250) {
+      if(postText?.length >= 250) {
         return
       }
 
