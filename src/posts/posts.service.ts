@@ -1661,7 +1661,7 @@ export class PostsService {
               // console.log(new Date(item?.date*1000))
               // console.log(new Date(dateLast))
               // console.log('=======================================')
-              // this.addNewPostToOtherRepositories(item, result.groups, result.profiles, true, category, telegramLimiter,);
+              this.addNewPostToOtherRepositories(item, result.groups, result.profiles, true, category, telegramLimiter,);
               if (!saveDateLastPostWhenSearching) saveDateLastPostWhenSearching = new Date(item?.date * 1000);
               if(!firstPostsDate) firstPostsDate = new Date(item?.date * 1000).getTime()
               if (i == counter) {
