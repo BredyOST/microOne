@@ -22,8 +22,6 @@ export class WordsSearchService {
   }
 
   async update(dto) {
-    console.log(dto)
-    console.log('ssssssssssssssssssssssssssssssssssssssssssss')
     await this.repository.update(dto.id, dto)
   }
 

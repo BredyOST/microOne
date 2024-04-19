@@ -113,7 +113,7 @@ export class PostsController {
 
 
   // СОЗДАЕМ
-  @Cron('0 */10 * * * *')
+  // @Cron('0 */10 * * * *')
   @Get('/createGroupsVk')
   async createGroupsVk() {
 
@@ -128,11 +128,14 @@ export class PostsController {
     }
 
     const nextCategory = categories?.filter((item) => !item.disabled)
+    // количество серверов
     const endLengthServer = serverConfig?.servers?.length
+    // количество слов
     const endWordsLength = words?.length
+    // старт перебора слов
     let indexSearch = 0;
 
-    for (let i = 0; i <= endWordsLength; i++) {
+    for (let i = 0; i < endWordsLength; i++) {
 
       const word = words[i]
 
