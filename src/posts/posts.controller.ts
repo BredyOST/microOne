@@ -113,7 +113,7 @@ export class PostsController {
 
 
   // СОЗДАЕМ
-  // @Cron('0 */10 * * * *')
+  @Cron('0 */10 * * * *')
   @Get('/createGroupsVk')
   async createGroupsVk() {
 
