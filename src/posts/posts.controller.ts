@@ -14,28 +14,6 @@ export class PostsController {
   ) {
   }
 
-  // БЛОК ДЛЯ ВК
-  // ----------------------------------------------------------
-  //добавление постов новой группы
-  // @Cron('0 */10 * * * *')
-  // @Get('/createGroupsVk')
-  // createGroupsVk() {
-  //   if(serverConfig?.servers?.length >= 1 ){
-  //     const countPosts = process.env['COUNTER_POSTS'];
-  //     let pass = 0;
-  //     const end = process.env['SEARCH_END'];
-  //
-  //     for (let i = 1; pass <= +end; i++) {
-  //       if(+pass > +end) break;
-  //       serverConfig?.servers?.map((item) => {
-  //         if(+pass > +end) return;
-  //         this.postsService.processGroups(`1`, countPosts, pass, false, item.ip)
-  //         pass += +countPosts;
-  //       });
-  //     }
-  //   }
-  // }
-
   // обновление постов
   // @Cron('0 */10 * * * *')
   @Get('/addNewPosts')
@@ -73,24 +51,6 @@ export class PostsController {
       }
     }
   }
-
-  // !!!!!!!!!!!!!!!добавление групп с вк новых!!!!!!!!!!!!!!!!!!!!!!!!!
-  // @Get('/addNewPosts')
-  // addNewGroupFromVk() {
-  //   if(serverConfig?.servers?.length >= 1 ){
-  //     const countPosts = process.env['COUNTER_POSTS'];
-  //     let pass = 0;
-  //     const end = process.env['SEARCH_END'];
-  //     for (let i = 1; pass <= +end; i++) {
-  //       if(+pass > +end) break;
-  //       serverConfig?.servers?.map((item) => {
-  //         if(+pass > +end) return;
-  //         this.postsService.addGroupFromVk(groupsIds, item.ip);
-  //         pass += +countPosts;
-  //       });
-  //     }
-  //   }
-  // }
 
   // ----------------------------------------------------------
 
