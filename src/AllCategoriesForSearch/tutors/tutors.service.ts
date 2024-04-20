@@ -173,7 +173,7 @@ export class TutorsService {
       const ownerId = String(item?.owner_id).replace('-', '');
       const groupInfo = groups?.find((element) => element?.id == ownerId);
       const profileInfo = profiles?.find(
-          (element) => element.id == item?.signer_id,
+          (element) => element.id == item?.signer_id || item?.owner_id,
       );
 
       if (groupInfo?.id == `199727029` ||
@@ -182,7 +182,13 @@ export class TutorsService {
           groupInfo?.id == `222783887` ||
           groupInfo?.id == `224877554` ||
           groupInfo?.id == `210182463` ||
-          groupInfo?.id == `224877648`
+          groupInfo?.id == `224877648` ||
+          groupInfo?.id == `225537848` ||
+          groupInfo?.id == `225537909` ||
+          groupInfo?.id == `225537941` ||
+          groupInfo?.id == `225538003` ||
+          groupInfo?.id == `222873123` ||
+          groupInfo?.id == `222873119`
       ) {
         return
       }
@@ -723,6 +729,5 @@ export class TutorsService {
     }
   }
 
-
-
 }
+

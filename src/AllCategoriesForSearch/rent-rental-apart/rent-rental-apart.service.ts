@@ -165,8 +165,9 @@ export class RentRentalApartService {
       const ownerId = String(item.owner_id).replace('-', '');
       const groupInfo = groups?.find((element) => element.id == ownerId);
       const profileInfo = profiles?.find(
-        (element) => element.id == item.signer_id,
+          (element) => element.id == item?.signer_id || item?.owner_id,
       );
+
       const cityGroup = groupInfo?.city
       const cityUser = profileInfo?.city
       let cityGroupEng;
