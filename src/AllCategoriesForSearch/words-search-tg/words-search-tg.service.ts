@@ -1,13 +1,14 @@
 import { Injectable } from '@nestjs/common';
-import {WordSearchEntity} from "./entities/words-search.entity";
 import {InjectRepository} from "@nestjs/typeorm";
 import {Repository} from "typeorm";
+import {WordsSearchTgEntity} from "./entities/words-search-tg.entity";
 
 @Injectable()
-export class WordsSearchService {
+export class WordsSearchTgService {
+
   constructor(
-      @InjectRepository(WordSearchEntity)
-      private repository: Repository<WordSearchEntity>,
+      @InjectRepository(WordsSearchTgEntity)
+      private repository: Repository<WordsSearchTgEntity>,
   ){}
 
   findAll() {

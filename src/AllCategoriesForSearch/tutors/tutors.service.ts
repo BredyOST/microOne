@@ -120,7 +120,14 @@ export class TutorsService {
       console.log(err);
     }
   }
+
+
   async createTg(item, groups, profiles, identificator, sendMessage, tokenBot, telegramLimiter,) {
+
+    const postText = item?.message;
+    if(postText?.length >= 150) {
+      return
+    }
 
     if (sendMessage) this.sendPostToTelegramFromTg(item,groups,profiles, tokenBot, telegramLimiter);
 
@@ -163,12 +170,23 @@ export class TutorsService {
         return
       }
 
-
       const ownerId = String(item?.owner_id).replace('-', '');
       const groupInfo = groups?.find((element) => element?.id == ownerId);
       const profileInfo = profiles?.find(
           (element) => element.id == item?.signer_id,
       );
+
+      if (groupInfo?.id == `199727029` ||
+          groupInfo?.id == `222707022` ||
+          groupInfo?.id == `224879501` ||
+          groupInfo?.id == `222783887` ||
+          groupInfo?.id == `224877554` ||
+          groupInfo?.id == `210182463` ||
+          groupInfo?.id == `224877648`
+      ) {
+        return
+      }
+
       const cityGroup = groupInfo?.city
       const cityUser = profileInfo?.city
       let cityGroupEng;

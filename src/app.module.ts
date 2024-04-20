@@ -30,6 +30,8 @@ import { TelegramPostsModule } from './telegram-posts/telegram-posts.module';
 import { TelegramPostEntity } from './telegram-posts/entities/telegram-post.entity';
 import { WordSearchEntity } from './AllCategoriesForSearch/words-search/entities/words-search.entity';
 import { WordsSearchModule } from './AllCategoriesForSearch/words-search/words-search.module';
+import {WordsSearchTgEntity} from "./AllCategoriesForSearch/words-search-tg/entities/words-search-tg.entity";
+import {WordsSearchTgModule} from "./AllCategoriesForSearch/words-search-tg/words-search-tg.module";
 
 @Module({
   imports: [
@@ -61,6 +63,7 @@ import { WordsSearchModule } from './AllCategoriesForSearch/words-search/words-s
             ItWebEntity,
             TelegramPostEntity,
             WordSearchEntity,
+            WordsSearchTgEntity,
           ],
         };
       },
@@ -78,6 +81,7 @@ import { WordsSearchModule } from './AllCategoriesForSearch/words-search/words-s
     ItWebModule,
     TelegramPostsModule,
     WordsSearchModule,
+    WordsSearchTgModule,
   ],
   controllers: [AppController],
   providers: [AppService],
