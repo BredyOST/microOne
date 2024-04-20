@@ -153,7 +153,7 @@ export class PostsService {
   }
 
   //===========================================================================================
-  async addNewPostToOtherRepositories(item, groupInfo, profilesInfo, sendMessage, category, telegramLimiter,word, categories, indexCommonWord) {
+  async addNewPostToOtherRepositories(item, groupInfo, profilesInfo, sendMessage, category, telegramLimiter,word, categoriesStart, indexCommonWord) {
 
     try {
       // токен бота
@@ -208,10 +208,9 @@ export class PostsService {
             word.word == 'ремонт' ||
             word.word == 'ремонтирует'
         ) {
-          const categoryTwo = categories?.find((category) => category?.id == 4)
-          console.log(categoryTwo.id)
-          // this.addNewPostToOtherRepositoriesTwo(item, groupInfo, profilesInfo, true, categoryTwo, telegramLimiter, word, categories, false)
-          this.addNewPostToOtherRepositoriesTwo(item, groupInfo, profilesInfo, true, categoryTwo, telegramLimiter)
+          const categoryTwo = categoriesStart?.find((category) => category?.id == 4)
+          this.addNewPostToOtherRepositories(item, groupInfo, profilesInfo, true, categoryTwo, telegramLimiter, word, categories, false)
+          // this.addNewPostToOtherRepositoriesTwo(item, groupInfo, profilesInfo, true, categoryTwo, telegramLimiter)
         }
        }
     } catch (err) {
@@ -221,62 +220,6 @@ export class PostsService {
       );
     }
   }
-
-  // таже функция для другой категории
-  async addNewPostToOtherRepositoriesTwo(item, groupInfo, profilesInfo, sendMessage, category, telegramLimiter) {
-
-    try {
-      // токен бота
-      const tokenBot = process.env['TOKEN_BOT'];
-
-      const categories = [
-        { id: 1, name: 'Для репетиторов', service: this.tutorService },
-        { id: 2, name: 'Поиск домашнего персонала', service: this.nanniesService,},
-        { id: 3, name: 'Ремонт и обслуживание техники', service: this.equipRepairMaintenanceService,},
-        { id: 4, name: 'Ремонт и строительство', service: this.handymanAndBuilderService,},
-        { id: 5, name: 'Аренда, сдача недвижимости', service: this.rentRentalApartService,},
-        { id: 6, name: 'Покупка, продажа недвижимости', service: this.purchaseSaleApartService,},
-        { id: 7, name: 'Для юристов', service: this.lawyerService },
-        { id: 8, name: 'IT/Web', service: this.itWebService },
-      ];
-
-      const categoryInfo = categories.find((cat) => cat.id === category.id);
-
-      if (!categoryInfo) return
-
-      if (categoryInfo) {
-        if (categoryInfo.service) {
-          const isSamePost = await categoryInfo.service.getPostById(item?.id);
-          // console.log(item)
-          if (isSamePost) return;
-        }
-
-        const positiveWords = await category?.positiveWords;
-        const negativeWords = await category?.negativeWords;
-
-        const filter = await this.filterOnePostForOthersRepositories(item, positiveWords, negativeWords);
-
-        if (filter) {
-          await categoryInfo.service?.createFromVkDataBase(
-              item,
-              groupInfo,
-              profilesInfo,
-              'vk',
-              sendMessage,
-              tokenBot,
-              telegramLimiter,
-          );
-        }
-      }
-    } catch (err) {
-      await this.logsServicePostsAdd.error(
-          `addNewPostToOtherRepositories - ошибка`,
-          `${err}`,
-      );
-    }
-  }
-
-
   //№3 фильтруем пост по ключевым словам
   async filterOnePostForOthersRepositories(post, positiveKeywords, negativeKeywords) {
     try {
@@ -437,8 +380,8 @@ export class PostsService {
   }
 
   async getKeysRedis() {
-    const keys = await this.redisService.getAllKeys('id:8-*');
-    await this.redisService.deleteKeysByPattern("id:8-*");
+    const keys = await this.redisService.getAllKeys('id:4-*');
+    await this.redisService.deleteKeysByPattern("id:4-*");
     return keys;
   }
   async getRedisPosts() {
