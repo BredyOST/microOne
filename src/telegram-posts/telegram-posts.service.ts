@@ -297,6 +297,7 @@ export class TelegramPostsService {
         const filter = await this.filterOnePostForOthersRepositories(item, positiveWords, negativeWords);
 
         if (filter) {
+
           await categoryInfo.service?.createTg(
               item,
               group,

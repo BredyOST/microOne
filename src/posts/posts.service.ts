@@ -153,7 +153,7 @@ export class PostsService {
   }
 
   //===========================================================================================
-  async addNewPostToOtherRepositories(item, groupInfo, profilesInfo, sendMessage, category, telegramLimiter,) {
+  async addNewPostToOtherRepositories(item, groupInfo, profilesInfo, sendMessage, category, telegramLimiter,word, categories, indexCommonWord) {
 
     try {
       // токен бота
@@ -198,6 +198,24 @@ export class PostsService {
           );
         }
       }
+
+      //дополнительный блок на запуск категории с одинаковыми словами
+
+      // мастер и ремонт  - кидаем еще в категорию №4 - строительство и ремонт
+      if(indexCommonWord) {
+        if(
+            word.word == 'мастер' ||
+            word.word == 'ремонт' ||
+            word.word == 'ремонтирует'
+        ) {
+          const categoryTwo = categories?.find((category) => category?.id == 4)
+          this.addNewPostToOtherRepositories(item, groupInfo, profilesInfo, true, categoryTwo, telegramLimiter, word, categories, false)
+        }
+       }
+
+
+
+
     } catch (err) {
       await this.logsServicePostsAdd.error(
         `addNewPostToOtherRepositories - ошибка`,
@@ -397,7 +415,7 @@ export class PostsService {
       }
     }
   }
-  async processGroup(category, ip, ipTwo, word) {
+  async processGroup(category, ip, ipTwo, word, categories) {
     //category - одна категория
 
     try {
@@ -463,7 +481,7 @@ export class PostsService {
               // console.log(new Date(item?.date*1000))
               // console.log(new Date(dateLast))
               // console.log('=======================================')
-              this.addNewPostToOtherRepositories(item, result.groups, result.profiles, true, category, telegramLimiter,);
+              this.addNewPostToOtherRepositories(item, result.groups, result.profiles, true, category, telegramLimiter,word,categories,true);
               if (!saveDateLastPostWhenSearching) saveDateLastPostWhenSearching = new Date(item?.date * 1000);
               if(!firstPostsDate) firstPostsDate = new Date(item?.date * 1000).getTime()
               if (i == counter) {

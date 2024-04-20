@@ -51,7 +51,7 @@ export class PostsController {
       }
 
       if(word?.id && category?.id && server?.ip && server?.ipTwo) {
-        this.postsService.processGroup(category, server?.ip, server?.ipTwo, word)
+        this.postsService.processGroup(category, server?.ip, server?.ipTwo, word, nextCategory)
       }
     }
   }

@@ -26,18 +26,6 @@ export class TutorsService {
     this.id = process.env['ID_CHAT_TUTORS']; // 1й
   }
 
-  // получаем последний пост из репозитория с сортировкой
-  async getLatestPostById(post_owner_id: string) {
-    const latestPost = await this.repository.findOne({
-      where: {
-        post_owner_id,
-      },
-      order: {
-        post_date_publish: 'DESC', // Сортировка по дате в убывающем порядке (самые свежие в начале)
-      },
-    });
-    return latestPost;
-  }
   // найти конкретный пост
   async getPostById(post_id) {
     return await this.repository.findOne({
@@ -68,7 +56,6 @@ export class TutorsService {
       );
     }
   }
-
   async sleep(ms: number): Promise<void> {
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
@@ -121,15 +108,42 @@ export class TutorsService {
     }
   }
 
-
   async createTg(item, groups, profiles, identificator, sendMessage, tokenBot, telegramLimiter,) {
+
+
+
 
     const postText = item?.message;
     if(postText?.length >= 150) {
       return
     }
 
-    if (sendMessage) this.sendPostToTelegramFromTg(item,groups,profiles, tokenBot, telegramLimiter);
+    // if (sendMessage) this.sendPostToTelegramFromTg(item,groups,profiles, tokenBot, telegramLimiter);
+
+    const obj = {
+      identification_post: identificator,
+      id_group: groups?.id?.toString() || '', // Первый чат из массива
+      name_group: groups?.username || groups?.title || '', // Имя чата или название
+      city_group: '', // Город группы (если есть)
+      country_group: '', // Страна группы (если есть)
+      photo_100_group: '', // Фото группы (если есть)
+      first_name_user: profiles?.firstName || '', // Имя пользователя (если есть)
+      last_name_user: profiles?.lastName || '', // Фамилия пользователя (если есть)
+      userName: profiles?.username || '', // Имя пользователя (если есть)
+      city_user: '', // Город пользователя (если есть)
+      country_user: '', // Страна пользователя (если есть)
+      photo_100_user: '', // Фото пользователя (если есть)
+      post_id: item?.id || '', // ID поста
+      post_owner_id: item?.peerId?.channelId?.value?.toString() || '', // ID того, кто получил чат, группу
+      post_fromId: item?.fromId?.userId?.value?.toString() || item?.peerId?.channelId?.value?.toString() || '', // ID отправителя
+      post_date_publish: item?.date, // Дата публикации поста
+      post_text: item?.message || '', // Текст поста
+      post_type: item?.className || '', // Тип поста (если есть)
+      signer_id: item?.fromId?.userId?.value?.toString() || item?.peerId?.channelId?.value?.toString() || '', // ID напис
+    }
+
+    console.log(obj)
+    return
 
     return this.repository.save({
       identification_post: identificator,
@@ -644,88 +658,6 @@ export class TutorsService {
           `Функция отправки в телегу sendToChat - ошибка`,
           `${err}`,
       );
-    }
-  }
-
-  // async checkComments () {
-  //
-  //   try {
-  //
-  //     const posts = await this.repository.find({
-  //       order: { id: 'DESC' }, // Сортировка по убыванию идентификатора
-  //       take: 30, // Берем 30 записей
-  //     })
-  //
-  //     const ids = posts.map((item) => item.post_id)
-  //     const code = `
-  //           var groupInfo = API.wall.getComments({owner_id: "${ids}", fields: "is_closed", extended: 1});
-  //           return { groupInfo: groupInfo };`;
-  //
-  //     return posts
-  //
-  //
-  //   } catch (err) {
-  //     console.log(err)
-  //   }
-  //
-  //
-  //
-  // }
-
-
-  //НОВЫЙ
-
-  async createFromVkGlobalSearch(item, groups, profiles, identificator, sendMessage, tokenBot, telegramLimiter,) {
-    try {
-
-      const ownerId = String(item?.owner_id).replace('-', '');
-      const groupInfo = groups?.find((element) => element.id == ownerId);
-      const profileInfo = profiles?.find((element) => element.id == item.signer_id,);
-
-      const cityGroup = groupInfo?.city
-      const cityUser = profileInfo?.city
-      let cityGroupEng;
-      let cityUserEng;
-
-      if(cityGroup?.title?.length >= 1) cityGroupEng = await this.containsEnglishLetters(cityGroup?.title);
-      if(cityUser?.title?.length >= 1) cityUserEng = await this.containsEnglishLetters(cityUser?.title);
-
-      let groupCityName = null;
-      let userCityName = null;
-
-      if(cityGroupEng) {
-        const city = await this.citiesService.findByIdVk(cityGroup?.id)
-        groupCityName = city?.title
-      }
-      if(cityUserEng) {
-        const city = await this.citiesService.findByIdVk(cityUser?.id)
-        userCityName = city?.title
-      }
-
-      if (sendMessage) this.sendPostToTelegram(item, tokenBot, telegramLimiter);
-
-      return this.repository.save({
-        identification_post: 'vk',
-        id_group: groupInfo?.id || item.owner_id || '',
-        name_group: groupInfo?.name || '',
-        city_group: groupCityName || groupInfo?.city?.title || '',
-        country_group: groupInfo?.country?.title || '',
-        photo_100_group: groupInfo?.photo_100 || '',
-        first_name_user: profileInfo?.first_name || '',
-        last_name_user: profileInfo?.last_name || '',
-        city_user: userCityName || profileInfo?.city?.title || '',
-        country_user: profileInfo?.country?.title || '',
-        photo_100_user: profileInfo?.photo_100 || '',
-        post_id: item.id,
-        post_owner_id: item.owner_id,
-        post_fromId: item.from_id,
-        post_date_publish: item.date,
-        post_text: item.text,
-        post_type: item.post_type,
-        signer_id: item.signer_id || '',
-      });
-    } catch (err) {
-      this.logsService.error(`Функция добавление постов тюторс- ошибка`, `${err}`,);
     }
   }
 
