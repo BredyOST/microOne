@@ -214,8 +214,8 @@ export class PostsService {
         }
        }
       // если 4 категория то и в 5 кидаем пост
-      if(indexCommonWord && category.id == 4) {
-        const categoryTwo = categoriesStart?.find((category) => category?.id == 5)
+      if(indexCommonWord && category.id == 5) {
+        const categoryTwo = categoriesStart?.find((category) => category?.id == 6)
         this.addNewPostToOtherRepositories(item, groupInfo, profilesInfo, true, categoryTwo, telegramLimiter, word, categories, false)
       }
 

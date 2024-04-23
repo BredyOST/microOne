@@ -27,8 +27,14 @@ import * as bigInt from 'big-integer'
 
 const telegramLimiter = new Bottleneck({
   maxConcurrent: 1, // Максимальное количество одновременных запросов
-  minTime: 1500, // Минимальное время между запросами (в миллисекундах)
+  minTime: 150000, // Минимальное время между запросами (в миллисекундах)
 });
+
+const telegramLimiterTwo = new Bottleneck({
+  maxConcurrent: 1, // Максимальное количество одновременных запросов
+  minTime: 1000, // Минимальное время между запросами (в миллисекундах)
+});
+
 
 @Injectable()
 export class TelegramPostsService {
@@ -504,7 +510,7 @@ export class TelegramPostsService {
           if(i > counter) break
 
           let result;
-          await telegramLimiter.schedule(async () => {
+          await telegramLimiterTwo.schedule(async () => {
                 result = await client.invoke(
                     new channels.GetParticipants({
                       channel:`${text}`,
@@ -519,8 +525,9 @@ export class TelegramPostsService {
 
           if (`count` in result) counter = Math.floor(result?.count / limit)
           if('users' in result) users = result?.users
-
-          const constIds = users.filter((item) => item?.username != null).map((item) => item?.id.value?.toString())
+          console.log(users)
+          // const constIds = users.filter((item) => item?.username != null).map((item) => item?.id.value?.toString())
+          const constIds = users.filter((item) => item?.username != null).map((item) => item?.username)
           if(constIds?.length >= 1) {
             constUsersId = [...constUsersId, ...constIds]
           }
@@ -536,34 +543,7 @@ export class TelegramPostsService {
         await client.connect(); // Подключение к Telegram
 
       const chatId = '-1002097526611';
-      const longChatId = bigInt(chatId)
 
-
-        const resultss = await client.invoke(
-            new SearchGlobal({
-              q: `Все просто, многие сталкиваются с банальными, казалось`, // Слово для поиска
-              filter: new Api.InputMessagesFilterEmpty(),
-              minDate: Math.floor(Date.now() / 1000) - (35 * 60 * 60),
-              maxDate: Math.floor(Date.now() / 1000),
-              offsetRate: 0, // Начальное значение для пагинации = 0
-              offsetPeer: new Api.InputPeerEmpty(), // Смещение для пагинации (указан username)
-              offsetId: 0, // Начальное значение идентификатора для пагинации = 0
-              limit: 10
-            })
-        );
-
-        // let chatIds
-
-        // if(`chats` in resultss) {
-        //   chatIds = resultss.chats[0]?.id
-        //   console.log(resultss)
-        //   console.log(resultss.chats[0]?.id)
-        // }
-        // console.log(chatIds)
-        // const numId = bigInt(chatIds)
-
-      console.log(longChatId)
-        console.log(longChatId?.toString())
       for (const item of constUsersId) {
         let resultTwo;
         await telegramLimiter.schedule(async () => {
@@ -584,6 +564,7 @@ export class TelegramPostsService {
         //       })
         //   );
         // });
+        console.log('results two')
         console.log(resultTwo)
       }
         await client.disconnect(); // Отключение от Telegram
