@@ -19,14 +19,15 @@ import {StringSession} from "telegram/sessions";
 import * as process from 'process';
 import * as input from 'input';
 import {Api, TelegramClient} from "telegram";
-import GetHistory = Api.messages.GetHistory;
 import Bottleneck from "bottleneck";
 import SearchGlobal = Api.messages.SearchGlobal;
 import {WordsSearchTgService} from "../AllCategoriesForSearch/words-search-tg/words-search-tg.service";
+import channels = Api.channels;
+import * as bigInt from 'big-integer'
 
 const telegramLimiter = new Bottleneck({
   maxConcurrent: 1, // Максимальное количество одновременных запросов
-  minTime: 500, // Минимальное время между запросами (в миллисекундах)
+  minTime: 1500, // Минимальное время между запросами (в миллисекундах)
 });
 
 @Injectable()
@@ -345,7 +346,7 @@ export class TelegramPostsService {
 
   //--------------------------------------------------
   // async processGroups(indicator, start, pass, boolIndex, ip) {
-    async processGroups(category, ip, ipTwo, word) {
+  async processGroups(category, ip, ipTwo, word) {
 
       if(word?.id && category?.id && ip?.ip && ipTwo?.ipTwo) return
 
@@ -474,9 +475,7 @@ export class TelegramPostsService {
             }
           }
         }
-
         }
-
 
       await client.disconnect(); // Отключение от Telegram
     };
@@ -484,176 +483,121 @@ export class TelegramPostsService {
     await run(); // Вызываем функцию run
   }
 
-
-
-
-  // async processGroups(indicator, start, pass, boolIndex, ip) {
-  //
-  //   // получаем чаты с репозитория в формате масcива объектов на указанный диапазон start-pass
-  //   let groups = await this.getChats(start, pass);
-  //
-  //   const groupsNames = groups.map((item) => item.chatName)
-  //
-  //   const apiId = +process.env['API_ID']; // Ваш API ID
-  //   const apiHash = process.env['API_HASH'];
-  //   let end;
-  //   if(indicator == 1) end = 15
-  //   if(indicator == 2) end = 1
-  //
-  //   const stringSession = new StringSession(process.env['TELEGRAM_SESSION_STRING']); // Значение из сессии, чтобы избежать повторной аутентификации
-  //   const client = new TelegramClient(stringSession, apiId, apiHash, {});
-  //
-  //   const run = async () => {
-  //     await client.connect(); // Подключение к Telegram
-  //
-  //     for (let item of groupsNames) {
-  //
-  //       let start = 0
-  //
-  //       for (let i = 0; i < end; i++) {
-  //         await telegramLimiter.schedule(async () => {
-  //         const result = await client.invoke(
-  //             new GetHistory({
-  //               peer:`${item}`, // Имя пользователя или ID чата
-  //               limit: 10, // Количество сообщений для получения
-  //               addOffset: start,
-  //             })
-  //         );
-  //         console.log(result)
-  //
-  //         let messages;
-  //         let users;
-  //         let chats;
-  //         if ('messages' in result) {
-  //           messages = result?.messages; // Получаем массив сообщений из ответа
-  //         }
-  //         if ('users' in result) {
-  //           users = result?.users; // Получаем массив сообщений из ответа
-  //         }
-  //         if ('chats' in result) {
-  //           chats = result?.chats; // Получаем массив сообщений из ответа
-  //         }
-  //
-  //         if (indicator == 1 && !boolIndex) {
-  //           await this.forFuncfilterGroupsIfCreateGroups(messages, users,chats, i, boolIndex,item);
-  //         } else if (indicator == 2) {
-  //           // this.forFuncfilterGroupsIfUpadete(messages, users,chats, i, boolIndex,item);
-  //         } else if (indicator == 1 && boolIndex) {
-  //           // this.forFuncfilterGroupsIfCreate(messages, users,chats, i, boolIndex,item);
-  //         }
-  //       });
-  //       }
-  //     }
-  //     await client.disconnect(); // Отключение от Telegram
-  //   };
-  //
-  //   await run(); // Вызываем функцию run
-  // }
-  async forFuncfilterGroupsIfCreateGroups(messages, users, chats, i, boolIndex, chatName) {
-
-
-    try {
-      const currentMonth = new Date().getMonth(); // текущий месяц
-      const currentYear = new Date().getFullYear(); // текущий год
-      const searchFromCurrentMonth = currentMonth == 0 ? 0 : currentMonth - 1; // месяц до которого будем просматривать все посты с каждой группы
-      const sendMessage = false;
-
-
-      for (let i = 0; i < messages.length; i++) {
-
-        const item = messages[i];
-
-        if(item.className == 'Message') {
-          console.log(item.id)
-          // если год поста меньше года искомого и это не с закрепа то останавливаемся
-          if (new Date(item.date * 1000).getFullYear() < currentYear) {
-            break;
-          }
-
-          if (new Date(item.date * 1000).getMonth() < searchFromCurrentMonth) {
-              break;
-          }
-
-          // Если же дата больше искомой то добавляем в репозиторий
-          if (new Date(item.date * 1000).getMonth() >= searchFromCurrentMonth && currentYear == new Date(item.date * 1000).getFullYear()) {
-            const postData = {
-              date: new Date(item.date * 1000),
-              chatName: chatName,
-            };
-            this.addPostCounter(postData);
-            this.givePostsToAllRepositories(item, chats, users, sendMessage,boolIndex);
-          }
-        }
-      }
-    }catch (err) {
-      // this.logsServicePostsAdd.error(`№6.1 error групп ${ii} -${ii + mainBatchSize} пачка ${u} - ${u + batchSize}`, `ошибка при фильтрации постов для создания: ${err}`,);
-    }
-  }
-
-  async forFuncfilterGroupsIfUpadete(messages, users, chats, i, boolIndex, chatName) {
+  async addNewPeople(text) {
 
     try {
 
-      const sendMessage = true;
+      const apiId = +process.env['API_ID'];
+      const apiHash = process.env['API_HASH'];
+      const stringSession = new StringSession(process.env['TELEGRAM_SESSION_STRING']); // Значение из сессии, чтобы избежать повторной аутентификации
+      const client = new TelegramClient(stringSession, apiId, apiHash, {});
+      let constUsersId=[]
+      const run = async () => {
+        await client.connect(); // Подключение к Telegram
 
-      let latestPostsDates;
-      const groupInfo = await this.findByNameChat(chatName);
+        let offsetId = 0
+        let counter = 5000
+        let limit = 100
 
-      if (groupInfo?.postsLastDate) {
-        latestPostsDates = new Date(groupInfo?.postsLastDate).getTime();
-      } else if (groupInfo?.postsDateWhenUpdate) {
-        latestPostsDates = new Date(groupInfo?.postsDateWhenUpdate).getTime();
-        groupInfo.postsLastDate = groupInfo?.postsDateWhenUpdate;
-        const info = {
-          id: groupInfo.id,
-          group: groupInfo,
-        };
-        this.updateThis(info);
-      } else {
-        const currentDate = new Date();
-        const fifteenDaysAgo = new Date(currentDate);
-        fifteenDaysAgo.setDate(currentDate.getDate() - 15);
-        const formattedDate = fifteenDaysAgo;
-        groupInfo.postsLastDate = formattedDate;
-        const info = {
-          id: groupInfo.id,
-          group: groupInfo,
-        };
-        this.updateThis(info);
-      }
+        cycle: for (let i = 0; i < counter; i++) {
+          console.log(`--------------------------------${i}`)
+          if(i > counter) break
 
-      for (let i = 0; i < messages.length; i++) {
+          let result;
+          await telegramLimiter.schedule(async () => {
+                result = await client.invoke(
+                    new channels.GetParticipants({
+                      channel:`${text}`,
+                      filter: new Api.ChannelParticipantsSearch({q: ''}),
+                      offset: offsetId,
+                      limit: limit,
+                    })
+                );
+          });
 
-        const item = messages[i];
+          let users;
 
-        if(item.className == 'Message') {
+          if (`count` in result) counter = Math.floor(result?.count / limit)
+          if('users' in result) users = result?.users
 
-          if (new Date(item.date * 1000).getTime() < latestPostsDates) {
-              this.changePostsDateToDateUpdateWhenBreak(groupInfo);
-              break;
+          const constIds = users.filter((item) => item?.username != null).map((item) => item?.id.value?.toString())
+          if(constIds?.length >= 1) {
+            constUsersId = [...constUsersId, ...constIds]
           }
-          if (new Date(item.date * 1000).getTime() > new Date(latestPostsDates).getTime()) {
-            const postData = {
-              date: new Date(item.date * 1000),
-              idVk: item.owner_id,
-              groupInfo: groupInfo,
-            };
-            this.addPostDateWhenUpdate(postData);
-            this.givePostsToAllRepositories(
-                item,
-                users,
-                chats,
-                sendMessage,
-                boolIndex
-            );
-          }
+          offsetId++
         }
+
+        await client.disconnect(); // Отключение от Telegram
+      };
+
+      await run()
+
+      const runs = async () => {
+        await client.connect(); // Подключение к Telegram
+
+      const chatId = '-1002097526611';
+      const longChatId = bigInt(chatId)
+
+
+        const resultss = await client.invoke(
+            new SearchGlobal({
+              q: `Все просто, многие сталкиваются с банальными, казалось`, // Слово для поиска
+              filter: new Api.InputMessagesFilterEmpty(),
+              minDate: Math.floor(Date.now() / 1000) - (35 * 60 * 60),
+              maxDate: Math.floor(Date.now() / 1000),
+              offsetRate: 0, // Начальное значение для пагинации = 0
+              offsetPeer: new Api.InputPeerEmpty(), // Смещение для пагинации (указан username)
+              offsetId: 0, // Начальное значение идентификатора для пагинации = 0
+              limit: 10
+            })
+        );
+
+        // let chatIds
+
+        // if(`chats` in resultss) {
+        //   chatIds = resultss.chats[0]?.id
+        //   console.log(resultss)
+        //   console.log(resultss.chats[0]?.id)
+        // }
+        // console.log(chatIds)
+        // const numId = bigInt(chatIds)
+
+      console.log(longChatId)
+        console.log(longChatId?.toString())
+      for (const item of constUsersId) {
+        let resultTwo;
+        await telegramLimiter.schedule(async () => {
+          resultTwo = await client.invoke(
+              new channels.InviteToChannel({
+                channel: chatId,
+                users: [item]
+              })
+          );
+        });
+
+        // await telegramLimiter.schedule(async () => {
+        //   resultTwo = await client.invoke(
+        //       new messages.AddChatUser({
+        //         chatId: bigInt(chatId),
+        //         userId: +item,
+        //         fwdLimit: 20,
+        //       })
+        //   );
+        // });
+        console.log(resultTwo)
       }
-    }catch (err) {
-      // this.logsServicePostsAdd.error(`№6.1 error групп ${ii} -${ii + mainBatchSize} пачка ${u} - ${u + batchSize}`, `ошибка при фильтрации постов для создания: ${err}`,);
+        await client.disconnect(); // Отключение от Telegram
+      }
+
+     await runs()
+
+      return true;
+
+    } catch (err) {
+      console.log(err)
+      return false
     }
   }
-
 }
 
 

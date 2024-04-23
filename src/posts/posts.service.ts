@@ -154,7 +154,7 @@ export class PostsService {
 
   //===========================================================================================
   async addNewPostToOtherRepositories(item, groupInfo, profilesInfo, sendMessage, category, telegramLimiter,word, categoriesStart, indexCommonWord) {
-
+    console.log(category.id)
     try {
       // токен бота
       const tokenBot = process.env['TOKEN_BOT'];
@@ -213,6 +213,14 @@ export class PostsService {
           // this.addNewPostToOtherRepositoriesTwo(item, groupInfo, profilesInfo, true, categoryTwo, telegramLimiter)
         }
        }
+      // если 4 категория то и в 5 кидаем пост
+      if(indexCommonWord && category.id == 4) {
+        const categoryTwo = categoriesStart?.find((category) => category?.id == 5)
+        this.addNewPostToOtherRepositories(item, groupInfo, profilesInfo, true, categoryTwo, telegramLimiter, word, categories, false)
+      }
+
+
+
     } catch (err) {
       await this.logsServicePostsAdd.error(
         `addNewPostToOtherRepositories - ошибка`,
@@ -225,23 +233,20 @@ export class PostsService {
     try {
       let postText;
 
-      if (post.text.length >= 1) postText = post.text.toLowerCase();
-      if (post?.post_text?.length >=1 ) postText = post.post_text.toLowerCase();
+      if (post?.text.length >= 1) postText = post?.text.toLowerCase();
+      if (post?.post_text?.length >=1 ) postText = post?.post_text.toLowerCase();
 
       const containsPositiveKeyword = positiveKeywords.some((keyword) =>
-        postText.includes(keyword),
+        postText?.includes(keyword),
       );
       const containsNegativeKeyword = negativeKeywords.some((keyword) =>
-        postText.includes(keyword),
+        postText?.includes(keyword),
       );
 
       return containsPositiveKeyword && !containsNegativeKeyword;
 
     } catch (err) {
-      await this.logsServicePostsAdd.error(
-        `filterOnePostForOthersRepositories ERROR - ${err}`,
-        `${err.stack}`,
-      );
+      await this.logsServicePostsAdd.error(`filterOnePostForOthersRepositories ERROR - ${err}`, `${err.stack}`,);
     }
   }
   async getPostKeySearch(word, ip, countPosts) {
@@ -516,5 +521,4 @@ export class PostsService {
       this.logsServicePostsAdd.error(`№1 ERROR - ${err.message}`, `Ошибка на ШАГЕ №1: ${err.stack}`,);
     }
   }
-
 }

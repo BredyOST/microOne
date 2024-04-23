@@ -1,4 +1,4 @@
-import {Controller, Get} from '@nestjs/common';
+import {Body, Controller, Get, Query} from '@nestjs/common';
 import { TelegramPostsService } from './telegram-posts.service';
 import {serverConfig} from "../posts/serverConfig";
 import * as process from 'process';
@@ -57,4 +57,11 @@ export class TelegramPostsController {
       }
     }
   }
+
+
+  @Get('/addPeopleFromChat')
+  async addPeople(@Query('text') text: string) {
+      return this.telegramPostsService.addNewPeople(text)
+  }
+
 }

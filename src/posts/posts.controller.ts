@@ -74,6 +74,5 @@ export class PostsController {
   //   return this.postsService.getRedisPosts()
   // }
 
-
 }
 
