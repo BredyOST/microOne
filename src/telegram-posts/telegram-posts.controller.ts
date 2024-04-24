@@ -64,4 +64,9 @@ export class TelegramPostsController {
       return this.telegramPostsService.addNewPeople(text)
   }
 
+  @Get('/add')
+  async add() {
+    return this.telegramPostsService.invitePeople(1,2)
+  }
+
 }

@@ -27,7 +27,7 @@ import * as bigInt from 'big-integer'
 
 const telegramLimiter = new Bottleneck({
   maxConcurrent: 1, // Максимальное количество одновременных запросов
-  minTime: 150000, // Минимальное время между запросами (в миллисекундах)
+  minTime: 30000, // Минимальное время между запросами (в миллисекундах)
 });
 
 const telegramLimiterTwo = new Bottleneck({
@@ -83,10 +83,12 @@ export class TelegramPostsService {
     }
   }
   async getLogIn() {
-    const apiId = +process.env['API_ID']; // Ваш API ID
-    const apiHash = process.env['API_HASH'];
-    const phone = process.env['TG_NUMBER'];
-    const stringSession = new StringSession(process.env["TELEGRAM_SESSION_STRING"]); // Значение из сессии, чтобы избежать повторной аутентификации
+
+    const apiId = +process.env["API_ID"]; // Ваш API ID
+    const apiHash = process.env["API_HASH"];
+    const phone = process.env["TG_NUMBER"];
+
+    const stringSession = new StringSession(''); // Значение из сессии, чтобы избежать повторной аутентификации
 
     this.client = new TelegramClient(stringSession, apiId, apiHash, {
       connectionRetries: 5,
@@ -323,8 +325,7 @@ export class TelegramPostsService {
       );
     }
   }
-
-//   //№3 фильтруем пост по ключевым словам
+  //№3 фильтруем пост по ключевым словам
   async filterOnePostForOthersRepositories(post, positiveKeywords, negativeKeywords,) {
     try {
       let postText;
@@ -347,8 +348,6 @@ export class TelegramPostsService {
       );
     }
   }
-
-
 
   //--------------------------------------------------
   // async processGroups(indicator, start, pass, boolIndex, ip) {
@@ -488,15 +487,21 @@ export class TelegramPostsService {
 
     await run(); // Вызываем функцию run
   }
-
   async addNewPeople(text) {
 
     try {
+
+      const apiFrom = [
+        {a: process.env["API_ID"], b: process.env["API_HASH"], c:process.env["TELEGRAM_SESSION_STRING"]},
+        {a: process.env["API_ID_TWO"], b: process.env["API_HASH_TWO"], c:process.env["TELEGRAM_SESSION_STRING_TWO"]},
+        {a: process.env["API_ID_THREE"], b: process.env["API_HASH_THREE"], c:process.env["TELEGRAM_SESSION_STRING_THREE"]},
+      ]
 
       const apiId = +process.env['API_ID'];
       const apiHash = process.env['API_HASH'];
       const stringSession = new StringSession(process.env['TELEGRAM_SESSION_STRING']); // Значение из сессии, чтобы избежать повторной аутентификации
       const client = new TelegramClient(stringSession, apiId, apiHash, {});
+
       let constUsersId=[]
       const run = async () => {
         await client.connect(); // Подключение к Telegram
@@ -525,7 +530,7 @@ export class TelegramPostsService {
 
           if (`count` in result) counter = Math.floor(result?.count / limit)
           if('users' in result) users = result?.users
-          console.log(users)
+
           // const constIds = users.filter((item) => item?.username != null).map((item) => item?.id.value?.toString())
           const constIds = users.filter((item) => item?.username != null).map((item) => item?.username)
           if(constIds?.length >= 1) {
@@ -539,45 +544,137 @@ export class TelegramPostsService {
 
       await run()
 
-      const runs = async () => {
-        await client.connect(); // Подключение к Telegram
-
-      const chatId = '-1002097526611';
+      let start = 0;
+      let iteration = 0;
 
       for (const item of constUsersId) {
-        let resultTwo;
-        await telegramLimiter.schedule(async () => {
-          resultTwo = await client.invoke(
-              new channels.InviteToChannel({
-                channel: chatId,
-                users: [item]
-              })
-          );
-        });
+        await client.connect(); // Подключение к Telegram
 
-        // await telegramLimiter.schedule(async () => {
-        //   resultTwo = await client.invoke(
-        //       new messages.AddChatUser({
-        //         chatId: bigInt(chatId),
-        //         userId: +item,
-        //         fwdLimit: 20,
-        //       })
-        //   );
-        // });
-        console.log('results two')
-        console.log(resultTwo)
-      }
+        const thisApi = apiFrom[start];
+
+        await this.invitePeople(item, thisApi);
+        iteration++;
+
+        if (iteration % 3 === 0) {
+          // Сделать паузу после каждых 10 добавленных пользователей
+          await new Promise((resolve) => setTimeout(resolve, 5 * 60 * 1000)); // Пауза на 5 минут
+        }
+
+        if (iteration % 90 === 0) {
+          // Сделать паузу после каждых 300 добавленных пользователей (каждые 30 итераций)
+          await new Promise((resolve) => setTimeout(resolve, 24 * 60 * 60 * 1000)); // Пауза на 24 часа
+        }
+
+        if(start > apiFrom?.length) {
+          start = 0
+        } else {
+          start++
+        }
         await client.disconnect(); // Отключение от Telegram
       }
 
-     await runs()
-
       return true;
-
     } catch (err) {
       console.log(err)
       return false
     }
+  }
+
+
+  async invitePeople(item, infoConnect) {
+
+    try {
+
+      const apiId = +infoConnect?.a;
+      const apiHash = infoConnect?.b;
+      const stringSession = new StringSession(infoConnect?.c); // Значение из сессии, чтобы избежать повторной аутентификации
+      const client = new TelegramClient(stringSession, apiId, apiHash, {});
+
+      const runs = async () => {
+
+        await client.connect(); // Подключение к Telegram
+
+        const chatId = '-1002097526611';
+
+          const resultTwo = await client.invoke(
+                new channels.InviteToChannel({
+                  channel: `${chatId}`,
+                  users: [`${item}`]
+                })
+            );
+          console.log(resultTwo)
+        await client.disconnect(); // Отключение от Telegram
+      }
+
+      await runs()
+
+    } catch (err) {
+      console.log(err)
+    }
+  }
+
+
+  async logginBots(item, infoBot) {
+    console.log(infoBot)
+
+    try {
+
+      const stringSession = new StringSession(infoBot?.a);
+      const BOT_API = infoBot?.b;
+      const apiHash = process.env['API_HASH'];
+      const apiId = +process.env['API_ID']; // Ваш API ID
+
+      this.client = new TelegramClient(stringSession, apiId, apiHash, {
+        connectionRetries: 5,
+      });
+
+      const start = async () => {
+        await this.client.start({
+          botAuthToken: BOT_API,
+        });
+        console.log(apiId)
+        console.log(this.client.session.save());
+      }
+
+      await start()
+
+
+
+      // const runs = async () => {
+      //   console.log(client)
+      //
+      //   await client.start({
+      //     botAuthToken: apiId,
+      //   });
+      //
+      //   await client.connect(); // Подключение к Telegram
+      //   console.log(thisApi)
+      //   console.log(client.session.save())
+      //
+      //   const chatId = '-1002065082233';
+      //
+      //     let resultTwo;
+      //     await telegramLimiter.schedule(async () => {
+      //       resultTwo = await client.invoke(
+      //           new channels.InviteToChannel({
+      //             channel: chatId,
+      //             users: [`${item}`]
+      //           })
+      //       );
+      //     });
+      //     console.log(resultTwo)
+      //
+      //   await client.disconnect(); // Отключение от Telegram
+      // }
+      //
+      // await runs()
+
+
+    } catch (err) {
+
+    }
+
+
   }
 }
 
