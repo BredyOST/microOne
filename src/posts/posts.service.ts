@@ -281,26 +281,6 @@ export class PostsService {
         }
       }
 
-      //дополнительный блок на запуск категории с одинаковыми словами
-
-      // мастер и ремонт  - кидаем еще в категорию №4 - строительство и ремонт
-      // if(indexCommonWord) {
-      //   if(
-      //     word.word == 'мастер' ||
-      //     word.word == 'ремонт' ||
-      //     word.word == 'ремонтирует'
-      //   ) {
-      //     const categoryTwo = categoriesStart?.find((category) => category?.id == 4)
-      //     this.addNewPostToOtherRepositories(item, groupInfo, profilesInfo, true, categoryTwo, telegramLimiter, word, categories, false)
-      //     // this.addNewPostToOtherRepositoriesTwo(item, groupInfo, profilesInfo, true, categoryTwo, telegramLimiter)
-      //   }
-      // }
-      // // если 4 категория то и в 5 кидаем пост
-      // if(indexCommonWord && category.id == 5) {
-      //   const categoryTwo = categoriesStart?.find((category) => category?.id == 6)
-      //   this.addNewPostToOtherRepositories(item, groupInfo, profilesInfo, true, categoryTwo, telegramLimiter, word, categories, false)
-      // }
-
     } catch (err) {
       await this.logsServicePostsAdd.error(
         `addNewPostToOtherRepositories - ошибка`,
