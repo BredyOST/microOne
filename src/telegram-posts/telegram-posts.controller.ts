@@ -20,7 +20,7 @@ export class TelegramPostsController {
 
   @Get('/createGroupsTgPosts')
   async createGroups() {
-
+    console.log('s')
   const categories = await this.telegramPostsService.getCategories()
   const words = await this.wordsSearchTgService.findAll()
 
@@ -30,6 +30,8 @@ export class TelegramPostsController {
   if (!words || words?.length < 1) {
       return;
   }
+
+    console.log('s')
     const nextCategory = categories?.filter((item) => !item.disabled)
     // количество серверов
     const endLengthServer = serverConfig?.servers?.length

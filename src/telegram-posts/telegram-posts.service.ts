@@ -361,6 +361,8 @@ export class TelegramPostsService {
   //--------------------------------------------------
   // async processGroups(indicator, start, pass, boolIndex, ip) {
   async processGroups(category, ip, ipTwo, word) {
+    console.log(`2`)
+    return
 
     const apiId = +process.env['API_ID'];
     const apiHash = process.env['API_HASH'];

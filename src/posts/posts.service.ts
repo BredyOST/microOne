@@ -225,7 +225,10 @@ export class PostsService {
         const categoryTwo = categoriesStart?.find((category) => category?.id == 6)
         this.addNewPostToOtherRepositories(item, groupInfo, profilesInfo, true, categoryTwo, telegramLimiter, word, categories, false)
       }
-
+      if(word.word == 'мастер') {
+        const categoryTwo = categoriesStart?.find((category) => category?.id == 9)
+        this.addNewPostToOtherRepositories(item, groupInfo, profilesInfo, true, categoryTwo, telegramLimiter, word, categories, false)
+      }
     } catch (err) {
       await this.logsServicePostsAdd.error(
         `addNewPostToOtherRepositories - ошибка`,
@@ -311,6 +314,7 @@ export class PostsService {
     }
   }
   async getPostKeySearch(word, ip, countPosts) {
+
     const access = process.env['ACCESS_TOKEN'];
     const versionVk = process.env['VERSION_VK'];
     const currentTimeUnix = Math.floor(Date.now() / 1000); // Текущее время в Unixtime
@@ -523,6 +527,7 @@ export class PostsService {
           result = await limiter.schedule(() => this.getPostKeySearch(word.word, ip, countPosts),);
           nextRate = result?.next_from
         }
+
 
         if (!result?.items || result?.items?.length < 1) break
 
