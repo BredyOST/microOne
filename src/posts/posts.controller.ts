@@ -80,6 +80,4 @@ export class PostsController {
   // async getRedisPosts() {
   //   return this.postsService.getRedisPosts()
   // }
-
 }
-
