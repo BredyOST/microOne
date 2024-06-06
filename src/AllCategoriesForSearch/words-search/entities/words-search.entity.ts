@@ -9,6 +9,8 @@ export class WordSearchEntity {
     @Column()
     word:string
     @Column({ nullable: true })
+    indicator:string
+    @Column({ nullable: true })
     dateLast:Date
     @CreateDateColumn()
     createdAt: Date

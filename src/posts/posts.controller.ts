@@ -1,8 +1,9 @@
 import { Controller, Get, Post, Body } from '@nestjs/common'
 import { PostsService } from './posts.service'
-import {serverConfig} from "./serverConfig";
+import {serverConfig, serverConfigTwo} from "./serverConfig";
 import {WordsSearchService} from "../AllCategoriesForSearch/words-search/words-search.service";
 import {Cron} from "@nestjs/schedule";
+import * as process from "process";
 
 @Controller('posts')
 export class PostsController {
@@ -18,6 +19,7 @@ export class PostsController {
   @Get('/createGroupsVk')
   async createGroupsVk() {
 
+    const indexWords = process.env['INDEX_WORD']
     const categories = await this.postsService.getCategories()
     const words = await this.wordsSearchService.findAll()
 
@@ -27,21 +29,26 @@ export class PostsController {
     if (!words || words?.length < 1) {
       return
     }
+    // фильтруем по индексу
+    const wordNext = words.filter((item) => item?.indicator == indexWords)
 
     const nextCategory = categories?.filter((item) => !item.disabled)
     // количество серверов
     const endLengthServer = serverConfig?.servers?.length
     // количество слов
-    const endWordsLength = words?.length
+    const endWordsLength = wordNext?.length
     // старт перебора слов
     let indexSearch = 0;
 
     for (let i = 0; i < endWordsLength; i++) {
 
-      const word = words[i]
+      const word = wordNext[i]
 
       const category = nextCategory?.find((category) => category?.id == word?.idCategory)
-      const server = serverConfig?.servers[indexSearch]
+      let server;
+
+      if (indexWords == `1`) server = serverConfig?.servers[indexSearch];
+      if (indexWords == `2`) server = serverConfigTwo?.servers[indexSearch];
 
       if(indexSearch < endLengthServer) {
         indexSearch++

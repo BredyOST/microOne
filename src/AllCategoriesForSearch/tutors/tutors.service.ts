@@ -110,11 +110,9 @@ export class TutorsService {
 
   async createTg(item, groups, profiles, identificator, sendMessage, tokenBot, telegramLimiter,) {
 
-
-
-
     const postText = item?.message;
-    if(postText?.length >= 150) {
+
+    if(postText?.length >= 350) {
       return
     }
 
@@ -143,7 +141,6 @@ export class TutorsService {
     }
 
     console.log(obj)
-    return
 
     return this.repository.save({
       identification_post: identificator,

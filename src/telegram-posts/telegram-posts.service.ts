@@ -24,6 +24,8 @@ import SearchGlobal = Api.messages.SearchGlobal;
 import {WordsSearchTgService} from "../AllCategoriesForSearch/words-search-tg/words-search-tg.service";
 import channels = Api.channels;
 import * as bigInt from 'big-integer'
+import { BeautyService } from "../AllCategoriesForSearch/beauty/beauty.service";
+import { DriversService } from "../AllCategoriesForSearch/drivers/drivers.service";
 
 const telegramLimiter = new Bottleneck({
   maxConcurrent: 1, // Максимальное количество одновременных запросов
@@ -53,7 +55,9 @@ export class TelegramPostsService {
       private equipRepairMaintenanceService: EquipRepairMaintenanceService,
       private lawyerService: LawyerService,
       private itWebService: ItWebService,
-      private readonly wordsSearchTgService: WordsSearchTgService
+      private readonly wordsSearchTgService: WordsSearchTgService,
+      private beautyService: BeautyService,
+      private driversService: DriversService,
 
   ) {
   }
@@ -84,9 +88,9 @@ export class TelegramPostsService {
   }
   async getLogIn() {
 
-    const apiId = +process.env["API_ID"]; // Ваш API ID
-    const apiHash = process.env["API_HASH"];
-    const phone = process.env["TG_NUMBER"];
+    const apiId = +process.env["API_ID_TWO"]; // Ваш API ID
+    const apiHash = process.env["API_HASH_TWO"];
+    const phone = process.env["TG_NUMBER_TWO"];
 
     const stringSession = new StringSession(''); // Значение из сессии, чтобы избежать повторной аутентификации
 
@@ -275,6 +279,10 @@ export class TelegramPostsService {
     const profile = profilesInfo.find((elem) => elem?.id?.value?.toString() == item?.fromId?.userId?.value?.toString())
     const group = groupInfo.find((elem) => elem?.id?.value?.toString() == item?.peerId?.channelId?.value?.toString())
 
+    if (item?.message?.length >= 350) {
+      return
+    }
+
     try {
       // токен бота
       const tokenBot = process.env['TOKEN_BOT'];
@@ -288,6 +296,8 @@ export class TelegramPostsService {
         { id: 6, name: 'Покупка, продажа недвижимости', service: this.purchaseSaleApartService,},
         { id: 7, name: 'Для юристов', service: this.lawyerService },
         { id: 8, name: 'IT/Web', service: this.itWebService },
+        { id: 9, name: 'Красота', service: this.beautyService },
+        { id: 10, name: 'Водители', service: this.driversService },
       ];
 
       const categoryInfo = categories.find((cat) => cat.id === category.id);
@@ -306,8 +316,7 @@ export class TelegramPostsService {
         const filter = await this.filterOnePostForOthersRepositories(item, positiveWords, negativeWords);
 
         if (filter) {
-
-          await categoryInfo.service?.createTg(
+          categoryInfo.service?.createTg(
               item,
               group,
               profile,
@@ -353,15 +362,13 @@ export class TelegramPostsService {
   // async processGroups(indicator, start, pass, boolIndex, ip) {
   async processGroups(category, ip, ipTwo, word) {
 
-      if(word?.id && category?.id && ip?.ip && ipTwo?.ipTwo) return
-
     const apiId = +process.env['API_ID'];
     const apiHash = process.env['API_HASH'];
     const stringSession = new StringSession(process.env['TELEGRAM_SESSION_STRING']); // Значение из сессии, чтобы избежать повторной аутентификации
     const client = new TelegramClient(stringSession, apiId, apiHash, {});
 
-      let counter = 50; // стартовое значение для цикла, ограничение на 1000 постов
-      const countPosts = 5;
+      let counter = 20; // стартовое значение для цикла, ограничение на 1000 постов
+      const countPosts = 50;
       // один объект формата {"id": 1, "idCategory": "1", "word": null, "dateLast": null, "createdAt":null,updateAt:null}
       const thisExtraWordObject = word;
       // дата последнего обновления слова
@@ -419,6 +426,7 @@ export class TelegramPostsService {
             offsetRate = result.nextRate
             offsetId = Math.max(...messages.map(item => item.id));
           }
+        console.log(result)
           if (messages?.length <= 1) {
             if(saveDateLastPostWhenSearching && thisExtraWordObject) {
               thisExtraWordObject.dateLast = saveDateLastPostWhenSearching;
@@ -431,6 +439,7 @@ export class TelegramPostsService {
         for(let o = 0; o <= messages?.length; o++){
 
           const item = messages?.[o]
+
 
           if(firstPostsDate && firstPostsDate == new Date(item?.date * 1000).getTime()) {
             if(saveDateLastPostWhenSearching && thisExtraWordObject) {

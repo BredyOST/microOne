@@ -18,6 +18,8 @@ import { TelegramPostEntity } from './entities/telegram-post.entity';
 import { LogsService } from '../otherServices/logger.service';
 import { RedisService } from '../redis/redis.service';
 import { WordsSearchTgModule } from '../AllCategoriesForSearch/words-search-tg/words-search-tg.module';
+import { DriversModule } from "../AllCategoriesForSearch/drivers/drivers.module";
+import { BeautyModule } from "../AllCategoriesForSearch/beauty/beauty.module";
 
 @Module({
   imports: [
@@ -35,6 +37,8 @@ import { WordsSearchTgModule } from '../AllCategoriesForSearch/words-search-tg/w
     LawyerModule,
     ItWebModule,
     WordsSearchTgModule,
+    DriversModule,
+    BeautyModule,
   ],
   controllers: [TelegramPostsController],
   providers: [

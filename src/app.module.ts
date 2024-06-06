@@ -32,6 +32,10 @@ import { WordSearchEntity } from './AllCategoriesForSearch/words-search/entities
 import { WordsSearchModule } from './AllCategoriesForSearch/words-search/words-search.module';
 import {WordsSearchTgEntity} from "./AllCategoriesForSearch/words-search-tg/entities/words-search-tg.entity";
 import {WordsSearchTgModule} from "./AllCategoriesForSearch/words-search-tg/words-search-tg.module";
+import { BeautyEntity } from "./AllCategoriesForSearch/beauty/entities/beauty.entity";
+import { BeautyModule } from "./AllCategoriesForSearch/beauty/beauty.module";
+import { DriverEntity } from "./AllCategoriesForSearch/drivers/entities/driver.entity";
+import { DriversModule } from "./AllCategoriesForSearch/drivers/drivers.module";
 
 @Module({
   imports: [
@@ -64,6 +68,8 @@ import {WordsSearchTgModule} from "./AllCategoriesForSearch/words-search-tg/word
             TelegramPostEntity,
             WordSearchEntity,
             WordsSearchTgEntity,
+            BeautyEntity,
+            DriverEntity,
           ],
         };
       },
@@ -82,6 +88,8 @@ import {WordsSearchTgModule} from "./AllCategoriesForSearch/words-search-tg/word
     TelegramPostsModule,
     WordsSearchModule,
     WordsSearchTgModule,
+    BeautyModule,
+    DriversModule,
   ],
   controllers: [AppController],
   providers: [AppService],

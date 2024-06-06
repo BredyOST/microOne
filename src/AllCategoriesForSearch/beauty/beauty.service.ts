@@ -1,28 +1,28 @@
-import {Injectable, Logger} from '@nestjs/common';
-import {AppService} from "../../app.service";
-import {InjectRepository} from "@nestjs/typeorm";
-import {Repository} from "typeorm";
-import {HttpService} from "@nestjs/axios";
-import {LogsService} from "../../otherServices/logger.service";
-import {RedisService} from "../../redis/redis.service";
-import {CitiesService} from "../../cities/cities.service";
+import { Injectable, Logger } from "@nestjs/common";
+import { AppService } from "../../app.service";
+import { InjectRepository } from "@nestjs/typeorm";
+import { Repository } from "typeorm";
+import { HttpService } from "@nestjs/axios";
+import { LogsService } from "../../otherServices/logger.service";
+import { RedisService } from "../../redis/redis.service";
+import { CitiesService } from "../../cities/cities.service";
 import * as process from 'process';
-import {ItWebEntity} from "./entities/it-web.entity";
-
+import { BeautyEntity } from "./entities/beauty.entity";
 
 @Injectable()
-export class ItWebService {
+export class BeautyService {
+
   private readonly logger = new Logger(AppService.name);
   private id: string | number;
   constructor(
-      @InjectRepository(ItWebEntity)
-      private repository: Repository<ItWebEntity>,
-      private readonly httpService: HttpService,
-      private logsService: LogsService,
-      private redisService: RedisService,
-      private citiesService: CitiesService,
+    @InjectRepository(BeautyEntity)
+    private repository: Repository<BeautyEntity>,
+    private readonly httpService: HttpService,
+    private logsService: LogsService,
+    private redisService: RedisService,
+    private citiesService: CitiesService,
   ) {
-    this.id = process.env["ID_IT"]; // 8й
+    this.id = process.env['ID_BEATY']; // 9й
   }
 
   // получаем последний пост из репозитория с сортировкой
@@ -59,11 +59,11 @@ export class ItWebService {
   // получить весь репозиторий c Redis
   async getAll() {
     const posts = await this.redisService.get(
-        '1dd67c02cf41f00cde6819e97c3752d91b742a1b99c8bc209252ad028c35bbba',
+      '1dd67c02cf41f00cde6819e97c3752d91b742a1b99c8bc209252ad028c35bbba',
     );
     if (posts && posts !== null) {
       return JSON.parse(posts).sort(
-          (a, b) => b.post_date_publish - a.post_date_publish,
+        (a, b) => b.post_date_publish - a.post_date_publish,
       );
     }
   }
@@ -76,8 +76,8 @@ export class ItWebService {
       const postCountInKey = 300;
       const queryBuilder = this.repository.createQueryBuilder('posts');
       const sortedPosts = await queryBuilder
-          .orderBy('posts.post_date_publish', 'DESC')
-          .getMany();
+        .orderBy('posts.post_date_publish', 'DESC')
+        .getMany();
 
       const pattern = await this.redisService.getAllKeys(`id:${this.id}-*`);
       const counterNow = Math.ceil(sortedPosts.length / postCountInKey);
@@ -119,7 +119,6 @@ export class ItWebService {
     }
   }
   async createTg(item, groups, profiles, identificator, sendMessage, tokenBot, telegramLimiter,) {
-    console.log(item)
     const postText = item?.message;
 
     if(postText?.length >= 350) {
@@ -127,30 +126,6 @@ export class ItWebService {
     }
 
     // if (sendMessage) this.sendPostToTelegramFromTg(item,groups,profiles, tokenBot, telegramLimiter);
-
-    const obj = {
-      identification_post: identificator,
-      id_group: groups?.id?.toString() || '', // Первый чат из массива
-      name_group: groups?.username || groups?.title || '', // Имя чата или название
-      city_group: '', // Город группы (если есть)
-      country_group: '', // Страна группы (если есть)
-      photo_100_group: '', // Фото группы (если есть)
-      first_name_user: profiles?.firstName || '', // Имя пользователя (если есть)
-      last_name_user: profiles?.lastName || '', // Фамилия пользователя (если есть)
-      userName: profiles?.username || '', // Имя пользователя (если есть)
-      city_user: '', // Город пользователя (если есть)
-      country_user: '', // Страна пользователя (если есть)
-      photo_100_user: '', // Фото пользователя (если есть)
-      post_id: item?.id || '', // ID поста
-      post_owner_id: item?.peerId?.channelId?.value?.toString() || '', // ID того, кто получил чат, группу
-      post_fromId: item?.fromId?.userId?.value?.toString() || item?.peerId?.channelId?.value?.toString() || '', // ID отправителя
-      post_date_publish: item?.date, // Дата публикации поста
-      post_text: item?.message || '', // Текст поста
-      post_type: item?.className || '', // Тип поста (если есть)
-      signer_id: item?.fromId?.userId?.value?.toString() || item?.peerId?.channelId?.value?.toString() || '', // ID напис
-    }
-
-    console.log(obj)
 
     return this.repository.save({
       identification_post: identificator,
@@ -184,20 +159,20 @@ export class ItWebService {
   }
   // создание для ВК
   async createFromVkDataBase(
-      item,
-      groups,
-      profiles,
-      identificator,
-      sendMessage,
-      tokenBot,
-      telegramLimiter,
+    item,
+    groups,
+    profiles,
+    identificator,
+    sendMessage,
+    tokenBot,
+    telegramLimiter,
   ) {
     try {
 
       const ownerId = String(item.owner_id).replace('-', '');
       const groupInfo = groups?.find((element) => element.id == ownerId);
       const profileInfo = profiles?.find(
-          (element) => element.id == item?.signer_id || item?.owner_id,
+        (element) => element.id == item?.signer_id || item?.owner_id,
       );
       const cityGroup = groupInfo?.city
       const cityUser = profileInfo?.city
@@ -243,8 +218,8 @@ export class ItWebService {
       });
     } catch (err) {
       this.logsService.error(
-          `Функция добавление постов тюторс- ошибка`,
-          `${err}`,
+        `Функция добавление постов красота- ошибка`,
+        `${err}`,
       );
     }
   }

@@ -3,7 +3,7 @@ import { Repository } from 'typeorm';
 import { HttpService } from '@nestjs/axios';
 import { PostEntity } from './entities/post.entity';
 import * as process from 'process';
-import {catchError, firstValueFrom, pipe} from 'rxjs';
+import {catchError, firstValueFrom} from 'rxjs';
 import { AxiosError } from 'axios';
 import { LogsService } from '../otherServices/logger.service';
 import { RedisService } from '../redis/redis.service';
@@ -18,6 +18,8 @@ import {
 import {LawyerService} from "../AllCategoriesForSearch/lawyer/lawyer.service";
 import {ItWebService} from "../AllCategoriesForSearch/it-web/it-web.service";
 import {WordsSearchService} from "../AllCategoriesForSearch/words-search/words-search.service";
+import { BeautyService } from "../AllCategoriesForSearch/beauty/beauty.service";
+import { DriversService } from "../AllCategoriesForSearch/drivers/drivers.service";
 
 const Bottleneck = require('bottleneck');
 
@@ -51,6 +53,8 @@ export class PostsService {
     private lawyerService: LawyerService,
     private itWebService: ItWebService,
     private wordsSearchService: WordsSearchService,
+    private beautyService: BeautyService,
+    private driversService: DriversService,
   ) {}
 
   async getPostsFromRedis(dto) {
@@ -67,6 +71,7 @@ export class PostsService {
     try {
 
       const link = process.env['API_URL'];
+
       const response = await fetch(`${link}/categories/getAll`, {
         method: 'GET',
         headers: {
@@ -154,7 +159,7 @@ export class PostsService {
 
   //===========================================================================================
   async addNewPostToOtherRepositories(item, groupInfo, profilesInfo, sendMessage, category, telegramLimiter,word, categoriesStart, indexCommonWord) {
-    console.log(category.id)
+
     try {
       // токен бота
       const tokenBot = process.env['TOKEN_BOT'];
@@ -168,6 +173,8 @@ export class PostsService {
         { id: 6, name: 'Покупка, продажа недвижимости', service: this.purchaseSaleApartService,},
         { id: 7, name: 'Для юристов', service: this.lawyerService },
         { id: 8, name: 'IT/Web', service: this.itWebService },
+        { id: 9, name: 'Красота', service: this.beautyService },
+        { id: 10, name: 'Водители', service: this.driversService },
       ];
 
       const categoryInfo = categories.find((cat) => cat.id === category.id);
@@ -219,7 +226,80 @@ export class PostsService {
         this.addNewPostToOtherRepositories(item, groupInfo, profilesInfo, true, categoryTwo, telegramLimiter, word, categories, false)
       }
 
+    } catch (err) {
+      await this.logsServicePostsAdd.error(
+        `addNewPostToOtherRepositories - ошибка`,
+        `${err}`,
+      );
+    }
+  }
 
+  async addNewPostToOtherRepositoriesTwo(item, groupInfo, profilesInfo, sendMessage, category, telegramLimiter,word, categoriesStart, indexCommonWord) {
+    console.log('yes')
+    console.log(category.id)
+    try {
+      // токен бота
+      const tokenBot = process.env['TOKEN_BOT'];
+
+      const categories = [
+        { id: 1, name: 'Для репетиторов', service: this.tutorService },
+        { id: 2, name: 'Поиск домашнего персонала', service: this.nanniesService,},
+        { id: 3, name: 'Ремонт и обслуживание техники', service: this.equipRepairMaintenanceService,},
+        { id: 4, name: 'Ремонт и строительство', service: this.handymanAndBuilderService,},
+        { id: 5, name: 'Аренда, сдача недвижимости', service: this.rentRentalApartService,},
+        { id: 6, name: 'Покупка, продажа недвижимости', service: this.purchaseSaleApartService,},
+        { id: 7, name: 'Для юристов', service: this.lawyerService },
+        { id: 8, name: 'IT/Web', service: this.itWebService },
+      ];
+
+      const categoryInfo = categories.find((cat) => cat.id === category.id);
+
+      if (!categoryInfo) return
+
+      if (categoryInfo) {
+        if (categoryInfo.service) {
+          const isSamePost = await categoryInfo.service.getPostById(item?.id);
+          // console.log(item)
+          if (isSamePost) return;
+        }
+
+        const positiveWords = await category?.positiveWords;
+        const negativeWords = await category?.negativeWords;
+
+        const filter = await this.filterOnePostForOthersRepositories(item, positiveWords, negativeWords);
+
+        if (filter) {
+          await categoryInfo.service?.createFromVkDataBase(
+            item,
+            groupInfo,
+            profilesInfo,
+            'vk',
+            sendMessage,
+            tokenBot,
+            telegramLimiter,
+          );
+        }
+      }
+
+      //дополнительный блок на запуск категории с одинаковыми словами
+
+      // мастер и ремонт  - кидаем еще в категорию №4 - строительство и ремонт
+      // if(indexCommonWord) {
+      //   if(
+      //     word.word == 'мастер' ||
+      //     word.word == 'ремонт' ||
+      //     word.word == 'ремонтирует'
+      //   ) {
+      //     const categoryTwo = categoriesStart?.find((category) => category?.id == 4)
+      //     this.addNewPostToOtherRepositories(item, groupInfo, profilesInfo, true, categoryTwo, telegramLimiter, word, categories, false)
+      //     // this.addNewPostToOtherRepositoriesTwo(item, groupInfo, profilesInfo, true, categoryTwo, telegramLimiter)
+      //   }
+      // }
+      // // если 4 категория то и в 5 кидаем пост
+      // if(indexCommonWord && category.id == 5) {
+      //   const categoryTwo = categoriesStart?.find((category) => category?.id == 6)
+      //   this.addNewPostToOtherRepositories(item, groupInfo, profilesInfo, true, categoryTwo, telegramLimiter, word, categories, false)
+      // }
 
     } catch (err) {
       await this.logsServicePostsAdd.error(
@@ -228,6 +308,7 @@ export class PostsService {
       );
     }
   }
+
   //№3 фильтруем пост по ключевым словам
   async filterOnePostForOthersRepositories(post, positiveKeywords, negativeKeywords) {
     try {
@@ -262,7 +343,6 @@ export class PostsService {
 
       const { data } = await firstValueFrom(
       // this.httpService.get<any>(`https://api.vk.com/method/newsfeed.search?q=${word}&count=${counter}&latitude=-90&longitude=-180&start_time=${startOfDayUnix}&end_time=${currentTimeUnix}&fields=city,country,photo_50&access_token=${access}&v=${versionVk}&extended=1`
-
           this.httpService.get<any>(`${ip}`, { headers: {
               'code': `${encodeURIComponent(word)}`,
               'version':versionVk,
@@ -297,6 +377,7 @@ export class PostsService {
                   }),
               ),
       );
+
       if (!data || !data.response || typeof data.response !== 'object') {
         this.logsServicePostsAdd.error(
             `getPostsFromVK error`,
@@ -329,6 +410,7 @@ export class PostsService {
       // this.httpService.get<any>(`https://api.vk.com/method/newsfeed.search?q=${word}&count=${counter}&latitude=-90&longitude=-180&start_time=${startOfDayUnix}&end_time=${currentTimeUnix}&start_from=${nextRate}&fields=city,country,photo_50&access_token=${access}&v=${versionVk}&extended=1`,
 
       const { data } = await firstValueFrom(
+        // this.httpService.get<any>(`https://api.vk.com/method/newsfeed.search?q=${word}&count=${counter}&latitude=-90&longitude=-180&start_time=${startOfDayUnix}&end_time=${currentTimeUnix}&start_from=${nextRate}&fields=city,country,photo_50&access_token=${access}&v=${versionVk}&extended=1`,
           this.httpService.get<any>(`${ip}`, { headers: {
               // 'code': `${encodeURIComponent(request)}`,
               'code': `${encodeURIComponent(word)}`,
@@ -344,6 +426,7 @@ export class PostsService {
               'startfrom':`${encodeURIComponent(nextRate)}`,
             },
           })
+        // )
               .pipe(
                   catchError((error: AxiosError) => {
                     if (
@@ -418,6 +501,7 @@ export class PostsService {
     }
   }
   async processGroup(category, ip, ipTwo, word, categories) {
+
     //category - одна категория
 
     try {
@@ -479,10 +563,6 @@ export class PostsService {
           // если есть дата последнего поста в бд то проверяем пост проходит или нет
           if(dateLast) {
             if(new Date(item?.date*1000).getTime() > dateLast) {
-              // console.log(`${new Date(item.date*1000).toLocaleDateString()}${new Date(item.date*1000).toLocaleTimeString()}`)
-              // console.log(new Date(item?.date*1000))
-              // console.log(new Date(dateLast))
-              // console.log('=======================================')
               this.addNewPostToOtherRepositories(item, result.groups, result.profiles, true, category, telegramLimiter,word,categories,true);
               if (!saveDateLastPostWhenSearching) saveDateLastPostWhenSearching = new Date(item?.date * 1000);
               if(!firstPostsDate) firstPostsDate = new Date(item?.date * 1000).getTime()
