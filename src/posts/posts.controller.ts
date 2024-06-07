@@ -43,7 +43,7 @@ export class PostsController {
 
     // -----------------------------
     const acceses = [
-      // { token: process.env['ACCESS_TOKEN'] },
+      { token: process.env['ACCESS_TOKEN'] },
       { token: process.env['ACCESS_TOKEN_TWO'] },
     ]
     // стартовый индекс
