@@ -194,6 +194,7 @@ export class PostsService {
         const filter = await this.filterOnePostForOthersRepositories(item, positiveWords, negativeWords);
 
         if (filter) {
+
           await categoryInfo.service?.createFromVkDataBase(
             item,
             groupInfo,
@@ -238,8 +239,7 @@ export class PostsService {
   }
 
   async addNewPostToOtherRepositoriesTwo(item, groupInfo, profilesInfo, sendMessage, category, telegramLimiter,word, categoriesStart, indexCommonWord) {
-    console.log('yes')
-    console.log(category.id)
+
     try {
       // токен бота
       const tokenBot = process.env['TOKEN_BOT'];
@@ -313,16 +313,14 @@ export class PostsService {
       await this.logsServicePostsAdd.error(`filterOnePostForOthersRepositories ERROR - ${err}`, `${err.stack}`,);
     }
   }
-  async getPostKeySearch(word, ip, countPosts) {
+  async getPostKeySearch(word, ip, countPosts, access) {
 
-    const access = process.env['ACCESS_TOKEN'];
     const versionVk = process.env['VERSION_VK'];
     const currentTimeUnix = Math.floor(Date.now() / 1000); // Текущее время в Unixtime
     const startOfDayUnix = Math.floor(new Date().setHours(0, 0, 0, 0) / 1000); // Время начала текущего дня в Unixtime
     const counter = +countPosts;
 
-    // const aa = `https://api.vk.com/method/newsfeed.search?q=${word}&count=${counter}&latitude=-90&longitude=-180&start_time=${startOfDayUnix}&end_time=${currentTimeUnix}&fields=city,country,photo_50&access_token=${access}&v=${versionVk}&extended=1`
-
+    // const dataa = `https://api.vk.com/method/newsfeed.search?q=${word}&count=${counter}&latitude=-90&longitude=-180&start_time=${startOfDayUnix}&end_time=${currentTimeUnix}&fields=city,country,photo_50&access_token=${access}&v=${versionVk}&extended=1`
     try {
 
       const { data } = await firstValueFrom(
@@ -375,16 +373,15 @@ export class PostsService {
           delete data.response.execute_errors;
         }
       }
-
+      console.log(data)
       return data.response
 
     } catch (err) {
       this.logsServicePostsAdd.error(`getPostsFromVK error`, `ошибка получения постов в группе первой ${err}`,);
     }
   }
-  async getPostKeySearchNext(word, nextRate, ip, countPosts) {
+  async getPostKeySearchNext(word, nextRate, ip, countPosts, access) {
 
-    const access = process.env['ACCESS_TOKEN'];
     const versionVk = process.env['VERSION_VK'];
     const currentTimeUnix = Math.floor(Date.now() / 1000); // Текущее время в Unixtime
     const startOfDayUnix = Math.floor(new Date().setHours(0, 0, 0, 0) / 1000); // Время начала текущего дня в Unixtime
@@ -484,8 +481,7 @@ export class PostsService {
       }
     }
   }
-  async processGroup(category, ip, ipTwo, word, categories) {
-
+  async processGroup(category, ip, ipTwo, word, categories, access) {
     //category - одна категория
 
     try {
@@ -515,26 +511,25 @@ export class PostsService {
       }
 
       cycle: for (let i = 0; i <= counter; i++) {
-
+        console.log(`!!!!!!!!!!!!!!!!!!!!!!!!!! ${i}`)
         let result;
 
         if(i >= 1) {
-          result = await limiter.schedule(() => this.getPostKeySearchNext(word.word, nextRate,ipTwo, countPosts),);
+          result = await limiter.schedule(() => this.getPostKeySearchNext(word.word, nextRate,ipTwo, countPosts, access),);
           nextRate = result?.next_from
         }
 
         if(i == 0) {
-          result = await limiter.schedule(() => this.getPostKeySearch(word.word, ip, countPosts),);
+          result = await limiter.schedule(() => this.getPostKeySearch(word.word, ip, countPosts, access),);
           nextRate = result?.next_from
         }
-
 
         if (!result?.items || result?.items?.length < 1) break
 
         for(let o = 0; o <= result?.items?.length; o++){
 
           const item = result?.items?.[o]
-
+          console.log(item)
           if(firstPostsDate && firstPostsDate == new Date(item?.date * 1000).getTime()) {
             if(saveDateLastPostWhenSearching && thisExtraWordObject) {
               thisExtraWordObject.dateLast = saveDateLastPostWhenSearching;
@@ -583,6 +578,7 @@ export class PostsService {
       }
 
     } catch (err) {
+      console.log(err)
       this.logsServicePostsAdd.error(`№1 ERROR - ${err.message}`, `Ошибка на ШАГЕ №1: ${err.stack}`,);
     }
   }

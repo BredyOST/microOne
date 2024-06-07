@@ -40,6 +40,18 @@ export class PostsController {
     // старт перебора слов
     let indexSearch = 0;
 
+
+    // -----------------------------
+    const acceses = [
+      // { token: process.env['ACCESS_TOKEN'] },
+      { token: process.env['ACCESS_TOKEN_TWO'] },
+    ]
+    // стартовый индекс
+    let indexStart = 0;
+    // всего элементов в массиве
+    const maxIndexSearch = acceses?.length;
+    // -----------------------------
+
     for (let i = 0; i < endWordsLength; i++) {
 
       const word = wordNext[i]
@@ -56,9 +68,16 @@ export class PostsController {
       if(indexSearch == endLengthServer) {
         indexSearch = 0
       }
+      // блок обновления для acces токенов
+      // если индекс больше элементов в массиве, то сбрасываем на 0
+      if(indexStart == maxIndexSearch) indexStart = 0
+      const access = acceses[indexStart]?.token
+      indexStart++;
+
+
 
       if(word?.id && category?.id && server?.ip && server?.ipTwo) {
-        this.postsService.processGroup(category, server?.ip, server?.ipTwo, word, nextCategory)
+        this.postsService.processGroup(category, server?.ip, server?.ipTwo, word, nextCategory, access)
       }
     }
   }
