@@ -40,12 +40,14 @@ export class PostsController {
     // старт перебора слов
     let indexSearch = 0;
 
-
     // -----------------------------
     const acceses = [
       { token: process.env['ACCESS_TOKEN'] },
       { token: process.env['ACCESS_TOKEN_TWO'] },
+      { token: process.env['ACCESS_TOKEN_THREE'] },
+      { token: process.env['ACCESS_TOKEN_FOURE'] },
     ]
+
     // стартовый индекс
     let indexStart = 0;
     // всего элементов в массиве
@@ -73,8 +75,6 @@ export class PostsController {
       if(indexStart == maxIndexSearch) indexStart = 0
       const access = acceses[indexStart]?.token
       indexStart++;
-
-
 
       if(word?.id && category?.id && server?.ip && server?.ipTwo) {
         this.postsService.processGroup(category, server?.ip, server?.ipTwo, word, nextCategory, access)
