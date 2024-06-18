@@ -511,7 +511,7 @@ export class PostsService {
       }
 
       cycle: for (let i = 0; i <= counter; i++) {
-        console.log(`!!!!!!!!!!!!!!!!!!!!!!!!!! ${i}`)
+        // console.log(`!!!!!!!!!!!!!!!!!!!!!!!!!! ${i}`)
         let result;
 
         if(i >= 1) {
@@ -529,7 +529,7 @@ export class PostsService {
         for(let o = 0; o <= result?.items?.length; o++){
 
           const item = result?.items?.[o]
-          console.log(item)
+          // console.log(item)
           if(firstPostsDate && firstPostsDate == new Date(item?.date * 1000).getTime()) {
             if(saveDateLastPostWhenSearching && thisExtraWordObject) {
               thisExtraWordObject.dateLast = saveDateLastPostWhenSearching;
