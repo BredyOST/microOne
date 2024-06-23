@@ -297,13 +297,13 @@ export class PostsService {
     try {
       let postText;
 
-      if (post?.text.length >= 1) postText = post?.text.toLowerCase();
-      if (post?.post_text?.length >=1 ) postText = post?.post_text.toLowerCase();
+      if (post?.text?.length >= 1) postText = post?.text.toLowerCase();
+      if (post?.post_text?.length >= 1) postText = post?.post_text.toLowerCase();
 
-      const containsPositiveKeyword = positiveKeywords.some((keyword) =>
+      const containsPositiveKeyword = positiveKeywords?.some((keyword) =>
         postText?.includes(keyword),
       );
-      const containsNegativeKeyword = negativeKeywords.some((keyword) =>
+      const containsNegativeKeyword = negativeKeywords?.some((keyword) =>
         postText?.includes(keyword),
       );
 
