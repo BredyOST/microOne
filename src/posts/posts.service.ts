@@ -449,8 +449,8 @@ export class PostsService {
   }
 
   async getKeysRedis() {
-    const keys = await this.redisService.getAllKeys('id:4-*');
-    await this.redisService.deleteKeysByPattern("id:4-*");
+    const keys = await this.redisService.getAllKeys('id:9-*');
+    await this.redisService.deleteKeysByPattern("id:9-*");
     return keys;
   }
   async getRedisPosts() {
