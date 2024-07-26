@@ -20,6 +20,14 @@ import {ItWebService} from "../AllCategoriesForSearch/it-web/it-web.service";
 import {WordsSearchService} from "../AllCategoriesForSearch/words-search/words-search.service";
 import { BeautyService } from "../AllCategoriesForSearch/beauty/beauty.service";
 import { DriversService } from "../AllCategoriesForSearch/drivers/drivers.service";
+import {CookService} from "../AllCategoriesForSearch/cook/cook.service";
+import {PsychologistsService} from "../AllCategoriesForSearch/psychologists/psychologists.service";
+import {AccountantService} from "../AllCategoriesForSearch/accountant/accountant.service";
+import {InternetMarketingService} from "../AllCategoriesForSearch/internet-marketing/internet-marketing.service";
+import {FotoVideoCreaterService} from "../AllCategoriesForSearch/foto-video-creater/foto-video-creater.service";
+import {
+  CustomMadeFurnitureService
+} from "../AllCategoriesForSearch/custom-made-furniture/custom-made-furniture.service";
 
 const Bottleneck = require('bottleneck');
 
@@ -55,6 +63,14 @@ export class PostsService {
     private wordsSearchService: WordsSearchService,
     private beautyService: BeautyService,
     private driversService: DriversService,
+    private cookService: CookService,
+    private psychologistsService: PsychologistsService,
+    private accountantService: AccountantService,
+    private internetMarketingService: InternetMarketingService,
+    private fotoVideoCreaterService: FotoVideoCreaterService,
+    private customMadeFurnitureService: CustomMadeFurnitureService,
+
+
   ) {}
 
   async getPostsFromRedis(dto) {
@@ -175,6 +191,12 @@ export class PostsService {
         { id: 8, name: 'IT/Web', service: this.itWebService },
         { id: 9, name: 'Красота', service: this.beautyService },
         { id: 10, name: 'Водители', service: this.driversService },
+        { id: 11, name: 'Кулинария', service: this.cookService },
+        { id: 12, name: 'Психологи', service: this.psychologistsService },
+        { id: 13, name: 'Бухгалтерские услуги', service: this.accountantService },
+        { id: 14, name: 'Интернет маркетинг', service: this.internetMarketingService },
+        { id: 15, name: 'Фото и видеосъемка', service: this.fotoVideoCreaterService },
+        { id: 16, name: 'Мебель на заказ', service: this.customMadeFurnitureService },
       ];
 
       const categoryInfo = categories.find((cat) => cat.id === category.id);
@@ -253,6 +275,14 @@ export class PostsService {
         { id: 6, name: 'Покупка, продажа недвижимости', service: this.purchaseSaleApartService,},
         { id: 7, name: 'Для юристов', service: this.lawyerService },
         { id: 8, name: 'IT/Web', service: this.itWebService },
+        { id: 9, name: 'Красота', service: this.beautyService },
+        { id: 10, name: 'Водители', service: this.driversService },
+        { id: 11, name: 'Кулинария', service: this.cookService },
+        { id: 12, name: 'Психологи', service: this.psychologistsService },
+        { id: 13, name: 'Бухгалтерские услуги', service: this.accountantService },
+        { id: 14, name: 'Интернет маркетинг', service: this.internetMarketingService },
+        { id: 15, name: 'Фото и видеосъемка', service: this.fotoVideoCreaterService },
+        { id: 16, name: 'Мебель на заказ', service: this.customMadeFurnitureService },
       ];
 
       const categoryInfo = categories.find((cat) => cat.id === category.id);

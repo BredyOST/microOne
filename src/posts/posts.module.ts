@@ -20,6 +20,12 @@ import {ItWebModule} from "../AllCategoriesForSearch/it-web/it-web.module";
 import {WordsSearchModule} from "../AllCategoriesForSearch/words-search/words-search.module";
 import { DriversModule } from "../AllCategoriesForSearch/drivers/drivers.module";
 import { BeautyModule } from "../AllCategoriesForSearch/beauty/beauty.module";
+import {CookModule} from "../AllCategoriesForSearch/cook/cook.module";
+import {PsychologistsModule} from "../AllCategoriesForSearch/psychologists/psychologists.module";
+import {AccountantModule} from "../AllCategoriesForSearch/accountant/accountant.module";
+import {InternetMarketingModule} from "../AllCategoriesForSearch/internet-marketing/internet-marketing.module";
+import {FotoVideoCreaterModule} from "../AllCategoriesForSearch/foto-video-creater/foto-video-creater.module";
+import {CustomMadeFurnitureModule} from "../AllCategoriesForSearch/custom-made-furniture/custom-made-furniture.module";
 
 @Module({
   imports: [
@@ -39,6 +45,12 @@ import { BeautyModule } from "../AllCategoriesForSearch/beauty/beauty.module";
     WordsSearchModule,
     DriversModule,
     BeautyModule,
+    CookModule,
+    PsychologistsModule,
+    AccountantModule,
+    InternetMarketingModule,
+    FotoVideoCreaterModule,
+    CustomMadeFurnitureModule
   ],
   controllers: [PostsController],
   providers: [PostsService, LogsService, RedisService, RepositoryPostsAdd],

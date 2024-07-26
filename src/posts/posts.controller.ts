@@ -46,6 +46,9 @@ export class PostsController {
       { token: process.env['ACCESS_TOKEN_FIVE'] },
       { token: process.env['ACCESS_TOKEN_SIX'] },
       { token: process.env['ACCESS_TOKEN_SEVEN'] },
+      { token: process.env['ACCESS_TOKEN_EIGHT'] },
+      { token: process.env['ACCESS_TOKEN_NINE'] },
+      { token: process.env['ACCESS_TOKEN_TEN'] },
     ];
 
     // стартовый индекс

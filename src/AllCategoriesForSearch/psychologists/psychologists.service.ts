@@ -1,31 +1,31 @@
 import {Injectable, Logger} from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { NannyEntity } from './entities/nanny.entity';
-import { catchError, firstValueFrom } from 'rxjs';
-import { AxiosError } from 'axios';
-import { HttpService } from '@nestjs/axios';
-import { RedisService } from '../../redis/redis.service';
-import { LogsService } from '../../otherServices/logger.service';
-import { AppService } from "../../app.service";
+import {AppService} from "../../app.service";
+import {InjectRepository} from "@nestjs/typeorm";
+import {Repository} from "typeorm";
+import {HttpService} from "@nestjs/axios";
+import {LogsService} from "../../otherServices/logger.service";
+import {RedisService} from "../../redis/redis.service";
+import {CitiesService} from "../../cities/cities.service";
+import {catchError, firstValueFrom} from "rxjs";
+import {AxiosError} from "axios/index";
 import * as process from 'process';
-import { CitiesService } from '../../cities/cities.service';
-
+import {PsychologistEntity} from "./entities/psychologist.entity";
 @Injectable()
-export class NanniesService {
+export class PsychologistsService {
+
   private readonly logger = new Logger(AppService.name);
   private id: string | number;
 
   constructor(
-    @InjectRepository(NannyEntity)
-    private repository: Repository<NannyEntity>,
+      @InjectRepository(PsychologistEntity)
+      private repository: Repository<PsychologistEntity>,
 
-    private readonly httpService: HttpService,
-    private logsService: LogsService,
-    private redisService: RedisService,
-    private citiesService: CitiesService,
+      private readonly httpService: HttpService,
+      private logsService: LogsService,
+      private redisService: RedisService,
+      private citiesService: CitiesService,
   ) {
-    this.id = process.env['ID_CHAT_NANNIES']; // 2й
+    this.id = process.env['ID_PSYHOLOGISTS']; // 12й
   }
 
   // получаем последния пост из репозитория с сортировкой
@@ -268,8 +268,8 @@ export class NanniesService {
         `${item.text}.`,
         (item.signer_id && !String(item.signer_id).includes('-')) ||
         (item.from_id && !String(item.from_id).includes('-'))
-          ? `Пользователя: https://vk.com/id${item.signer_id || item.from_id}.`
-          : null,
+            ? `Пользователя: https://vk.com/id${item.signer_id || item.from_id}.`
+            : null,
         `Пост: https://vk.com/wall${item.owner_id}_${item.id}.`,
       ];
 
@@ -288,17 +288,17 @@ export class NanniesService {
       }
     } catch (err) {
       this.logsService.error(
-        `Функция проверки и получению постов с вк - ошибка`,
-        `${err}`,
+          `Функция проверки и получению постов с вк - ошибка`,
+          `${err}`,
       );
     }
   }
 
   async sendToChat(
-    chatId: string,
-    messageText: string,
-    photoUrl: string,
-    token: string,
+      chatId: string,
+      messageText: string,
+      photoUrl: string,
+      token: string,
   ) {
     try {
       let url;
@@ -320,25 +320,25 @@ export class NanniesService {
       }
 
       const { data } = await firstValueFrom(
-        this.httpService.post<any>(url, dataToSend).pipe(
-          catchError((error: AxiosError) => {
-            if (
-              error.response &&
-              'data' in error.response &&
-              error.response.data != undefined
-            ) {
-              this.logsService.error(
-                  `Функция проверки и получению постов с вк - ошибка`,
-                  `${error}`,
-              );
-            }
-            this.logsService.error(
-              `Функция проверки и получению постов с вк - ошибка`,
-              `${error}`,
-            );
-            throw 'An error happened!';
-          }),
-        ),
+          this.httpService.post<any>(url, dataToSend).pipe(
+              catchError((error: AxiosError) => {
+                if (
+                    error.response &&
+                    'data' in error.response &&
+                    error.response.data != undefined
+                ) {
+                  this.logsService.error(
+                      `Функция проверки и получению постов с вк - ошибка`,
+                      `${error}`,
+                  );
+                }
+                this.logsService.error(
+                    `Функция проверки и получению постов с вк - ошибка`,
+                    `${error}`,
+                );
+                throw 'An error happened!';
+              }),
+          ),
       );
     } catch (err) {
       this.logsService.error(

@@ -1,31 +1,31 @@
 import { Module } from '@nestjs/common';
-import { NanniesController } from './nannies.controller';
+import { PsychologistsService } from './psychologists.service';
+import { PsychologistsController } from './psychologists.controller';
 import { HttpModule } from '@nestjs/axios';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ScheduleModule } from '@nestjs/schedule';
 import { ConfigModule } from '@nestjs/config';
-import { NannyEntity } from './entities/nanny.entity';
-import { NanniesService } from './nannies.service';
-import { RedisService } from '../../redis/redis.service';
-import { LogsService } from '../../otherServices/logger.service';
-import { RepositoryPostsAdd } from '../../otherServices/logger.module';
 import { CitiesModule } from '../../cities/cities.module';
+import { PsychologistEntity } from './entities/psychologist.entity';
+import { LogsService } from '../../otherServices/logger.service';
+import { RedisService } from '../../redis/redis.service';
+import { RepositoryPostsAdd } from '../../otherServices/logger.module';
 
 @Module({
   imports: [
     HttpModule,
-    TypeOrmModule.forFeature([NannyEntity]),
+    TypeOrmModule.forFeature([PsychologistEntity]),
     ScheduleModule.forRoot(),
     ConfigModule.forRoot(),
     CitiesModule,
   ],
-  controllers: [NanniesController],
+  controllers: [PsychologistsController],
   providers: [
-    NanniesService,
+    PsychologistsService,
     LogsService,
     RedisService,
-    RepositoryPostsAdd
+    RepositoryPostsAdd,
   ],
-  exports: [NanniesService],
+  exports: [PsychologistsService],
 })
-export class NanniesModule {}
+export class PsychologistsModule {}

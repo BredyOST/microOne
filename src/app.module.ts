@@ -36,6 +36,20 @@ import { BeautyEntity } from "./AllCategoriesForSearch/beauty/entities/beauty.en
 import { BeautyModule } from "./AllCategoriesForSearch/beauty/beauty.module";
 import { DriverEntity } from "./AllCategoriesForSearch/drivers/entities/driver.entity";
 import { DriversModule } from "./AllCategoriesForSearch/drivers/drivers.module";
+import {CookEntity} from "./AllCategoriesForSearch/cook/entities/cook.entity";
+import {CookModule} from "./AllCategoriesForSearch/cook/cook.module";
+import {PsychologistsModule} from "./AllCategoriesForSearch/psychologists/psychologists.module";
+import {PsychologistEntity} from "./AllCategoriesForSearch/psychologists/entities/psychologist.entity";
+import {AccountantEntity} from "./AllCategoriesForSearch/accountant/entities/accountant.entity";
+import {AccountantModule} from "./AllCategoriesForSearch/accountant/accountant.module";
+import {InternetMarketingEntity} from "./AllCategoriesForSearch/internet-marketing/entities/internet-marketing.entity";
+import {InternetMarketingModule} from "./AllCategoriesForSearch/internet-marketing/internet-marketing.module";
+import {FotoVideoCreaterModule} from "./AllCategoriesForSearch/foto-video-creater/foto-video-creater.module";
+import {FotoVideoCreaterEntity} from "./AllCategoriesForSearch/foto-video-creater/entities/foto-video-creater.entity";
+import {
+  CustomMadeFurnitureEntity
+} from "./AllCategoriesForSearch/custom-made-furniture/entities/custom-made-furniture.entity";
+import {CustomMadeFurnitureModule} from "./AllCategoriesForSearch/custom-made-furniture/custom-made-furniture.module";
 
 @Module({
   imports: [
@@ -70,6 +84,12 @@ import { DriversModule } from "./AllCategoriesForSearch/drivers/drivers.module";
             WordsSearchTgEntity,
             BeautyEntity,
             DriverEntity,
+            CookEntity,
+            PsychologistEntity,
+            AccountantEntity,
+            InternetMarketingEntity,
+            FotoVideoCreaterEntity,
+            CustomMadeFurnitureEntity,
           ],
         };
       },
@@ -90,6 +110,12 @@ import { DriversModule } from "./AllCategoriesForSearch/drivers/drivers.module";
     WordsSearchTgModule,
     BeautyModule,
     DriversModule,
+    CookModule,
+    PsychologistsModule,
+    AccountantModule,
+    InternetMarketingModule,
+    FotoVideoCreaterModule,
+    CustomMadeFurnitureModule,
   ],
   controllers: [AppController],
   providers: [AppService],
