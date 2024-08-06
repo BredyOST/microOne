@@ -12,7 +12,6 @@ export class TutorsController {
   @Cron('0 */5 * * * *')
   @Get('/forRedis')
   async savePostsToRedis() {
-    console.log('1')
     return this.tutorsService.savePostsToRedis()
   }
   @Get('/all')

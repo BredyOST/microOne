@@ -104,10 +104,10 @@ export class PostsController {
   async geRedisKey() {
     return this.postsService.getKeysRedis();
   }
-
+  @Cron('0 */5 * * * *')
   // для очистки
-  // @Get('/getRedisPosts')
-  // async getRedisPosts() {
-  //   return this.postsService.getRedisPosts()
-  // }
+  @Get('/deletePost')
+  async getRedisPosts() {
+    return this.postsService.getRedisPosts()
+  }
 }

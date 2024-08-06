@@ -25,6 +25,32 @@ export class FotoVideoCreaterService {
     this.id = process.env['ID_FOTO_VIDEO_CREATER']; // 15й
   }
 
+
+  // получаем последние 100 постов для удаления
+  async getOldestPosts(limit) {
+    const oldestPosts = await this.repository.find({
+      order: {
+        post_date_publish: 'ASC', // Сортировка по дате в возрастающем порядке (самые старые в начале)
+      },
+      take: limit,
+    });
+    return oldestPosts;
+  }
+  //удаление постов
+  async deleteOldPosts(limit) {
+
+    // Получаем самые старые записи
+    const oldestPosts = await this.getOldestPosts(limit);
+
+    if(oldestPosts?.length < limit) return
+
+    // Извлекаем идентификаторы записей для удаления
+    const postIds = oldestPosts.splice(0,200).map(post => post.id);
+
+    // Удаляем записи по идентификаторам
+    await this.repository.delete(postIds);
+  }
+
   // получаем последний пост из репозитория с сортировкой
   async getLatestPostById(post_owner_id: string) {
     const latestPost = await this.repository.findOne({
@@ -168,6 +194,11 @@ export class FotoVideoCreaterService {
       telegramLimiter,
   ) {
     try {
+
+      const postText = item?.text || item?.post_text;
+      if(postText?.length >= 550) {
+        return
+      }
 
       const ownerId = String(item.owner_id).replace('-', '');
       const groupInfo = groups?.find((element) => element.id == ownerId);

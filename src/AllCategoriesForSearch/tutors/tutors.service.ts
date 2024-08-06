@@ -26,6 +26,33 @@ export class TutorsService {
     this.id = process.env['ID_CHAT_TUTORS']; // 1й
   }
 
+
+  // получаем последние 100 постов для удаления
+  async getOldestPosts(limit) {
+    const oldestPosts = await this.repository.find({
+      order: {
+        post_date_publish: 'ASC', // Сортировка по дате в возрастающем порядке (самые старые в начале)
+      },
+      take: limit,
+    });
+    return oldestPosts;
+  }
+
+  //удаление постов
+  async deleteOldPosts(limit) {
+
+    // Получаем самые старые записи
+    const oldestPosts = await this.getOldestPosts(limit);
+
+    if(oldestPosts?.length < limit) return
+
+    // Извлекаем идентификаторы записей для удаления
+    const postIds = oldestPosts.splice(0,200).map(post => post.id);
+
+    // Удаляем записи по идентификаторам
+    await this.repository.delete(postIds);
+  }
+
   // найти конкретный пост
   async getPostById(post_id) {
     return await this.repository.findOne({
@@ -62,6 +89,7 @@ export class TutorsService {
   // сохраняем по ключам все в Redis
   async savePostsToRedis() {
     try {
+
       const postCountInKey = 300;
       const queryBuilder = this.repository.createQueryBuilder('posts');
       const sortedPosts = await queryBuilder

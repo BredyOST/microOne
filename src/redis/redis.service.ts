@@ -24,15 +24,49 @@ export class RedisService {
       },
     }
     this.client = createClient(config)
+
     this.client
       .connect()
       .then(() => {
         this.isConnected = true
         console.log('Redis client connected.')
+        // this.configureRedis();
+        console.log('Redis memory limit and eviction policy set.');
       })
       .catch((err) => {
         console.error('Redis connection error:', err)
       })
+  }
+
+  // private async configureRedis() {
+  //   try {
+  //     console.log('1')
+  //     // Установка предела потребляемой памяти и политики вытеснения
+  //     await this.client.sendCommand(['CONFIG', 'SET', 'maxmemory', '1gb']);
+  //     await this.client.sendCommand(['CONFIG', 'SET', 'maxmemory-policy', 'allkeys-lru']);
+  //     console.log('Redis memory limit and eviction policy set.');
+  //   } catch (err) {
+  //     console.error('Error setting Redis config:', err);
+  //   }
+  // }
+
+  async getMemoryInfo(): Promise<{
+    used_memory: string;
+    used_memory_human: string;
+    maxmemory: string;
+    maxmemory_human: string;
+    // другие поля...
+  }> {
+    const info = await this.client.info('memory');
+    const memoryInfo = info.split('\r\n').reduce((acc, line) => {
+      const [key, value] = line.split(':');
+      if (key && value) {
+        acc[key] = value;
+      }
+      return acc;
+    }, {} as any);
+
+    return memoryInfo;
   }
 
   async get(key: string): Promise<string | null> {

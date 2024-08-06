@@ -2,7 +2,6 @@ import {Injectable, Logger} from '@nestjs/common';
 import * as process from 'process';
 import {AppService} from "../../app.service";
 import {InjectRepository} from "@nestjs/typeorm";
-import {BeautyEntity} from "../beauty/entities/beauty.entity";
 import {Repository} from "typeorm";
 import {HttpService} from "@nestjs/axios";
 import {LogsService} from "../../otherServices/logger.service";
@@ -26,6 +25,32 @@ export class CustomMadeFurnitureService {
       private citiesService: CitiesService,
   ) {
     this.id = process.env['ID_MADE_FURNITURE']; // 16й
+  }
+
+
+  // получаем последние 100 постов для удаления
+  async getOldestPosts(limit) {
+    const oldestPosts = await this.repository.find({
+      order: {
+        post_date_publish: 'ASC', // Сортировка по дате в возрастающем порядке (самые старые в начале)
+      },
+      take: limit,
+    });
+    return oldestPosts;
+  }
+  //удаление постов
+  async deleteOldPosts(limit) {
+
+    // Получаем самые старые записи
+    const oldestPosts = await this.getOldestPosts(limit);
+
+    if(oldestPosts?.length < limit) return
+
+    // Извлекаем идентификаторы записей для удаления
+    const postIds = oldestPosts.splice(0,200).map(post => post.id);
+
+    // Удаляем записи по идентификаторам
+    await this.repository.delete(postIds);
   }
 
   // получаем последний пост из репозитория с сортировкой
@@ -171,6 +196,11 @@ export class CustomMadeFurnitureService {
       telegramLimiter,
   ) {
     try {
+
+      const postText = item?.text || item?.post_text;
+      if(postText?.length >= 550) {
+        return
+      }
 
       const ownerId = String(item.owner_id).replace('-', '');
       const groupInfo = groups?.find((element) => element.id == ownerId);
