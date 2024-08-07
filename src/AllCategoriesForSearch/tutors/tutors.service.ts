@@ -26,7 +26,6 @@ export class TutorsService {
     this.id = process.env['ID_CHAT_TUTORS']; // 1й
   }
 
-
   // получаем последние 100 постов для удаления
   async getOldestPosts(limit) {
     const oldestPosts = await this.repository.find({
@@ -40,14 +39,13 @@ export class TutorsService {
 
   //удаление постов
   async deleteOldPosts(limit) {
-
     // Получаем самые старые записи
     const oldestPosts = await this.getOldestPosts(limit);
 
-    if(oldestPosts?.length < limit) return
+    if (oldestPosts?.length < limit) return;
 
     // Извлекаем идентификаторы записей для удаления
-    const postIds = oldestPosts.splice(0,200).map(post => post.id);
+    const postIds = oldestPosts.splice(0, 200).map((post) => post.id);
 
     // Удаляем записи по идентификаторам
     await this.repository.delete(postIds);
@@ -89,30 +87,49 @@ export class TutorsService {
   // сохраняем по ключам все в Redis
   async savePostsToRedis() {
     try {
-
       const postCountInKey = 300;
       const queryBuilder = this.repository.createQueryBuilder('posts');
+
+      // получаем все отсортированные посты из бд
       const sortedPosts = await queryBuilder
-          .orderBy('posts.post_date_publish', 'DESC')
-          .getMany();
+        .orderBy('posts.post_date_publish', 'DESC')
+        .getMany();
 
+      // получаем все ключи на текущий момент
       const pattern = await this.redisService.getAllKeys(`id:${this.id}-*`);
-      const counterNow = Math.ceil(sortedPosts.length / postCountInKey)
 
-      if (pattern.length != 0 && (counterNow < pattern.length)){
-        pattern.forEach(async (item) => {
-          await this.redisService.del(item)
-        })
+      // сколько должно быть ключей
+      const counterNow = Math.ceil(sortedPosts.length / postCountInKey);
+
+      if (pattern.length != 0 && counterNow < pattern.length) {
+        for (const item of pattern) {
+          await this.redisService.del(item);
+        }
       }
 
-      for (let i = 0; i < sortedPosts.length; i += postCountInKey) {
+      for (let i = 0; i < +sortedPosts.length; i += postCountInKey) {
         const groupBatch = sortedPosts.slice(i, i + postCountInKey);
 
         if (groupBatch.length === 0) {
           break;
         }
-        const tempKey = `temp:id:${this.id}-${i}-${i + postCountInKey}`;
+
         const mainKey = `id:${this.id}-${i}-${i + postCountInKey}`;
+
+        // Проверяем существование основного ключа
+        const keyExists = await this.redisService.exists(mainKey);
+
+        // Если ключ уже существует, пропускаем его перезапись
+        if (
+          keyExists &&
+          (i < pattern.length * postCountInKey - postCountInKey ||
+          i > pattern.length * postCountInKey - postCountInKey)
+        ) {
+          console.log(`pass`)
+          continue;
+        }
+
+        const tempKey = `temp:id:${this.id}-${i}-${i + postCountInKey}`;
 
         // Сначала сохраняем во временный ключ
         await this.redisService.set(tempKey, groupBatch);
@@ -136,12 +153,19 @@ export class TutorsService {
     }
   }
 
-  async createTg(item, groups, profiles, identificator, sendMessage, tokenBot, telegramLimiter,) {
-
+  async createTg(
+    item,
+    groups,
+    profiles,
+    identificator,
+    sendMessage,
+    tokenBot,
+    telegramLimiter,
+  ) {
     const postText = item?.message;
 
-    if(postText?.length >= 350) {
-      return
+    if (postText?.length >= 350) {
+      return;
     }
 
     // if (sendMessage) this.sendPostToTelegramFromTg(item,groups,profiles, tokenBot, telegramLimiter);
@@ -161,14 +185,20 @@ export class TutorsService {
       photo_100_user: '', // Фото пользователя (если есть)
       post_id: item?.id || '', // ID поста
       post_owner_id: item?.peerId?.channelId?.value?.toString() || '', // ID того, кто получил чат, группу
-      post_fromId: item?.fromId?.userId?.value?.toString() || item?.peerId?.channelId?.value?.toString() || '', // ID отправителя
+      post_fromId:
+        item?.fromId?.userId?.value?.toString() ||
+        item?.peerId?.channelId?.value?.toString() ||
+        '', // ID отправителя
       post_date_publish: item?.date, // Дата публикации поста
       post_text: item?.message || '', // Текст поста
       post_type: item?.className || '', // Тип поста (если есть)
-      signer_id: item?.fromId?.userId?.value?.toString() || item?.peerId?.channelId?.value?.toString() || '', // ID напис
-    }
+      signer_id:
+        item?.fromId?.userId?.value?.toString() ||
+        item?.peerId?.channelId?.value?.toString() ||
+        '', // ID напис
+    };
 
-    console.log(obj)
+    console.log(obj);
 
     return this.repository.save({
       identification_post: identificator,
@@ -185,11 +215,17 @@ export class TutorsService {
       photo_100_user: '', // Фото пользователя (если есть)
       post_id: item?.id || '', // ID поста
       post_owner_id: item?.peerId?.channelId?.value?.toString() || '', // ID того, кто получил чат, группу
-      post_fromId: item?.fromId?.userId?.value?.toString() || item?.peerId?.channelId?.value?.toString() || '', // ID отправителя
+      post_fromId:
+        item?.fromId?.userId?.value?.toString() ||
+        item?.peerId?.channelId?.value?.toString() ||
+        '', // ID отправителя
       post_date_publish: item?.date, // Дата публикации поста
       post_text: item?.message || '', // Текст поста
       post_type: item?.className || '', // Тип поста (если есть)
-      signer_id: item?.fromId?.userId?.value?.toString() || item?.peerId?.channelId?.value?.toString() || '', // ID напис
+      signer_id:
+        item?.fromId?.userId?.value?.toString() ||
+        item?.peerId?.channelId?.value?.toString() ||
+        '', // ID напис
     });
   }
   //проверяем язык
@@ -200,56 +236,65 @@ export class TutorsService {
     return englishLettersRegex.test(str);
   }
   // создание для ВК
-  async createFromVkDataBase(item, groups, profiles, identificator, sendMessage, tokenBot, telegramLimiter,) {
-
+  async createFromVkDataBase(
+    item,
+    groups,
+    profiles,
+    identificator,
+    sendMessage,
+    tokenBot,
+    telegramLimiter,
+  ) {
     try {
-
       const postText = item?.text || item?.post_text;
-      if(postText?.length >= 250) {
-        return
+      if (postText?.length >= 250) {
+        return;
       }
 
       const ownerId = String(item?.owner_id).replace('-', '');
       const groupInfo = groups?.find((element) => element?.id == ownerId);
       const profileInfo = profiles?.find(
-          (element) => element.id == item?.signer_id || item?.owner_id,
+        (element) => element.id == item?.signer_id || item?.owner_id,
       );
 
-      if (groupInfo?.id == `199727029` ||
-          groupInfo?.id == `222707022` ||
-          groupInfo?.id == `224879501` ||
-          groupInfo?.id == `222783887` ||
-          groupInfo?.id == `224877554` ||
-          groupInfo?.id == `210182463` ||
-          groupInfo?.id == `224877648` ||
-          groupInfo?.id == `225537848` ||
-          groupInfo?.id == `225537909` ||
-          groupInfo?.id == `225537941` ||
-          groupInfo?.id == `225538003` ||
-          groupInfo?.id == `222873123` ||
-          groupInfo?.id == `222873119`
+      if (
+        groupInfo?.id == `199727029` ||
+        groupInfo?.id == `222707022` ||
+        groupInfo?.id == `224879501` ||
+        groupInfo?.id == `222783887` ||
+        groupInfo?.id == `224877554` ||
+        groupInfo?.id == `210182463` ||
+        groupInfo?.id == `224877648` ||
+        groupInfo?.id == `225537848` ||
+        groupInfo?.id == `225537909` ||
+        groupInfo?.id == `225537941` ||
+        groupInfo?.id == `225538003` ||
+        groupInfo?.id == `222873123` ||
+        groupInfo?.id == `222873119`
       ) {
-        return
+        return;
       }
 
-      const cityGroup = groupInfo?.city
-      const cityUser = profileInfo?.city
+      const cityGroup = groupInfo?.city;
+      const cityUser = profileInfo?.city;
       let cityGroupEng;
       let cityUserEng;
 
-      if(cityGroup?.title?.length >= 1) cityGroupEng = await this.containsEnglishLetters(cityGroup?.title);
-      if(cityUser?.title?.length >= 1) cityUserEng = await this.containsEnglishLetters(cityUser?.title);
+      if (cityGroup?.title?.length >= 1)
+        cityGroupEng = await this.containsEnglishLetters(cityGroup?.title);
+      if (cityUser?.title?.length >= 1)
+        cityUserEng = await this.containsEnglishLetters(cityUser?.title);
 
       let groupCityName = null;
       let userCityName = null;
 
-      if(cityGroupEng) {
-        const city = await this.citiesService.findByIdVk(cityGroup?.id)
-        groupCityName = city?.title
+      if (cityGroupEng) {
+        const city = await this.citiesService.findByIdVk(cityGroup?.id);
+        groupCityName = city?.title;
       }
-      if(cityUserEng) {
-        const city = await this.citiesService.findByIdVk(cityUser?.id)
-        userCityName = city?.title
+      if (cityUserEng) {
+        const city = await this.citiesService.findByIdVk(cityUser?.id);
+        userCityName = city?.title;
       }
 
       if (sendMessage) this.sendPostToTelegram(item, tokenBot, telegramLimiter);
@@ -275,7 +320,10 @@ export class TutorsService {
         signer_id: item?.signer_id || '',
       });
     } catch (err) {
-      this.logsService.error(`Функция добавление постов тюторс- ошибка`, `${err}`,);
+      this.logsService.error(
+        `Функция добавление постов тюторс- ошибка`,
+        `${err}`,
+      );
     }
   }
   async createIfEmpty(post) {
@@ -303,7 +351,6 @@ export class TutorsService {
     });
   }
   async sendPostToTelegram(item, tokenBot, telegramLimiter) {
-
     try {
       let chatId;
 
@@ -325,13 +372,12 @@ export class TutorsService {
         messageText = messageLines.filter((line) => line !== null).join('\n');
       }
 
-
       if (item?.text?.includes('матем' || 'матан' || 'алгебр')) {
         imageUrl = 'https://timgotow.ru/uploads/math.jpg';
         chatId = process.env['CHAT_MATH'];
         if (messageLines && chatId) {
           await telegramLimiter.schedule(() =>
-              this.sendToChat(chatId, messageText, imageUrl, tokenBot),
+            this.sendToChat(chatId, messageText, imageUrl, tokenBot),
           );
         }
       }
@@ -339,7 +385,7 @@ export class TutorsService {
         chatId = process.env['CHAT_MATH'];
         if (messageLines && chatId) {
           await telegramLimiter.schedule(() =>
-              this.sendToChat(chatId, messageText, imageUrl, tokenBot),
+            this.sendToChat(chatId, messageText, imageUrl, tokenBot),
           );
         }
       }
@@ -348,7 +394,7 @@ export class TutorsService {
         chatId = process.env['CHAT_BIOLOGY'];
         if (messageLines && chatId) {
           await telegramLimiter.schedule(() =>
-              this.sendToChat(chatId, messageText, imageUrl, tokenBot),
+            this.sendToChat(chatId, messageText, imageUrl, tokenBot),
           );
         }
       }
@@ -357,7 +403,7 @@ export class TutorsService {
         chatId = process.env['CHAT_BIOLOGY'];
         if (messageLines && chatId) {
           await telegramLimiter.schedule(() =>
-              this.sendToChat(chatId, messageText, imageUrl, tokenBot),
+            this.sendToChat(chatId, messageText, imageUrl, tokenBot),
           );
         }
       }
@@ -367,7 +413,7 @@ export class TutorsService {
         chatId = process.env['CHAT_INFORM'];
         if (messageLines && chatId) {
           await telegramLimiter.schedule(() =>
-              this.sendToChat(chatId, messageText, imageUrl, tokenBot),
+            this.sendToChat(chatId, messageText, imageUrl, tokenBot),
           );
         }
       }
@@ -376,7 +422,7 @@ export class TutorsService {
         chatId = process.env['CHAT_SOCIAL_HISTORY'];
         if (messageLines && chatId) {
           await telegramLimiter.schedule(() =>
-              this.sendToChat(chatId, messageText, imageUrl, tokenBot),
+            this.sendToChat(chatId, messageText, imageUrl, tokenBot),
           );
         }
       }
@@ -385,7 +431,7 @@ export class TutorsService {
         chatId = process.env['CHAT_SOCIAL_HISTORY'];
         if (messageLines && chatId) {
           await telegramLimiter.schedule(() =>
-              this.sendToChat(chatId, messageText, imageUrl, tokenBot),
+            this.sendToChat(chatId, messageText, imageUrl, tokenBot),
           );
         }
       }
@@ -394,16 +440,16 @@ export class TutorsService {
         chatId = process.env['CHAT_RUS'];
         if (messageLines && chatId) {
           await telegramLimiter.schedule(() =>
-              this.sendToChat(chatId, messageText, imageUrl, tokenBot),
+            this.sendToChat(chatId, messageText, imageUrl, tokenBot),
           );
         }
       }
       if (item?.text?.includes('рус')) {
         imageUrl = 'https://timgotow.ru/uploads/ru.jpg';
-        chatId = process.env["CHAT_RUS"];
+        chatId = process.env['CHAT_RUS'];
         if (messageLines && chatId) {
           await telegramLimiter.schedule(() =>
-              this.sendToChat(chatId, messageText, imageUrl, tokenBot),
+            this.sendToChat(chatId, messageText, imageUrl, tokenBot),
           );
         }
       }
@@ -412,7 +458,7 @@ export class TutorsService {
         chatId = process.env['CHAT_LANGUAGE'];
         if (messageLines && chatId) {
           await telegramLimiter.schedule(() =>
-              this.sendToChat(chatId, messageText, imageUrl, tokenBot),
+            this.sendToChat(chatId, messageText, imageUrl, tokenBot),
           );
         }
       }
@@ -420,7 +466,7 @@ export class TutorsService {
         chatId = process.env['CHAT_LANGUAGE'];
         if (messageLines && chatId) {
           await telegramLimiter.schedule(() =>
-              this.sendToChat(chatId, messageText, imageUrl, tokenBot),
+            this.sendToChat(chatId, messageText, imageUrl, tokenBot),
           );
         }
       }
@@ -429,7 +475,7 @@ export class TutorsService {
         chatId = process.env['CHAT_LANGUAGE'];
         if (messageLines && chatId) {
           await telegramLimiter.schedule(() =>
-              this.sendToChat(chatId, messageText, imageUrl, tokenBot),
+            this.sendToChat(chatId, messageText, imageUrl, tokenBot),
           );
         }
       }
@@ -438,7 +484,7 @@ export class TutorsService {
         chatId = process.env['CHAT_LANGUAGE'];
         if (messageLines && chatId) {
           await telegramLimiter.schedule(() =>
-              this.sendToChat(chatId, messageText, imageUrl, tokenBot),
+            this.sendToChat(chatId, messageText, imageUrl, tokenBot),
           );
         }
       }
@@ -448,29 +494,45 @@ export class TutorsService {
         chatId = process.env['CHAT_PHYSIC'];
         if (messageLines && chatId) {
           await telegramLimiter.schedule(() =>
-              this.sendToChat(chatId, messageText, imageUrl, tokenBot),
+            this.sendToChat(chatId, messageText, imageUrl, tokenBot),
           );
         }
       }
-      if (item?.text?.includes('2 класс' || '1 кл' || '3 кл' || '4 кл' || 'чтени' || 'первокла' || 'второкла' || 'треьекл' || 'четверок' || 'начал' || 'к школе' || 'школ')) {
+      if (
+        item?.text?.includes(
+          '2 класс' ||
+            '1 кл' ||
+            '3 кл' ||
+            '4 кл' ||
+            'чтени' ||
+            'первокла' ||
+            'второкла' ||
+            'треьекл' ||
+            'четверок' ||
+            'начал' ||
+            'к школе' ||
+            'школ',
+        )
+      ) {
         imageUrl = `https://timgotow.ru/uploads/start.jpg`;
         chatId = process.env['CHAT_START'];
         if (messageLines && chatId) {
           await telegramLimiter.schedule(() =>
-              this.sendToChat(chatId, messageText, imageUrl, tokenBot),
+            this.sendToChat(chatId, messageText, imageUrl, tokenBot),
           );
         }
       }
     } catch (err) {
-
-      this.logsService.error(
-        `Функция sendPostToTelegram - ошибка`,
-        `${err}`,
-      );
+      this.logsService.error(`Функция sendPostToTelegram - ошибка`, `${err}`);
     }
   }
-  async sendPostToTelegramFromTg(item, groups, profiles, tokenBot, telegramLimiter) {
-
+  async sendPostToTelegramFromTg(
+    item,
+    groups,
+    profiles,
+    tokenBot,
+    telegramLimiter,
+  ) {
     try {
       let chatId;
 
@@ -479,9 +541,9 @@ export class TutorsService {
         `${new Date(item?.date * 1000).toLocaleString()}.`,
         `Текст поста:`,
         `${item?.message}.`,
-        (profiles?.userName)
-            ? `Пользователь: https://t.me/${profiles?.userName}.`
-            : null,
+        profiles?.userName
+          ? `Пользователь: https://t.me/${profiles?.userName}.`
+          : null,
         `Пост: https://t.me/${groups.name_group}/${item.post_id}.`,
       ];
 
@@ -491,13 +553,12 @@ export class TutorsService {
         messageText = messageLines.filter((line) => line !== null).join('\n');
       }
 
-
       if (item?.message?.includes('матем' || 'матан' || 'алгебр')) {
         imageUrl = 'https://timgotow.ru/uploads/math.jpg';
         chatId = process.env['CHAT_MATH'];
         if (messageLines && chatId) {
           await telegramLimiter.schedule(() =>
-              this.sendToChat(chatId, messageText, imageUrl, tokenBot),
+            this.sendToChat(chatId, messageText, imageUrl, tokenBot),
           );
         }
       }
@@ -505,7 +566,7 @@ export class TutorsService {
         chatId = process.env['CHAT_MATH'];
         if (messageLines && chatId) {
           await telegramLimiter.schedule(() =>
-              this.sendToChat(chatId, messageText, imageUrl, tokenBot),
+            this.sendToChat(chatId, messageText, imageUrl, tokenBot),
           );
         }
       }
@@ -514,7 +575,7 @@ export class TutorsService {
         chatId = process.env['CHAT_BIOLOGY'];
         if (messageLines && chatId) {
           await telegramLimiter.schedule(() =>
-              this.sendToChat(chatId, messageText, imageUrl, tokenBot),
+            this.sendToChat(chatId, messageText, imageUrl, tokenBot),
           );
         }
       }
@@ -523,7 +584,7 @@ export class TutorsService {
         chatId = process.env['CHAT_BIOLOGY'];
         if (messageLines && chatId) {
           await telegramLimiter.schedule(() =>
-              this.sendToChat(chatId, messageText, imageUrl, tokenBot),
+            this.sendToChat(chatId, messageText, imageUrl, tokenBot),
           );
         }
       }
@@ -533,7 +594,7 @@ export class TutorsService {
         chatId = process.env['CHAT_INFORM'];
         if (messageLines && chatId) {
           await telegramLimiter.schedule(() =>
-              this.sendToChat(chatId, messageText, imageUrl, tokenBot),
+            this.sendToChat(chatId, messageText, imageUrl, tokenBot),
           );
         }
       }
@@ -542,7 +603,7 @@ export class TutorsService {
         chatId = process.env['CHAT_SOCIAL_HISTORY'];
         if (messageLines && chatId) {
           await telegramLimiter.schedule(() =>
-              this.sendToChat(chatId, messageText, imageUrl, tokenBot),
+            this.sendToChat(chatId, messageText, imageUrl, tokenBot),
           );
         }
       }
@@ -551,7 +612,7 @@ export class TutorsService {
         chatId = process.env['CHAT_SOCIAL_HISTORY'];
         if (messageLines && chatId) {
           await telegramLimiter.schedule(() =>
-              this.sendToChat(chatId, messageText, imageUrl, tokenBot),
+            this.sendToChat(chatId, messageText, imageUrl, tokenBot),
           );
         }
       }
@@ -560,16 +621,16 @@ export class TutorsService {
         chatId = process.env['CHAT_RUS'];
         if (messageLines && chatId) {
           await telegramLimiter.schedule(() =>
-              this.sendToChat(chatId, messageText, imageUrl, tokenBot),
+            this.sendToChat(chatId, messageText, imageUrl, tokenBot),
           );
         }
       }
       if (item?.message?.includes('рус')) {
         imageUrl = 'https://timgotow.ru/uploads/ru.jpg';
-        chatId = process.env["CHAT_RUS"];
+        chatId = process.env['CHAT_RUS'];
         if (messageLines && chatId) {
           await telegramLimiter.schedule(() =>
-              this.sendToChat(chatId, messageText, imageUrl, tokenBot),
+            this.sendToChat(chatId, messageText, imageUrl, tokenBot),
           );
         }
       }
@@ -578,7 +639,7 @@ export class TutorsService {
         chatId = process.env['CHAT_LANGUAGE'];
         if (messageLines && chatId) {
           await telegramLimiter.schedule(() =>
-              this.sendToChat(chatId, messageText, imageUrl, tokenBot),
+            this.sendToChat(chatId, messageText, imageUrl, tokenBot),
           );
         }
       }
@@ -586,7 +647,7 @@ export class TutorsService {
         chatId = process.env['CHAT_LANGUAGE'];
         if (messageLines && chatId) {
           await telegramLimiter.schedule(() =>
-              this.sendToChat(chatId, messageText, imageUrl, tokenBot),
+            this.sendToChat(chatId, messageText, imageUrl, tokenBot),
           );
         }
       }
@@ -595,7 +656,7 @@ export class TutorsService {
         chatId = process.env['CHAT_LANGUAGE'];
         if (messageLines && chatId) {
           await telegramLimiter.schedule(() =>
-              this.sendToChat(chatId, messageText, imageUrl, tokenBot),
+            this.sendToChat(chatId, messageText, imageUrl, tokenBot),
           );
         }
       }
@@ -604,7 +665,7 @@ export class TutorsService {
         chatId = process.env['CHAT_LANGUAGE'];
         if (messageLines && chatId) {
           await telegramLimiter.schedule(() =>
-              this.sendToChat(chatId, messageText, imageUrl, tokenBot),
+            this.sendToChat(chatId, messageText, imageUrl, tokenBot),
           );
         }
       }
@@ -614,30 +675,45 @@ export class TutorsService {
         chatId = process.env['CHAT_PHYSIC'];
         if (messageLines && chatId) {
           await telegramLimiter.schedule(() =>
-              this.sendToChat(chatId, messageText, imageUrl, tokenBot),
+            this.sendToChat(chatId, messageText, imageUrl, tokenBot),
           );
         }
       }
-      if (item?.message?.includes('2 класс' || '1 кл' || '3 кл' || '4 кл' || 'чтени' || 'первокла' || 'второкла' || 'треьекл' || 'четверок' || 'начал' || 'к школе' || 'школ')) {
+      if (
+        item?.message?.includes(
+          '2 класс' ||
+            '1 кл' ||
+            '3 кл' ||
+            '4 кл' ||
+            'чтени' ||
+            'первокла' ||
+            'второкла' ||
+            'треьекл' ||
+            'четверок' ||
+            'начал' ||
+            'к школе' ||
+            'школ',
+        )
+      ) {
         imageUrl = `https://timgotow.ru/uploads/start.jpg`;
         chatId = process.env['CHAT_START'];
         if (messageLines && chatId) {
           await telegramLimiter.schedule(() =>
-              this.sendToChat(chatId, messageText, imageUrl, tokenBot),
+            this.sendToChat(chatId, messageText, imageUrl, tokenBot),
           );
         }
       }
     } catch (err) {
-
-      this.logsService.error(
-          `Функция sendPostToTelegram - ошибка`,
-          `${err}`,
-      );
+      this.logsService.error(`Функция sendPostToTelegram - ошибка`, `${err}`);
     }
   }
-  async sendToChat(chatId: string, messageText: string, photoUrl: string, token: string,) {
+  async sendToChat(
+    chatId: string,
+    messageText: string,
+    photoUrl: string,
+    token: string,
+  ) {
     try {
-
       let url;
       let dataToSend;
       if (photoUrl) {
@@ -672,19 +748,16 @@ export class TutorsService {
               `Функция проверки и получению постов с вк - ошибка`,
               `${error}`,
             );
-            console.log(error)
+            console.log(error);
             throw 'An error happened!';
           }),
         ),
       );
     } catch (err) {
-
       this.logsService.error(
-          `Функция отправки в телегу sendToChat - ошибка`,
-          `${err}`,
+        `Функция отправки в телегу sendToChat - ошибка`,
+        `${err}`,
       );
     }
   }
-
 }
-

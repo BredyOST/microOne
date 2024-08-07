@@ -96,31 +96,98 @@ export class RentRentalApartService {
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
   // сохраняем по ключам все в Redis
+  // async savePostsToRedis() {
+  //   try {
+  //     const postCountInKey = 300;
+  //     const queryBuilder = this.repository.createQueryBuilder('posts');
+  //     const sortedPosts = await queryBuilder
+  //       .orderBy('posts.post_date_publish', 'DESC')
+  //       .getMany();
+  //
+  //     const pattern = await this.redisService.getAllKeys(`id:${this.id}-*`);
+  //     const counterNow = Math.ceil(sortedPosts.length / postCountInKey);
+  //
+  //     if (pattern.length != 0 && counterNow < pattern.length) {
+  //       pattern.forEach(async (item) => {
+  //         await this.redisService.del(item);
+  //       });
+  //     }
+  //
+  //     for (let i = 0; i < sortedPosts.length; i += postCountInKey) {
+  //       const groupBatch = sortedPosts.slice(i, i + postCountInKey);
+  //
+  //       if (groupBatch.length === 0) {
+  //         break;
+  //       }
+  //       const tempKey = `temp:id:${this.id}-${i}-${i + postCountInKey}`;
+  //       const mainKey = `id:${this.id}-${i}-${i + postCountInKey}`;
+  //
+  //       // Сначала сохраняем во временный ключ
+  //       await this.redisService.set(tempKey, groupBatch);
+  //
+  //       let renameAttempts = 0;
+  //
+  //       while (renameAttempts <= 6) {
+  //         const checkKey = await this.redisService.exists(tempKey);
+  //         if (checkKey) {
+  //           await this.redisService.rename(tempKey, mainKey);
+  //           break;
+  //         } else {
+  //           renameAttempts++;
+  //           await this.sleep(1000); // Подождать 1 секунду перед следующей попыткой
+  //         }
+  //         break; // Если успешно, выходим из цикла
+  //       }
+  //     }
+  //   } catch (err) {
+  //     console.log(err);
+  //   }
+  // }
   async savePostsToRedis() {
     try {
       const postCountInKey = 300;
       const queryBuilder = this.repository.createQueryBuilder('posts');
+
+      // получаем все отсортированные посты из бд
       const sortedPosts = await queryBuilder
         .orderBy('posts.post_date_publish', 'DESC')
         .getMany();
 
+      // получаем все ключи на текущий момент
       const pattern = await this.redisService.getAllKeys(`id:${this.id}-*`);
+
+      // сколько должно быть ключей
       const counterNow = Math.ceil(sortedPosts.length / postCountInKey);
 
       if (pattern.length != 0 && counterNow < pattern.length) {
-        pattern.forEach(async (item) => {
+        for (const item of pattern) {
           await this.redisService.del(item);
-        });
+        }
       }
 
-      for (let i = 0; i < sortedPosts.length; i += postCountInKey) {
+      for (let i = 0; i < +sortedPosts.length; i += postCountInKey) {
         const groupBatch = sortedPosts.slice(i, i + postCountInKey);
 
         if (groupBatch.length === 0) {
           break;
         }
-        const tempKey = `temp:id:${this.id}-${i}-${i + postCountInKey}`;
+
         const mainKey = `id:${this.id}-${i}-${i + postCountInKey}`;
+
+        // Проверяем существование основного ключа
+        const keyExists = await this.redisService.exists(mainKey);
+
+        // Если ключ уже существует, пропускаем его перезапись
+        if (
+          keyExists &&
+          (i < pattern.length * postCountInKey - postCountInKey ||
+            i > pattern.length * postCountInKey - postCountInKey)
+        ) {
+          console.log(`pass`)
+          continue;
+        }
+
+        const tempKey = `temp:id:${this.id}-${i}-${i + postCountInKey}`;
 
         // Сначала сохраняем во временный ключ
         await this.redisService.set(tempKey, groupBatch);
