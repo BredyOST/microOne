@@ -622,7 +622,7 @@ export class PostsService {
       const memoryUse = await this.redisService.getMemoryInfo();
       const usedMemoryHuman = parseFloat(memoryUse?.used_memory_human);
       const maxMemoryHuman = parseFloat(memoryUse?.maxmemory_human);
-      const percent = (+usedMemoryHuman * 100) / +maxMemoryHuman >= 70;
+      const percent = (+usedMemoryHuman * 100) / +maxMemoryHuman >= 60;
 
       if (percent) {
         const categories = [
