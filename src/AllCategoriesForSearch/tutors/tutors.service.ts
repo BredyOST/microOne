@@ -427,10 +427,28 @@ export class TutorsService {
         `Пост: https://vk.com/wall${item?.owner_id}_${item?.id}.`,
       ];
 
+      const messageLinesTwo = [
+        `Дата публикации:`,
+        `${new Date(item?.date * 1000).toLocaleString()}.`,
+        `Текст поста:`,
+        `${item?.text}.`,
+        (item?.signer_id && !String(item.signer_id).includes('-')) ||
+        (item?.from_id && !String(item.from_id).includes('-'))
+          ? `Пользователь: https://vk.com/id${item?.signer_id || item?.from_id}.`
+          : null,
+        `Пост: https://vk.com/wall${item?.owner_id}_${item?.id}.`,
+        '----------------------------------',
+        `Больше заявок на нашем сайте клиенты.com, прямая ссылка https://xn--e1affem4a4d.com`,
+        'По вопросам доступа пишите https://t.me/nikaboiar',
+      ];
+
       let imageUrl;
       let messageText;
+      let messageTextTwo;
+
       if (messageLines) {
         messageText = messageLines.filter((line) => line !== null).join('\n');
+        messageTextTwo = messageLinesTwo.filter((line) => line !== null).join('\n');
       }
 
       if (item?.text?.includes('матем' || 'матан' || 'алгебр')) {
@@ -438,7 +456,7 @@ export class TutorsService {
         chatId = process.env['CHAT_MATH'];
         if (messageLines && chatId) {
           await telegramLimiter.schedule(() =>
-            this.sendToChat(chatId, messageText, imageUrl, tokenBot),
+            this.sendToChat(chatId, messageText, imageUrl, tokenBot, messageTextTwo),
           );
         }
       }
@@ -446,7 +464,7 @@ export class TutorsService {
         chatId = process.env['CHAT_MATH'];
         if (messageLines && chatId) {
           await telegramLimiter.schedule(() =>
-            this.sendToChat(chatId, messageText, imageUrl, tokenBot),
+              this.sendToChat(chatId, messageText, imageUrl, tokenBot, messageTextTwo),
           );
         }
       }
@@ -455,7 +473,7 @@ export class TutorsService {
         chatId = process.env['CHAT_BIOLOGY'];
         if (messageLines && chatId) {
           await telegramLimiter.schedule(() =>
-            this.sendToChat(chatId, messageText, imageUrl, tokenBot),
+              this.sendToChat(chatId, messageText, imageUrl, tokenBot, messageTextTwo),
           );
         }
       }
@@ -464,7 +482,7 @@ export class TutorsService {
         chatId = process.env['CHAT_BIOLOGY'];
         if (messageLines && chatId) {
           await telegramLimiter.schedule(() =>
-            this.sendToChat(chatId, messageText, imageUrl, tokenBot),
+              this.sendToChat(chatId, messageText, imageUrl, tokenBot, messageTextTwo),
           );
         }
       }
@@ -474,7 +492,7 @@ export class TutorsService {
         chatId = process.env['CHAT_INFORM'];
         if (messageLines && chatId) {
           await telegramLimiter.schedule(() =>
-            this.sendToChat(chatId, messageText, imageUrl, tokenBot),
+              this.sendToChat(chatId, messageText, imageUrl, tokenBot, messageTextTwo),
           );
         }
       }
@@ -483,7 +501,7 @@ export class TutorsService {
         chatId = process.env['CHAT_SOCIAL_HISTORY'];
         if (messageLines && chatId) {
           await telegramLimiter.schedule(() =>
-            this.sendToChat(chatId, messageText, imageUrl, tokenBot),
+              this.sendToChat(chatId, messageText, imageUrl, tokenBot, messageTextTwo),
           );
         }
       }
@@ -492,7 +510,7 @@ export class TutorsService {
         chatId = process.env['CHAT_SOCIAL_HISTORY'];
         if (messageLines && chatId) {
           await telegramLimiter.schedule(() =>
-            this.sendToChat(chatId, messageText, imageUrl, tokenBot),
+              this.sendToChat(chatId, messageText, imageUrl, tokenBot, messageTextTwo),
           );
         }
       }
@@ -501,7 +519,7 @@ export class TutorsService {
         chatId = process.env['CHAT_RUS'];
         if (messageLines && chatId) {
           await telegramLimiter.schedule(() =>
-            this.sendToChat(chatId, messageText, imageUrl, tokenBot),
+              this.sendToChat(chatId, messageText, imageUrl, tokenBot, messageTextTwo),
           );
         }
       }
@@ -510,7 +528,7 @@ export class TutorsService {
         chatId = process.env['CHAT_RUS'];
         if (messageLines && chatId) {
           await telegramLimiter.schedule(() =>
-            this.sendToChat(chatId, messageText, imageUrl, tokenBot),
+              this.sendToChat(chatId, messageText, imageUrl, tokenBot, messageTextTwo),
           );
         }
       }
@@ -519,7 +537,7 @@ export class TutorsService {
         chatId = process.env['CHAT_LANGUAGE'];
         if (messageLines && chatId) {
           await telegramLimiter.schedule(() =>
-            this.sendToChat(chatId, messageText, imageUrl, tokenBot),
+              this.sendToChat(chatId, messageText, imageUrl, tokenBot, messageTextTwo),
           );
         }
       }
@@ -527,7 +545,7 @@ export class TutorsService {
         chatId = process.env['CHAT_LANGUAGE'];
         if (messageLines && chatId) {
           await telegramLimiter.schedule(() =>
-            this.sendToChat(chatId, messageText, imageUrl, tokenBot),
+              this.sendToChat(chatId, messageText, imageUrl, tokenBot, messageTextTwo),
           );
         }
       }
@@ -536,7 +554,7 @@ export class TutorsService {
         chatId = process.env['CHAT_LANGUAGE'];
         if (messageLines && chatId) {
           await telegramLimiter.schedule(() =>
-            this.sendToChat(chatId, messageText, imageUrl, tokenBot),
+              this.sendToChat(chatId, messageText, imageUrl, tokenBot, messageTextTwo),
           );
         }
       }
@@ -545,7 +563,7 @@ export class TutorsService {
         chatId = process.env['CHAT_LANGUAGE'];
         if (messageLines && chatId) {
           await telegramLimiter.schedule(() =>
-            this.sendToChat(chatId, messageText, imageUrl, tokenBot),
+              this.sendToChat(chatId, messageText, imageUrl, tokenBot, messageTextTwo),
           );
         }
       }
@@ -555,7 +573,7 @@ export class TutorsService {
         chatId = process.env['CHAT_PHYSIC'];
         if (messageLines && chatId) {
           await telegramLimiter.schedule(() =>
-            this.sendToChat(chatId, messageText, imageUrl, tokenBot),
+              this.sendToChat(chatId, messageText, imageUrl, tokenBot, messageTextTwo),
           );
         }
       }
@@ -579,7 +597,7 @@ export class TutorsService {
         chatId = process.env['CHAT_START'];
         if (messageLines && chatId) {
           await telegramLimiter.schedule(() =>
-            this.sendToChat(chatId, messageText, imageUrl, tokenBot),
+              this.sendToChat(chatId, messageText, imageUrl, tokenBot, messageTextTwo),
           );
         }
       }
@@ -608,10 +626,27 @@ export class TutorsService {
         `Пост: https://t.me/${groups.name_group}/${item.post_id}.`,
       ];
 
+      const messageLinesTwo = [
+        `Дата публикации:`,
+        `${new Date(item?.date * 1000).toLocaleString()}.`,
+        `Текст поста:`,
+        `${item?.message}.`,
+        profiles?.userName
+            ? `Пользователь: https://t.me/${profiles?.userName}.`
+            : null,
+        `Пост: https://t.me/${groups.name_group}/${item.post_id}.`,
+        '----------------------------------',
+        `Больше заявок на нашем сайте клиенты.com или прямая ссылка https://xn--e1affem4a4d.com`,
+        'По вопросам доступа пишите @MaksOST1 или @Teodor2896'
+      ];
+
+
       let imageUrl;
       let messageText;
+      let messageTextTwo;
       if (messageLines) {
         messageText = messageLines.filter((line) => line !== null).join('\n');
+        messageTextTwo = messageLinesTwo.filter((line) => line !== null).join('\n');
       }
 
       if (item?.message?.includes('матем' || 'матан' || 'алгебр')) {
@@ -619,7 +654,7 @@ export class TutorsService {
         chatId = process.env['CHAT_MATH'];
         if (messageLines && chatId) {
           await telegramLimiter.schedule(() =>
-            this.sendToChat(chatId, messageText, imageUrl, tokenBot),
+            this.sendToChat(chatId, messageText, imageUrl, tokenBot, messageTextTwo),
           );
         }
       }
@@ -627,7 +662,7 @@ export class TutorsService {
         chatId = process.env['CHAT_MATH'];
         if (messageLines && chatId) {
           await telegramLimiter.schedule(() =>
-            this.sendToChat(chatId, messageText, imageUrl, tokenBot),
+              this.sendToChat(chatId, messageText, imageUrl, tokenBot, messageTextTwo),
           );
         }
       }
@@ -636,7 +671,7 @@ export class TutorsService {
         chatId = process.env['CHAT_BIOLOGY'];
         if (messageLines && chatId) {
           await telegramLimiter.schedule(() =>
-            this.sendToChat(chatId, messageText, imageUrl, tokenBot),
+              this.sendToChat(chatId, messageText, imageUrl, tokenBot, messageTextTwo),
           );
         }
       }
@@ -645,7 +680,7 @@ export class TutorsService {
         chatId = process.env['CHAT_BIOLOGY'];
         if (messageLines && chatId) {
           await telegramLimiter.schedule(() =>
-            this.sendToChat(chatId, messageText, imageUrl, tokenBot),
+              this.sendToChat(chatId, messageText, imageUrl, tokenBot, messageTextTwo),
           );
         }
       }
@@ -655,7 +690,7 @@ export class TutorsService {
         chatId = process.env['CHAT_INFORM'];
         if (messageLines && chatId) {
           await telegramLimiter.schedule(() =>
-            this.sendToChat(chatId, messageText, imageUrl, tokenBot),
+            this.sendToChat(chatId, messageText, imageUrl, tokenBot, messageTextTwo),
           );
         }
       }
@@ -664,7 +699,7 @@ export class TutorsService {
         chatId = process.env['CHAT_SOCIAL_HISTORY'];
         if (messageLines && chatId) {
           await telegramLimiter.schedule(() =>
-            this.sendToChat(chatId, messageText, imageUrl, tokenBot),
+            this.sendToChat(chatId, messageText, imageUrl, tokenBot, messageTextTwo),
           );
         }
       }
@@ -673,7 +708,7 @@ export class TutorsService {
         chatId = process.env['CHAT_SOCIAL_HISTORY'];
         if (messageLines && chatId) {
           await telegramLimiter.schedule(() =>
-            this.sendToChat(chatId, messageText, imageUrl, tokenBot),
+            this.sendToChat(chatId, messageText, imageUrl, tokenBot, messageTextTwo),
           );
         }
       }
@@ -682,7 +717,7 @@ export class TutorsService {
         chatId = process.env['CHAT_RUS'];
         if (messageLines && chatId) {
           await telegramLimiter.schedule(() =>
-            this.sendToChat(chatId, messageText, imageUrl, tokenBot),
+             this.sendToChat(chatId, messageText, imageUrl, tokenBot, messageTextTwo),
           );
         }
       }
@@ -691,7 +726,7 @@ export class TutorsService {
         chatId = process.env['CHAT_RUS'];
         if (messageLines && chatId) {
           await telegramLimiter.schedule(() =>
-            this.sendToChat(chatId, messageText, imageUrl, tokenBot),
+             this.sendToChat(chatId, messageText, imageUrl, tokenBot, messageTextTwo),
           );
         }
       }
@@ -700,7 +735,7 @@ export class TutorsService {
         chatId = process.env['CHAT_LANGUAGE'];
         if (messageLines && chatId) {
           await telegramLimiter.schedule(() =>
-            this.sendToChat(chatId, messageText, imageUrl, tokenBot),
+              this.sendToChat(chatId, messageText, imageUrl, tokenBot, messageTextTwo),
           );
         }
       }
@@ -708,7 +743,7 @@ export class TutorsService {
         chatId = process.env['CHAT_LANGUAGE'];
         if (messageLines && chatId) {
           await telegramLimiter.schedule(() =>
-            this.sendToChat(chatId, messageText, imageUrl, tokenBot),
+              this.sendToChat(chatId, messageText, imageUrl, tokenBot, messageTextTwo),
           );
         }
       }
@@ -717,7 +752,7 @@ export class TutorsService {
         chatId = process.env['CHAT_LANGUAGE'];
         if (messageLines && chatId) {
           await telegramLimiter.schedule(() =>
-            this.sendToChat(chatId, messageText, imageUrl, tokenBot),
+              this.sendToChat(chatId, messageText, imageUrl, tokenBot, messageTextTwo),
           );
         }
       }
@@ -726,7 +761,7 @@ export class TutorsService {
         chatId = process.env['CHAT_LANGUAGE'];
         if (messageLines && chatId) {
           await telegramLimiter.schedule(() =>
-            this.sendToChat(chatId, messageText, imageUrl, tokenBot),
+              this.sendToChat(chatId, messageText, imageUrl, tokenBot, messageTextTwo),
           );
         }
       }
@@ -736,7 +771,7 @@ export class TutorsService {
         chatId = process.env['CHAT_PHYSIC'];
         if (messageLines && chatId) {
           await telegramLimiter.schedule(() =>
-            this.sendToChat(chatId, messageText, imageUrl, tokenBot),
+              this.sendToChat(chatId, messageText, imageUrl, tokenBot, messageTextTwo),
           );
         }
       }
@@ -760,7 +795,7 @@ export class TutorsService {
         chatId = process.env['CHAT_START'];
         if (messageLines && chatId) {
           await telegramLimiter.schedule(() =>
-            this.sendToChat(chatId, messageText, imageUrl, tokenBot),
+              this.sendToChat(chatId, messageText, imageUrl, tokenBot, messageTextTwo),
           );
         }
       }
@@ -773,10 +808,13 @@ export class TutorsService {
     messageText: string,
     photoUrl: string,
     token: string,
+    messageTextTwo: string,
   ) {
     try {
+
       let url;
       let dataToSend;
+
       if (photoUrl) {
         url = `https://api.telegram.org/bot${token}/sendPhoto`;
         dataToSend = {
@@ -800,20 +838,80 @@ export class TutorsService {
               'data' in error.response &&
               error.response.data != undefined
             ) {
-              this.logsService.error(
-                `Функция проверки и получению постов с вк - ошибка`,
-                `${error}`,
-              );
+              this.logsService.error(`Функция проверки и получению постов с вк - ошибка`, `${error}`,);
             }
-            this.logsService.error(
-              `Функция проверки и получению постов с вк - ошибка`,
-              `${error}`,
-            );
-            console.log(error);
+            this.logsService.error(`Функция проверки и получению постов с вк - ошибка`, `${error}`,);
             throw 'An error happened!';
           }),
         ),
       );
+
+
+      const date = new Date().getTime();
+
+      const startDateOne = new Date().setHours(8, 0o0, 0o0, 0o0);
+      const endDateOne = new Date().setHours(8, 10, 0o0, 0o0);
+
+      const startDateTwo = new Date().setHours(12, 0o0, 0o0, 0o0);
+      const endDateTwo = new Date().setHours(12, 10, 0o0, 0o0);
+
+      const startDateThree = new Date().setHours(14, 0o0, 0o0, 0o0);
+      const endDateThree = new Date().setHours(14, 10, 0o0, 0o0);
+
+      const startDateFour = new Date().setHours(18, 0o0, 0o0, 0o0);
+      const endDateFour = new Date().setHours(18, 10, 0o0, 0o0);
+
+      const startDateFive = new Date().setHours(21, 0o0, 0o0, 0o0);
+      const endDateFive = new Date().setHours(21, 10, 0o0, 0o0);
+
+      const startDateSix = new Date().setHours(0o0, 0o0, 0o0, 0o0);
+      const endDateSix = new Date().setHours(0o0, 10, 0o0, 0o0);
+
+
+
+    if (date >= startDateOne && date <= endDateOne ||
+        (date >= startDateTwo && date <= endDateTwo) ||
+        (date >= startDateThree && date <= endDateThree) ||
+        (date >= startDateFour && date <= endDateFour) ||
+        (date >= startDateFive && date <= endDateFive) ||
+        (date >= startDateSix && date <= endDateSix)
+      ) {
+
+        let urlTwo;
+        let dataToSendTwo;
+        const idChat = process.env['CHAT_ID_COMMON_TUTORS'];
+
+        if (photoUrl) {
+          urlTwo = `https://api.telegram.org/bot${token}/sendPhoto`;
+          dataToSendTwo = {
+            chat_id: idChat,
+            caption: messageTextTwo,
+            photo: photoUrl,
+        };
+        } else {
+          urlTwo = `https://api.telegram.org/bot${token}/sendMessage`;
+          dataToSendTwo = {
+            chat_id: idChat,
+            text: messageTextTwo,
+      };
+    }
+
+    const { data } = await firstValueFrom(
+        this.httpService.post<any>(urlTwo, dataToSendTwo).pipe(
+            catchError((error: AxiosError) => {
+              if (
+                  error.response &&
+                  'data' in error.response &&
+                  error.response.data != undefined
+              ) {
+                this.logsService.error(`Функция проверки и получению постов с вк - ошибка`, `${error}`,);
+              }
+              this.logsService.error(`Функция проверки и получению постов с вк - ошибка`, `${error}`,);
+              throw 'An error happened!';
+            }),
+        ),
+    );
+  }
     } catch (err) {
       this.logsService.error(
         `Функция отправки в телегу sendToChat - ошибка`,

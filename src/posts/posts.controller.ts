@@ -49,6 +49,23 @@ export class PostsController {
       { token: process.env['ACCESS_TOKEN_EIGHT'] },
       { token: process.env['ACCESS_TOKEN_NINE'] },
       { token: process.env['ACCESS_TOKEN_TEN'] },
+      { token: process.env['ACCESS_TOKEN_ELEVEN'] },
+      { token: process.env['ACCESS_TOKEN_TWELVE'] },
+      { token: process.env['ACCESS_TOKEN_THIRTEEN'] },
+      { token: process.env['ACCESS_TOKEN_FOURTEEN'] },
+      { token: process.env['ACCESS_TOKEN_FIFTEEN'] },
+      { token: process.env['ACCESS_TOKEN_SIXTEEN'] },
+      { token: process.env['ACCESS_TOKEN_SEVENTEEN'] },
+      { token: process.env['ACCESS_TOKEN_EIGHTEEN'] },
+      { token: process.env['ACCESS_TOKEN_NINETEEN'] },
+      { token: process.env['ACCESS_TOKEN_TWENTY'] },
+      { token: process.env['ACCESS_TOKEN_TONE'] },
+      { token: process.env['ACCESS_TOKEN_TTWO'] },
+      { token: process.env['ACCESS_TOKEN_TTHREE'] },
+      { token: process.env['ACCESS_TOKEN_TFOUR'] },
+      { token: process.env['ACCESS_TOKEN_TFIVE'] },
+      { token: process.env['ACCESS_TOKEN_TSIX'] },
+      { token: process.env['ACCESS_TOKEN_TSEVEN'] },
     ];
 
     // стартовый индекс
@@ -108,6 +125,6 @@ export class PostsController {
   // для очистки
   @Get('/deletePost')
   async getRedisPosts() {
-    return this.postsService.getRedisPosts()
+    return this.postsService.getRedisPosts();
   }
 }
