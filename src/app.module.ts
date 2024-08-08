@@ -50,6 +50,7 @@ import {
   CustomMadeFurnitureEntity
 } from "./AllCategoriesForSearch/custom-made-furniture/entities/custom-made-furniture.entity";
 import {CustomMadeFurnitureModule} from "./AllCategoriesForSearch/custom-made-furniture/custom-made-furniture.module";
+import { FlRuModule } from './fl_ru/fl_ru.module';
 
 @Module({
   imports: [
@@ -116,6 +117,7 @@ import {CustomMadeFurnitureModule} from "./AllCategoriesForSearch/custom-made-fu
     InternetMarketingModule,
     FotoVideoCreaterModule,
     CustomMadeFurnitureModule,
+    FlRuModule,
   ],
   controllers: [AppController],
   providers: [AppService],

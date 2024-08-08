@@ -71,6 +71,15 @@ export class ItWebService {
       },
     });
   }
+  // найти конкретный пост для конкретной биржи
+  async getPostByIdFreelance(post_id, identification_post,) {
+    return await this.repository.findOne({
+      where: {
+        post_id,
+        identification_post,
+      },
+    });
+  }
   // найти посты для одной группы
   async getAllPostsByIdForOneGroup(post_owner_id: string) {
     return await this.repository.find({
@@ -401,4 +410,47 @@ export class ItWebService {
   //     );
   //   }
   // }
+
+
+  // для биржы fl.ru
+  async createFromFlRu(
+      item,
+      index
+  ) {
+    try {
+
+      const link = item?.link
+      const idMatch = link.match(/projects\/(\d+)\//);
+      const projectId = idMatch ? idMatch[1] : null;
+
+      // if (sendMessage) this.sendPostToTelegram(item, tokenBot, telegramLimiter);
+
+      return this.repository.save({
+        identification_post: index,
+        id_group: item?.link,
+        name_group: 'fl.ru',
+        city_group: '',
+        country_group: '',
+        photo_100_group: '',
+        first_name_user: '',
+        last_name_user: '',
+        city_user: '',
+        country_user:  '',
+        photo_100_user: '',
+        post_id: projectId || '',
+        post_owner_id: '',
+        post_fromId: '',
+        post_date_publish: `${new Date(item.pubDate).getTime() /1000}`,
+        post_text: item?.content,
+        post_type:'',
+        signer_id: '',
+      });
+    } catch (err) {
+      this.logsService.error(
+          `Функция добавление постов тюторс- ошибка`,
+          `${err}`,
+      );
+    }
+  }
+
 }

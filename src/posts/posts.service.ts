@@ -183,57 +183,21 @@ export class PostsService {
 
       const categories = [
         { id: 1, name: 'Для репетиторов', service: this.tutorService },
-        {
-          id: 2,
-          name: 'Поиск домашнего персонала',
-          service: this.nanniesService,
-        },
-        {
-          id: 3,
-          name: 'Ремонт и обслуживание техники',
-          service: this.equipRepairMaintenanceService,
-        },
-        {
-          id: 4,
-          name: 'Ремонт и строительство',
-          service: this.handymanAndBuilderService,
-        },
-        {
-          id: 5,
-          name: 'Аренда, сдача недвижимости',
-          service: this.rentRentalApartService,
-        },
-        {
-          id: 6,
-          name: 'Покупка, продажа недвижимости',
-          service: this.purchaseSaleApartService,
-        },
+        { id: 2, name: 'Поиск домашнего персонала', service: this.nanniesService,},
+        { id: 3, name: 'Ремонт и обслуживание техники', service: this.equipRepairMaintenanceService,},
+        { id: 4, name: 'Ремонт и строительство', service: this.handymanAndBuilderService,},
+        { id: 5, name: 'Аренда, сдача недвижимости', service: this.rentRentalApartService,},
+        { id: 6, name: 'Покупка, продажа недвижимости', service: this.purchaseSaleApartService,},
         { id: 7, name: 'Для юристов', service: this.lawyerService },
         { id: 8, name: 'IT/Web', service: this.itWebService },
         { id: 9, name: 'Красота', service: this.beautyService },
         { id: 10, name: 'Водители', service: this.driversService },
         { id: 11, name: 'Кулинария', service: this.cookService },
         { id: 12, name: 'Психологи', service: this.psychologistsService },
-        {
-          id: 13,
-          name: 'Бухгалтерские услуги',
-          service: this.accountantService,
-        },
-        {
-          id: 14,
-          name: 'Интернет маркетинг',
-          service: this.internetMarketingService,
-        },
-        {
-          id: 15,
-          name: 'Фото и видеосъемка',
-          service: this.fotoVideoCreaterService,
-        },
-        {
-          id: 16,
-          name: 'Мебель на заказ',
-          service: this.customMadeFurnitureService,
-        },
+        { id: 13, name: 'Бухгалтерские услуги', service: this.accountantService,},
+        { id: 14, name: 'Интернет маркетинг', service: this.internetMarketingService,},
+        { id: 15, name: 'Фото и видеосъемка', service: this.fotoVideoCreaterService,},
+        { id: 16, name: 'Мебель на заказ', service: this.customMadeFurnitureService,},
       ];
 
       const categoryInfo = categories.find((cat) => cat.id === category.id);
