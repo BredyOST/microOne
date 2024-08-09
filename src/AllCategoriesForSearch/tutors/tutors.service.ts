@@ -259,8 +259,6 @@ export class TutorsService {
         '', // ID напис
     };
 
-    console.log(obj);
-
     return this.repository.save({
       identification_post: identificator,
       id_group: groups?.id?.toString() || '', // Первый чат из массива
