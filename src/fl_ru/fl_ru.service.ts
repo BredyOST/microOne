@@ -71,7 +71,7 @@ export class FlRuService {
       if (!categoryInfo || !feed?.items?.length) return;
 
       for (let item of feed?.items) {
-
+        console.log(item)
         const link = item?.link
         const idMatch = link.match(/projects\/(\d+)\//);
         const projectId = idMatch ? idMatch[1] : null;

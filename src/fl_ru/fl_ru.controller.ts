@@ -1,8 +1,7 @@
 import { Controller, Get } from '@nestjs/common';
 import { FlRuService } from './fl_ru.service';
 import { Cron } from '@nestjs/schedule';
-import {PostsService} from "../posts/posts.service";
-import process from "process";
+import * as process from 'process';
 
 @Controller('fl-ru')
 export class FlRuController {
@@ -14,7 +13,6 @@ export class FlRuController {
   //fl.ru
   @Get('/createPosts')
   async createPosts() {
-
     const indexWords = process.env['INDEX_WORD'];
     // FLr.ru
     const linksFromFl = [
