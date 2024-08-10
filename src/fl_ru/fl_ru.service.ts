@@ -60,13 +60,14 @@ export class FlRuService {
   async createPosts(linksFromFl, category) {
 
     try {
-
+      console.log(linksFromFl.design)
       const categories = [
         { id: 8, name: 'IT/Web', service: this.itWebService },
       ];
 
       const categoryInfo = categories.find((cat) => cat.id === category.id);
       const feed = await this.parser.parseURL(linksFromFl.design);
+      // console.log(feed)
 
       if (!categoryInfo || !feed?.items?.length) return;
 
@@ -76,11 +77,9 @@ export class FlRuService {
         const idMatch = link.match(/projects\/(\d+)\//);
         const projectId = idMatch ? idMatch[1] : null;
 
-        if (categoryInfo) {
-          if (categoryInfo.service) {
+        if (categoryInfo && categoryInfo.service) {
             const isSamePost = await categoryInfo.service.getPostByIdFreelance(projectId, linksFromFl?.index);
-            if (isSamePost) return;
-          }
+            if (isSamePost) continue;
 
           const positiveWords = await category?.positiveWords;
           const negativeWords = await category?.negativeWords;
