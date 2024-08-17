@@ -8,6 +8,8 @@ import { LogsService } from '../../otherServices/logger.service';
 import { RedisService } from '../../redis/redis.service';
 import * as process from 'process';
 import {CitiesService} from "../../cities/cities.service";
+import {catchError, firstValueFrom} from "rxjs";
+import {AxiosError} from "axios";
 
 @Injectable()
 export class HandymanAndBuilderService {
@@ -220,7 +222,7 @@ export class HandymanAndBuilderService {
         userCityName = city?.title
       }
 
-      // if (sendMessage) this.sendPostToTelegram(item, tokenBot, telegramLimiter);
+      if (sendMessage) this.sendPostToTelegram(item, tokenBot, telegramLimiter);
 
       return this.repository.save({
         identification_post: 'vk',
@@ -274,101 +276,185 @@ export class HandymanAndBuilderService {
     });
   }
 
-  // async sendPostToTelegram(item, tokenBot, telegramLimiter) {
-  //
-  //   try {
-  //     let chatId;
-  //
-  //     const messageLines = [
-  //       `Дата публикации:`,
-  //       `${new Date(item?.date * 1000).toLocaleString()}.`,
-  //       `Текст поста:`,
-  //       `${item?.text}.`,
-  //       (item?.signer_id && !String(item.signer_id).includes('-')) ||
-  //       (item?.from_id && !String(item.from_id).includes('-'))
-  //           ? `Пользователь: https://vk.com/id${item?.signer_id || item?.from_id}.`
-  //           : null,
-  //       `Пост: https://vk.com/wall${item?.owner_id}_${item?.id}.`,
-  //     ];
-  //
-  //     let imageUrl;
-  //     let messageText;
-  //     if (messageLines) {
-  //       messageText = messageLines.filter((line) => line !== null).join('\n');
-  //     }
-  //
-  //
-  //     if (item?.text?.includes('матем' || 'матан' || 'алгебр')) {
-  //       imageUrl = 'https://timgotow.ru/uploads/math.jpg';
-  //       chatId = process.env['CHAT_MATH'];
-  //       if (messageLines && chatId) {
-  //         await telegramLimiter.schedule(() =>
-  //             this.sendToChat(chatId, messageText, imageUrl, tokenBot),
-  //         );
-  //       }
-  //     }
-  //
-  //   } catch (err) {
-  //
-  //     this.logsService.error(
-  //         `Функция sendPostToTelegram - ошибка`,
-  //         `${err}`,
-  //     );
-  //   }
-  // }
-  // async sendToChat(
-  //     chatId: string,
-  //     messageText: string,
-  //     photoUrl: string,
-  //     token: string,
-  // ) {
-  //   try {
-  //
-  //     let url;
-  //     let dataToSend;
-  //     if (photoUrl) {
-  //       url = `https://api.telegram.org/bot${token}/sendPhoto`;
-  //       dataToSend = {
-  //         chat_id: chatId,
-  //         caption: messageText,
-  //         photo: photoUrl,
-  //       };
-  //     } else {
-  //       url = `https://api.telegram.org/bot${token}/sendMessage`;
-  //       dataToSend = {
-  //         chat_id: chatId,
-  //         text: messageText,
-  //       };
-  //     }
-  //
-  //     const { data } = await firstValueFrom(
-  //         this.httpService.post<any>(url, dataToSend).pipe(
-  //             catchError((error: AxiosError) => {
-  //               if (
-  //                   error.response &&
-  //                   'data' in error.response &&
-  //                   error.response.data != undefined
-  //               ) {
-  //                 this.logsService.error(
-  //                     `Функция проверки и получению постов с вк - ошибка`,
-  //                     `${error}`,
-  //                 );
-  //               }
-  //               this.logsService.error(
-  //                   `Функция проверки и получению постов с вк - ошибка`,
-  //                   `${error}`,
-  //               );
-  //               console.log(error)
-  //               throw 'An error happened!';
-  //             }),
-  //         ),
-  //     );
-  //   } catch (err) {
-  //
-  //     this.logsService.error(
-  //         `Функция отправки в телегу sendToChat - ошибка`,
-  //         `${err}`,
-  //     );
-  //   }
-  // }
+  async sendPostToTelegram(item, tokenBot, telegramLimiter) {
+
+    try {
+      let chatId;
+
+      const messageLines = [
+        `Дата публикации:`,
+        `${new Date(item?.date * 1000).toLocaleString()}.`,
+        `Текст поста:`,
+        `${item?.text}.`,
+        (item?.signer_id && !String(item.signer_id).includes('-')) ||
+        (item?.from_id && !String(item.from_id).includes('-'))
+            ? `Пользователь: https://vk.com/id${item?.signer_id || item?.from_id}.`
+            : null,
+        `Пост: https://vk.com/wall${item?.owner_id}_${item?.id}.`,
+      ];
+
+      const messageLinesTwo = [
+        `Дата публикации:`,
+        `${new Date(item?.date * 1000).toLocaleString()}.`,
+        `Текст поста:`,
+        `${item?.text}.`,
+        (item?.signer_id && !String(item.signer_id).includes('-')) ||
+        (item?.from_id && !String(item.from_id).includes('-'))
+            ? `Пользователь: https://vk.com/id${item?.signer_id || item?.from_id}.`
+            : null,
+        `Пост: https://vk.com/wall${item?.owner_id}_${item?.id}.`,
+        '----------------------------------',
+        `Больше заявок на нашем сайте клиенты.com, прямая ссылка https://xn--e1affem4a4d.com`,
+        'По вопросам доступа пишите https://t.me/nikaboiar',
+      ];
+
+      let imageUrl;
+      let messageText;
+      let messageTextTwo;
+
+      if (messageLines) {
+        messageText = messageLines.filter((line) => line !== null).join('\n');
+      }
+
+      if(messageLinesTwo) {
+        messageTextTwo = messageLinesTwo.filter((line) => line !== null).join('\n');
+      }
+
+      await telegramLimiter.schedule(() => this.sendToChat(chatId, messageText, imageUrl, tokenBot, messageTextTwo))
+
+    } catch (err) {
+
+      this.logsService.error(
+          `Функция sendPostToTelegram - ошибка`,
+          `${err}`,
+      );
+    }
+  }
+  async sendToChat(
+      chatId: string,
+      messageText: string,
+      photoUrl: string,
+      token: string,
+      messageTextTwo: string,
+  ) {
+    try {
+
+      let url;
+      let dataToSend;
+      if (photoUrl) {
+        url = `https://api.telegram.org/bot${token}/sendPhoto`;
+        dataToSend = {
+          chat_id: chatId,
+          caption: messageText,
+          photo: photoUrl,
+        };
+      } else {
+        url = `https://api.telegram.org/bot${token}/sendMessage`;
+        dataToSend = {
+          chat_id: chatId,
+          text: messageText,
+        };
+      }
+
+      // const { data } = await firstValueFrom(
+      //     this.httpService.post<any>(url, dataToSend).pipe(
+      //         catchError((error: AxiosError) => {
+      //           if (
+      //               error.response &&
+      //               'data' in error.response &&
+      //               error.response.data != undefined
+      //           ) {
+      //             this.logsService.error(
+      //                 `Функция проверки и получению постов с вк - ошибка`,
+      //                 `${error}`,
+      //             );
+      //           }
+      //           this.logsService.error(
+      //               `Функция проверки и получению постов с вк - ошибка`,
+      //               `${error}`,
+      //           );
+      //           console.log(error)
+      //           throw 'An error happened!';
+      //         }),
+      //     ),
+      // );
+
+      const date = new Date().getTime();
+
+      const startDateOne = new Date().setHours(8, 0o0, 0o0, 0o0);
+      const endDateOne = new Date().setHours(8, 10, 0o0, 0o0);
+
+      const startDateTwo = new Date().setHours(12, 0o0, 0o0, 0o0);
+      const endDateTwo = new Date().setHours(12, 10, 0o0, 0o0);
+
+      const startDateThree = new Date().setHours(14, 0o0, 0o0, 0o0);
+      const endDateThree = new Date().setHours(14, 10, 0o0, 0o0);
+
+      const startDateFour = new Date().setHours(18, 0o0, 0o0, 0o0);
+      const endDateFour = new Date().setHours(18, 10, 0o0, 0o0);
+
+      const startDateFive = new Date().setHours(21, 0o0, 0o0, 0o0);
+      const endDateFive = new Date().setHours(21, 10, 0o0, 0o0);
+
+      const startDateSix = new Date().setHours(0o0, 0o0, 0o0, 0o0);
+      const endDateSix = new Date().setHours(0o0, 10, 0o0, 0o0);
+
+
+      if (date >= startDateOne && date <= endDateOne ||
+          (date >= startDateTwo && date <= endDateTwo) ||
+          (date >= startDateThree && date <= endDateThree) ||
+          (date >= startDateFour && date <= endDateFour) ||
+          (date >= startDateFive && date <= endDateFive) ||
+          (date >= startDateSix && date <= endDateSix)
+      ) {
+
+        // let urlTwo;
+        // let dataToSendTwo;
+        const idChat = process.env['CHAT_ID_COMMON_BUILD'];
+
+        // if (photoUrl) {
+        //   urlTwo = `https://api.telegram.org/bot${token}/sendPhoto`;
+        //   dataToSendTwo = {
+        //     chat_id: idChat,
+        //     caption: messageTextTwo,
+        //     photo: photoUrl,
+        //   };
+        // } else {
+        const urlTwo = `https://api.telegram.org/bot${token}/sendMessage`;
+
+        const dataToSendTwo = {
+          chat_id: idChat,
+          text: messageTextTwo,
+        };
+        // }
+
+        const { data } = await firstValueFrom(
+            this.httpService.post<any>(urlTwo, dataToSendTwo).pipe(
+                catchError((error: AxiosError) => {
+                  if (
+                      error.response &&
+                      'data' in error.response &&
+                      error.response.data != undefined
+                  ) {
+                    this.logsService.error(`Функция проверки и получению постов с вк - ошибка`, `${error}`,);
+                  }
+                  this.logsService.error(`Функция проверки и получению постов с вк - ошибка`, `${error}`,);
+                  throw 'An error happened!';
+                }),
+            ),
+        );
+      }
+
+
+
+
+
+    } catch (err) {
+
+      this.logsService.error(
+          `Функция отправки в телегу sendToChat - ошибка`,
+          `${err}`,
+      );
+    }
+  }
 }

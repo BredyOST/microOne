@@ -379,6 +379,9 @@ export class RentRentalApartService {
 
       if (messageLines) {
         messageText = messageLines.filter((line) => line !== null).join('\n');
+      }
+
+      if(messageLinesTwo) {
         messageTextTwo = messageLinesTwo.filter((line) => line !== null).join('\n');
       }
 
@@ -475,8 +478,8 @@ export class RentRentalApartService {
         //     photo: photoUrl,
         //   };
         // } else {
-         let urlTwo = `https://api.telegram.org/bot${token}/sendMessage`;
-        let dataToSendTwo = {
+        const urlTwo = `https://api.telegram.org/bot${token}/sendMessage`;
+        const dataToSendTwo = {
             chat_id: idChat,
             text: messageTextTwo,
           };
