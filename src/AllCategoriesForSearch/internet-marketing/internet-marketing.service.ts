@@ -284,7 +284,7 @@ export class InternetMarketingService {
   //   try {
   //     let chatId;
   //
-  //     const messageLines = [
+  //     constants messageLines = [
   //       `Дата публикации:`,
   //       `${new Date(item?.date * 1000).toLocaleString()}.`,
   //       `Текст поста:`,
@@ -346,7 +346,7 @@ export class InternetMarketingService {
   //       };
   //     }
   //
-  //     const { data } = await firstValueFrom(
+  //     constants { data } = await firstValueFrom(
   //         this.httpService.post<any>(url, dataToSend).pipe(
   //             catchError((error: AxiosError) => {
   //               if (

@@ -540,7 +540,7 @@ export class TelegramPostsService {
           if (`count` in result) counter = Math.floor(result?.count / limit)
           if('users' in result) users = result?.users
 
-          // const constIds = users.filter((item) => item?.username != null).map((item) => item?.id.value?.toString())
+          // constants constIds = users.filter((item) => item?.username != null).map((item) => item?.id.value?.toString())
           const constIds = users.filter((item) => item?.username != null).map((item) => item?.username)
           if(constIds?.length >= 1) {
             constUsersId = [...constUsersId, ...constIds]
@@ -649,7 +649,7 @@ export class TelegramPostsService {
 
 
 
-      // const runs = async () => {
+      // constants runs = async () => {
       //   console.log(client)
       //
       //   await client.start({
@@ -660,7 +660,7 @@ export class TelegramPostsService {
       //   console.log(thisApi)
       //   console.log(client.session.save())
       //
-      //   const chatId = '-1002065082233';
+      //   constants chatId = '-1002065082233';
       //
       //     let resultTwo;
       //     await telegramLimiter.schedule(async () => {

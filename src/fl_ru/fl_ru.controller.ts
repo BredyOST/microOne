@@ -9,7 +9,7 @@ export class FlRuController {
       private readonly flRuService: FlRuService,
   ) {}
 
-  @Cron('0 */5 * * * *')
+  // @Cron('0 */5 * * * *')
   //fl.ru
   @Get('/createPosts')
   async createPosts() {

@@ -446,7 +446,7 @@ export class PostsService {
     const startOfDayUnix = Math.floor(new Date().setHours(0, 0, 0, 0) / 1000); // Время начала текущего дня в Unixtime
     const counter = +countPosts;
 
-    // const dataa = `https://api.vk.com/method/newsfeed.search?q=${word}&count=${counter}&latitude=-90&longitude=-180&start_time=${startOfDayUnix}&end_time=${currentTimeUnix}&fields=city,country,photo_50&access_token=${access}&v=${versionVk}&extended=1`
+    // constants dataa = `https://api.vk.com/method/newsfeed.search?q=${word}&count=${counter}&latitude=-90&longitude=-180&start_time=${startOfDayUnix}&end_time=${currentTimeUnix}&fields=city,country,photo_50&access_token=${access}&v=${versionVk}&extended=1`
     try {
       const { data } = await firstValueFrom(
         // this.httpService.get<any>(`https://api.vk.com/method/newsfeed.search?q=${word}&count=${counter}&latitude=-90&longitude=-180&start_time=${startOfDayUnix}&end_time=${currentTimeUnix}&fields=city,country,photo_50&access_token=${access}&v=${versionVk}&extended=1`
@@ -711,7 +711,7 @@ export class PostsService {
 
         for (let o = 0; o <= result?.items?.length; o++) {
           const item = result?.items?.[o];
-          // console.log(item)
+
           if (
             firstPostsDate &&
             firstPostsDate == new Date(item?.date * 1000).getTime()

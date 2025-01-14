@@ -144,9 +144,9 @@ export class ItWebService {
             break;
           } else {
             renameAttempts++;
-            await this.sleep(1000); // Подождать 1 секунду перед следующей попыткой
+            await this.sleep(1000);
           }
-          break; // Если успешно, выходим из цикла
+          break;
         }
       }
     } catch (err) {
@@ -318,7 +318,7 @@ export class ItWebService {
   //   try {
   //     let chatId;
   //
-  //     const messageLines = [
+  //     constants messageLines = [
   //       `Дата публикации:`,
   //       `${new Date(item?.date * 1000).toLocaleString()}.`,
   //       `Текст поста:`,
@@ -380,7 +380,7 @@ export class ItWebService {
   //       };
   //     }
   //
-  //     const { data } = await firstValueFrom(
+  //     constants { data } = await firstValueFrom(
   //         this.httpService.post<any>(url, dataToSend).pipe(
   //             catchError((error: AxiosError) => {
   //               if (

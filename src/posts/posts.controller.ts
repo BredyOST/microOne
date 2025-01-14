@@ -36,7 +36,6 @@ export class PostsController {
     const endWordsLength = wordNext?.length;
     // старт перебора слов
     let indexSearch = 0;
-
     // -----------------------------
     const acceses = [
       { token: process.env['ACCESS_TOKEN'] },

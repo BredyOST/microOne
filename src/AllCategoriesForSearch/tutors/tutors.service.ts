@@ -90,35 +90,35 @@ export class TutorsService {
   //
   //   try {
   //     // кол-во постов в блоке
-  //     const postCountInKey = 300;
-  //     const queryBuilder = this.repository.createQueryBuilder('posts');
+  //     constants postCountInKey = 300;
+  //     constants queryBuilder = this.repository.createQueryBuilder('posts');
   //
   //     // получаем все отсортированные посты из бд
-  //     const sortedPosts = await queryBuilder
+  //     constants sortedPosts = await queryBuilder
   //       .orderBy('posts.post_date_publish', 'DESC')
   //       .getMany();
   //
   //     // получаем все ключи на текущий момент
-  //     const pattern = await this.redisService.getAllKeys(`id:${this.id}-*`);
+  //     constants pattern = await this.redisService.getAllKeys(`id:${this.id}-*`);
   //
   //     // сколько должно быть ключей
-  //     const counterNow = Math.ceil(sortedPosts.length / postCountInKey);
+  //     constants counterNow = Math.ceil(sortedPosts.length / postCountInKey);
   //
   //     if (pattern.length != 0 && counterNow < pattern.length) {
-  //       for (const item of pattern) {
+  //       for (constants item of pattern) {
   //         await this.redisService.del(item);
   //       }
   //     }
   //
   //     for (let i = 0; i < +sortedPosts.length; i += postCountInKey) {
   //
-  //       const groupBatch = sortedPosts.slice(i, i + postCountInKey);
-  //       const mainKey = `id:${this.id}-${i}-${i + postCountInKey}`;
+  //       constants groupBatch = sortedPosts.slice(i, i + postCountInKey);
+  //       constants mainKey = `id:${this.id}-${i}-${i + postCountInKey}`;
   //
   //       // console.log(mainKey)
   //
   //       // Проверяем существование основного ключа
-  //       const keyExists = await this.redisService.exists(mainKey);
+  //       constants keyExists = await this.redisService.exists(mainKey);
   //
   //       // Если ключ уже существует, пропускаем его перезапись
   //       // console.log(`всего постов ${sortedPosts.length}`)
@@ -142,7 +142,7 @@ export class TutorsService {
   //       console.log(`до ${i + postCountInKey}`)
   //       console.log('пишем')
   //
-  //       const tempKey = `temp:id:${this.id}-${i}-${i + postCountInKey}`;
+  //       constants tempKey = `temp:id:${this.id}-${i}-${i + postCountInKey}`;
   //
   //       // Сначала сохраняем во временный ключ
   //       await this.redisService.set(tempKey, groupBatch);
@@ -150,7 +150,7 @@ export class TutorsService {
   //       let renameAttempts = 0;
   //
   //       while (renameAttempts <= 6) {
-  //         const checkKey = await this.redisService.exists(tempKey);
+  //         constants checkKey = await this.redisService.exists(tempKey);
   //         if (checkKey) {
   //           await this.redisService.rename(tempKey, mainKey);
   //           break;
@@ -446,6 +446,9 @@ export class TutorsService {
 
       if (messageLines) {
         messageText = messageLines.filter((line) => line !== null).join('\n');
+      }
+
+      if (messageLinesTwo) {
         messageTextTwo = messageLinesTwo.filter((line) => line !== null).join('\n');
       }
 
@@ -592,12 +595,15 @@ export class TutorsService {
         )
       ) {
         imageUrl = `https://timgotow.ru/uploads/start.jpg`;
+
         chatId = process.env['CHAT_START'];
+
         if (messageLines && chatId) {
           await telegramLimiter.schedule(() =>
               this.sendToChat(chatId, messageText, imageUrl, tokenBot, messageTextTwo),
           );
         }
+
       }
     } catch (err) {
       this.logsService.error(`Функция sendPostToTelegram - ошибка`, `${err}`);
