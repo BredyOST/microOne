@@ -356,7 +356,7 @@ export class TutorsService {
         userCityName = city?.title;
       }
 
-      if (sendMessage) this.sendPostToTelegram(item, tokenBot, telegramLimiter);
+      // if (sendMessage) this.sendPostToTelegram(item, tokenBot, telegramLimiter);
 
       return this.repository.save({
         identification_post: 'vk',
